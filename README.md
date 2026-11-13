@@ -1,5 +1,7 @@
 # PawQuest
 
+> **Mục đích:** Dự án này là tài liệu học tập về lập trình ứng dụng di động. Toàn bộ mã nguồn, dữ liệu và tài khoản đều do cá nhân tạo và dùng cho mục đích học tập. Dự án không chứa và không sử dụng dữ liệu, mã nguồn hay thông tin nội bộ của bất kỳ công ty nào.
+
 Android-first habit-building app with focus quests, rewards and virtual companions. Built with Kotlin Multiplatform, Compose Multiplatform, Coroutines/StateFlow, Koin and Supabase.
 
 ## Features
