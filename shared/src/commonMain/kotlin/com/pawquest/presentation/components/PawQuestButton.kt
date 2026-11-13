@@ -88,28 +88,28 @@ fun PawQuestButton(
     val (containerColor, contentColor, borderColor, shadowElevation) = when (variant) {
         ButtonVariant.Primary -> {
             if (enabled) {
-                Quadruple(colors.primary, colors.onPrimary, colors.borderLight, if (isPressed) 1.dp else 4.dp)
+                Quadruple(colors.primary, colors.onPrimary, null, if (isPressed) 1.dp else 4.dp)
             } else {
                 Quadruple(colors.surfaceVariant, colors.textMuted, colors.textMuted, 0.dp)
             }
         }
         ButtonVariant.Secondary -> {
             if (enabled) {
-                Quadruple(colors.secondary, colors.textPrimary, colors.borderLight, if (isPressed) 0.dp else 2.dp)
+                Quadruple(colors.secondary, colors.textPrimary, null, if (isPressed) 0.dp else 2.dp)
             } else {
                 Quadruple(colors.backgroundAlt, colors.textMuted, colors.borderLight, 0.dp)
             }
         }
         ButtonVariant.Accent -> {
             if (enabled) {
-                Quadruple(colors.accentGold, colors.textPrimary, colors.borderLight, if (isPressed) 1.dp else 4.dp)
+                Quadruple(colors.accentGold, colors.textPrimary, null, if (isPressed) 1.dp else 4.dp)
             } else {
                 Quadruple(colors.surfaceVariant, colors.textMuted, colors.textMuted, 0.dp)
             }
         }
         ButtonVariant.Outlined -> {
             if (enabled) {
-                Quadruple(Color.Transparent, colors.textPrimary, colors.borderLight, 0.dp)
+                Quadruple(Color.Transparent, colors.textPrimary, colors.outlineStrong, 0.dp)
             } else {
                 Quadruple(Color.Transparent, colors.textMuted, colors.borderLight, 0.dp)
             }
@@ -155,7 +155,7 @@ fun PawQuestButton(
                 // A solid shadow behind transparent outlined buttons hides their label.
                 if (enabled && containerColor.alpha>0f && variant != ButtonVariant.Ghost && !isPressed) {
                     val outline=shape.createOutline(this.size,layoutDirection,this)
-                    translate(top=3.dp.toPx()) {drawOutline(outline,colors.borderLight)}
+                    translate(top=3.dp.toPx()) {drawOutline(outline,colors.shadowColor)}
                 }
             }
             .clickable(
@@ -169,7 +169,7 @@ fun PawQuestButton(
         shape = shape,
         color = containerColor,
         contentColor = labelColor ?: contentColor,
-        border = borderColor?.let { BorderStroke(2.dp, it) },
+        border = borderColor?.let { BorderStroke(1.5.dp, it) },
         shadowElevation = 0.dp,
     ) {
         Box(
@@ -263,7 +263,7 @@ fun PawQuestIconButton(
         shape = PawQuestTheme.shapes.pill,
         color = containerColor,
         contentColor = contentColor,
-        border = borderColor?.let { BorderStroke(2.dp, it) },
+        border = borderColor?.let { BorderStroke(1.5.dp, it) },
         shadowElevation = if (isPressed) 0.dp else 2.dp,
     ) {
         Box(contentAlignment = Alignment.Center) {

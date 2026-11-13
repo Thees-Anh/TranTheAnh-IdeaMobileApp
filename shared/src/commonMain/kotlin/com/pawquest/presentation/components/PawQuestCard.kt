@@ -30,7 +30,7 @@ fun PawQuestCard(
     variant: CardVariant = CardVariant.Elevated,
     shape: Shape = PawQuestTheme.shapes.card,
     onClick: (() -> Unit)? = null,
-    elevation: Dp = if (variant == CardVariant.Elevated) 2.dp else 0.dp,
+    elevation: Dp = if (variant == CardVariant.Elevated) 1.dp else 0.dp,
     content: @Composable BoxScope.() -> Unit,
 ) {
     val colors = PawQuestTheme.colors
@@ -40,10 +40,10 @@ fun PawQuestCard(
         CardVariant.SoftTint -> colors.surfaceVariant
     }
 
-    val border = when (variant) {
-        CardVariant.Elevated -> BorderStroke(2.dp, colors.borderLight)
-        CardVariant.Outlined -> BorderStroke(2.dp, colors.borderLight)
-        CardVariant.SoftTint -> BorderStroke(2.dp, colors.borderLight)
+    val border: BorderStroke? = when (variant) {
+        CardVariant.Elevated -> BorderStroke(1.dp, colors.borderLight)
+        CardVariant.Outlined -> BorderStroke(1.dp, colors.borderLight)
+        CardVariant.SoftTint -> null
     }
 
     Surface(

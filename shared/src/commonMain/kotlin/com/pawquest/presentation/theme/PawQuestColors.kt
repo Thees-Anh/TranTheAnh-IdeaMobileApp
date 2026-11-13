@@ -4,27 +4,30 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
-/** Prototype-inspired warm kawaii palette. User-approved 2D visual direction. */
+/**
+ * Habit-first cozy palette (2026-11-13): warm cream surfaces, peach call-to-action, amber streaks and
+ * green habit progress. Cards use soft borders/shadows; [outlineStrong] keeps control edges at 3:1.
+ */
 @Immutable
 data class PawQuestColors(
-    val primary: Color = Color(0xFFF9A8D4),
-    val primaryDark: Color = Color(0xFF9D174D),
-    val primaryContainer: Color = Color(0xFFFCE7F3),
-    val onPrimary: Color = Color(0xFF592512),
+    val primary: Color = Color(0xFFF4A48A),
+    val primaryDark: Color = Color(0xFFA8432A),
+    val primaryContainer: Color = Color(0xFFFDE8DF),
+    val onPrimary: Color = Color(0xFF3B2A24),
     
     val secondary: Color = Color(0xFFF3E8FF),
     val secondaryDark: Color = Color(0xFFD8B4ED),
     val onSecondary: Color = Color(0xFF70419B),
     
-    val background: Color = Color(0xFFFFF9F5),
-    val backgroundAlt: Color = Color(0xFFFDF2F8),
+    val background: Color = Color(0xFFFFF8F1),
+    val backgroundAlt: Color = Color(0xFFFFF3EA),
     val surface: Color = Color(0xFFFFFFFF),
-    val surfaceVariant: Color = Color(0xFFFFF1F5),
-    val surfaceElevated: Color = Color(0xFFFFFBF6),
+    val surfaceVariant: Color = Color(0xFFFFF4EC),
+    val surfaceElevated: Color = Color(0xFFFFFBF7),
     
-    val textPrimary: Color = Color(0xFF592512),
-    val textSecondary: Color = Color(0xFF8C5233),
-    val textMuted: Color = Color(0xFF8C6350),
+    val textPrimary: Color = Color(0xFF3B2A24),
+    val textSecondary: Color = Color(0xFF7A5848),
+    val textMuted: Color = Color(0xFF806052),
     
     val accentGold: Color = Color(0xFFFACC15),
     val accentGoldDark: Color = Color(0xFF874B14),
@@ -50,9 +53,10 @@ data class PawQuestColors(
     val errorContainer: Color = Color(0xFFFFE2E9),
     val onError: Color = Color(0xFFFFFFFF),
     
-    val borderLight: Color = Color(0xFF592512),
-    val borderFocus: Color = Color(0xFFB55782),
-    val shadowColor: Color = Color(0x28592512),
+    val borderLight: Color = Color(0xFFEFE1D6),
+    val outlineStrong: Color = Color(0xFFA98A7B),
+    val borderFocus: Color = Color(0xFFE07A5F),
+    val shadowColor: Color = Color(0x2E7A4A35),
 )
 
 val LocalPawQuestColors = staticCompositionLocalOf { PawQuestColors() }
@@ -63,7 +67,7 @@ val LocalPawQuestColors = staticCompositionLocalOf { PawQuestColors() }
  * become light tints because they are drawn as text/icons on dark surfaces.
  */
 fun pawQuestDarkColors() = PawQuestColors(
-    primary = Color(0xFF8E3A64), primaryDark = Color(0xFFF9A8D4), primaryContainer = Color(0xFF3A2230), onPrimary = Color(0xFFFFE8F2),
+    primary = Color(0xFF9A4A35), primaryDark = Color(0xFFF8B4A0), primaryContainer = Color(0xFF3A2620), onPrimary = Color(0xFFFFEDE6),
     secondary = Color(0xFF3B2E4F), secondaryDark = Color(0xFF6E5A8C), onSecondary = Color(0xFFE3D0FF),
     background = Color(0xFF1C1416), backgroundAlt = Color(0xFF22181C), surface = Color(0xFF2A1F23),
     surfaceVariant = Color(0xFF33252B), surfaceElevated = Color(0xFF30242A),
@@ -74,5 +78,5 @@ fun pawQuestDarkColors() = PawQuestColors(
     hunger = Color(0xFFC98A4E), hungerDark = Color(0xFFFFC48A), hungerContainer = Color(0xFF3A2A1A),
     energy = Color(0xFF6D86C2), energyDark = Color(0xFFB9CBFF), energyContainer = Color(0xFF232B40),
     error = Color(0xFFFF8FA6), errorContainer = Color(0xFF4A1C27), onError = Color(0xFF2A0A12),
-    borderLight = Color(0xFF9C7B6C), borderFocus = Color(0xFFF9A8D4), shadowColor = Color(0x66000000),
+    borderLight = Color(0xFF4A3A36), outlineStrong = Color(0xFF9C7B6C), borderFocus = Color(0xFFF8B4A0), shadowColor = Color(0x66000000),
 )

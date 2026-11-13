@@ -61,12 +61,12 @@ class DesignSystemTest {
     }
 
     @Test
-    fun colorsFollowApprovedPrototypePalette() {
+    fun colorsFollowHabitFirstCozyPalette() {
         val colors = PawQuestColors()
-        assertEquals(Color(0xFFF9A8D4), colors.primary)
+        assertEquals(Color(0xFFF4A48A), colors.primary)
         assertEquals(Color(0xFFF3E8FF), colors.secondary)
-        assertEquals(Color(0xFFFFF9F5), colors.background)
-        assertEquals(Color(0xFF592512), colors.textPrimary)
+        assertEquals(Color(0xFFFFF8F1), colors.background)
+        assertEquals(Color(0xFF3B2A24), colors.textPrimary)
         assertEquals(Color(0xFFFACC15), colors.accentGold)
         assertEquals(Color(0xFF75C6A1), colors.success)
         assertEquals(Color(0xFFFDB874), colors.hunger)
@@ -83,6 +83,16 @@ class DesignSystemTest {
             val b = background.luminance()
             val contrast = (maxOf(a, b) + 0.05f) / (minOf(a, b) + 0.05f)
             assertTrue(contrast >= 4.5f, "Text contrast $contrast must reach 4.5:1")
+        }
+    }
+
+    @Test
+    fun controlOutlinesReachNonTextContrastInBothThemes() {
+        listOf(PawQuestColors(), com.pawquest.presentation.theme.pawQuestDarkColors()).forEach { c ->
+            val a = c.outlineStrong.luminance()
+            val b = c.surface.luminance()
+            val contrast = (maxOf(a, b) + 0.05f) / (minOf(a, b) + 0.05f)
+            assertTrue(contrast >= 3f, "Control outline contrast $contrast must reach 3:1")
         }
     }
 

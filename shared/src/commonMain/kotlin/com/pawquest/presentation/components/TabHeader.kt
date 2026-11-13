@@ -50,7 +50,7 @@ fun AvatarButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     val colors = PawQuestTheme.colors
     val label = tr("Open settings")
     Surface(onClick = onClick, shape = PawQuestTheme.shapes.lg, color = colors.surface,
-        border = BorderStroke(1.5.dp, colors.borderLight.copy(alpha = .25f)),
+        border = BorderStroke(1.5.dp, colors.borderLight),
         modifier = modifier.size(52.dp).semantics { contentDescription = label }) {
         Box(contentAlignment = Alignment.Center) {
             Icon(CartoonIcons.Profile, null, Modifier.size(32.dp), tint = Color.Unspecified)

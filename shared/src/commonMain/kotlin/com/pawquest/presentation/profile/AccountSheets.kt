@@ -302,7 +302,7 @@ fun ProgressSheetContent(modifier: Modifier = Modifier) {
 private fun ProgressTile(value: String, label: String, modifier: Modifier = Modifier) {
     val colors = PawQuestTheme.colors
     Surface(modifier = modifier, color = colors.surface, shape = PawQuestTheme.shapes.lg,
-        border = BorderStroke(1.dp, colors.borderLight.copy(alpha = .15f))) {
+        border = BorderStroke(1.dp, colors.borderLight)) {
         Column(Modifier.padding(vertical = 14.dp, horizontal = 6.dp).semantics(mergeDescendants = true) {},
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(value, style = PawQuestTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),

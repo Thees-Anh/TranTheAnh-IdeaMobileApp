@@ -81,7 +81,7 @@ fun QuestManagementScreen(model: QuestViewModel, modifier: Modifier = Modifier, 
                         val selected = state.filter == filter
                         Surface(onClick = { model.selectFilter(filter) }, shape = PawQuestTheme.shapes.pill,
                             color = if (selected) colors.textPrimary else colors.surface,
-                            border = BorderStroke(1.dp, colors.borderLight.copy(alpha = if (selected) 1f else .2f)),
+                            border = BorderStroke(1.dp, colors.borderLight),
                             modifier = Modifier.heightIn(min = 40.dp).semantics { this.selected = selected; role = Role.Tab }) {
                             Box(Modifier.padding(horizontal = 16.dp, vertical = 10.dp), contentAlignment = Alignment.Center) {
                                 Text(tr(filter.label), style = PawQuestTheme.typography.labelLarge,
@@ -154,7 +154,7 @@ fun QuestManagementScreen(model: QuestViewModel, modifier: Modifier = Modifier, 
     val colors = PawQuestTheme.colors
     Surface(onClick = onOpen, shape = PawQuestTheme.shapes.xl,
         color = if (active != null) colors.primaryContainer else colors.surface,
-        border = BorderStroke(if (active != null) 2.dp else 1.dp, if (active != null) colors.primaryDark else colors.borderLight.copy(alpha = .12f)),
+        border = BorderStroke(if (active != null) 2.dp else 1.dp, if (active != null) colors.primaryDark else colors.borderLight),
         modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             if (active != null) QuestCountdown(active)
@@ -275,7 +275,7 @@ fun QuestManagementScreen(model: QuestViewModel, modifier: Modifier = Modifier, 
             val selected = current == category
             Surface(onClick = { onSelect(category) }, enabled = enabled, shape = PawQuestTheme.shapes.pill,
                 color = if (selected) colors.primaryContainer else colors.surface,
-                border = BorderStroke(if (selected) 2.dp else 1.dp, if (selected) colors.primaryDark else colors.borderLight.copy(alpha = .25f)),
+                border = BorderStroke(if (selected) 2.dp else 1.dp, if (selected) colors.primaryDark else colors.borderLight),
                 modifier = Modifier.heightIn(min = 44.dp).semantics { this.selected = selected; role = Role.RadioButton }) {
                 Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -294,7 +294,7 @@ fun QuestManagementScreen(model: QuestViewModel, modifier: Modifier = Modifier, 
             val selected = value == minutes
             Surface(onClick = { onSelect(minutes) }, enabled = enabled, shape = PawQuestTheme.shapes.pill,
                 color = if (selected) colors.textPrimary else colors.surface,
-                border = BorderStroke(1.dp, colors.borderLight.copy(alpha = if (selected) 1f else .25f)),
+                border = BorderStroke(1.dp, colors.borderLight),
                 modifier = Modifier.heightIn(min = 44.dp).semantics { this.selected = selected }) {
                 Box(Modifier.padding(horizontal = 16.dp, vertical = 10.dp), contentAlignment = Alignment.Center) {
                     Text(tr("$minutes min"), style = PawQuestTheme.typography.labelLarge,

@@ -49,7 +49,7 @@ fun PawQuestTheme(
         onSurface = colors.textPrimary,
         surfaceVariant = colors.surfaceVariant,
         onSurfaceVariant = colors.textSecondary,
-        outline = colors.borderLight,
+        outline = colors.outlineStrong,
         outlineVariant = colors.borderFocus,
         error = colors.error,
         onError = colors.onError,

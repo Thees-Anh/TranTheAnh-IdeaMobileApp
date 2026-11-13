@@ -97,7 +97,7 @@ private fun ExploreTile(card: ExploreCard, onClick: () -> Unit, modifier: Modifi
     val colors = PawQuestTheme.colors
     val (icon, tint) = card.icon()
     Surface(onClick = onClick, shape = PawQuestTheme.shapes.xl, color = card.container(colors),
-        border = BorderStroke(1.dp, colors.borderLight.copy(alpha = .08f)),
+        border = BorderStroke(1.dp, colors.borderLight),
         modifier = modifier.heightIn(min = 140.dp).semantics { role = Role.Button }) {
         Box(Modifier.padding(16.dp)) {
             Column(Modifier.align(Alignment.TopStart).padding(end = 36.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {

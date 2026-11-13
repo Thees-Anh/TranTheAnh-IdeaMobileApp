@@ -112,7 +112,7 @@ fun TodayScreen(
         val total = quests.todayItems.size
         val done = quests.doneCount
         SectionTitle("Today's progress", if (total > 0) tr("$done/$total quests") else null)
-        Surface(shape = PawQuestTheme.shapes.xl, color = colors.surface, border = BorderStroke(1.dp, colors.borderLight.copy(alpha = .12f)),
+        Surface(shape = PawQuestTheme.shapes.xl, color = colors.surface, border = BorderStroke(1.dp, colors.borderLight),
             modifier = Modifier.fillMaxWidth()) {
             Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 val fraction = if (total == 0) 0f else done.toFloat() / total
@@ -174,7 +174,7 @@ private fun CompanionCard(onVisitRoom: () -> Unit) {
         else -> Res.drawable.pet_mochi
     }
     Surface(onClick = onVisitRoom, shape = PawQuestTheme.shapes.xl, color = colors.primaryContainer,
-        border = BorderStroke(1.dp, colors.borderLight.copy(alpha = .08f)), modifier = Modifier.fillMaxWidth()) {
+        border = BorderStroke(1.dp, colors.borderLight), modifier = Modifier.fillMaxWidth()) {
         Row(Modifier.padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(tr("Your companion").uppercase(), style = PawQuestTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
@@ -197,7 +197,7 @@ private fun CompanionCard(onVisitRoom: () -> Unit) {
 @Composable
 private fun NextQuestCard(next: QuestUiItem?, total: Int, onStart: (String) -> Unit, onCreate: () -> Unit) {
     val colors = PawQuestTheme.colors
-    Surface(shape = PawQuestTheme.shapes.xl, color = colors.surface, border = BorderStroke(1.dp, colors.borderLight.copy(alpha = .12f)),
+    Surface(shape = PawQuestTheme.shapes.xl, color = colors.surface, border = BorderStroke(1.dp, colors.borderLight),
         modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             if (next == null) {

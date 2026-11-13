@@ -20,7 +20,7 @@ Source: the user's HTML prototype screenshots (Home, Quests, Pet Room, Explore, 
 
 ## Non-goals
 
-- No colour/visual-style refresh (draft colours not agreed; existing tokens kept).
+- Visual refresh added on request (2026-11-13): use the ui-ux-pro-max skill to redesign the look. Applied at token level (see docs/design/PROTOTYPE_UI.md); the room/pet illustrations are unchanged.
 - No new Strict Focus or reduced-motion features (prototype demo toggles).
 - No database migration, no change to reward/streak rules.
 
