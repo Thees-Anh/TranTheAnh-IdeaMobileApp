@@ -2,6 +2,8 @@ package com.pawquest.presentation.quests
 
 import com.pawquest.localization.tr
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -67,15 +69,35 @@ fun QuestManagementScreen(model: QuestViewModel, modifier: Modifier = Modifier, 
 
 @Composable private fun QuestList(state: QuestManagementState, model: QuestViewModel, modifier: Modifier,
     focus: com.pawquest.presentation.focus.FocusState?,resume: (()->Unit)?) {
-    Column(modifier.fillMaxWidth()) {
-        Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Title("Your quests")
-            Text(tr("Small steps, happy paws."), color = PawQuestTheme.colors.textSecondary)
-            Action("Create Quest", model::openCreate)
-        }
-        LazyColumn(Modifier.weight(1f).fillMaxWidth(), contentPadding = PaddingValues(16.dp),
+    val colors = PawQuestTheme.colors
+    Box(modifier.fillMaxWidth()) {
+        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 96.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            item { DailyProgress(state, model) }
+            item { com.pawquest.presentation.components.TabHeader("Quests", "Every achievement starts with one small step.") }
+            item { TodayQuestProgress(state, model) }
+            item {
+                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    QuestFilter.entries.forEach { filter ->
+                        val selected = state.filter == filter
+                        Surface(onClick = { model.selectFilter(filter) }, shape = PawQuestTheme.shapes.pill,
+                            color = if (selected) colors.textPrimary else colors.surface,
+                            border = BorderStroke(1.dp, colors.borderLight.copy(alpha = if (selected) 1f else .2f)),
+                            modifier = Modifier.heightIn(min = 40.dp).semantics { this.selected = selected; role = Role.Tab }) {
+                            Box(Modifier.padding(horizontal = 16.dp, vertical = 10.dp), contentAlignment = Alignment.Center) {
+                                Text(tr(filter.label), style = PawQuestTheme.typography.labelLarge,
+                                    color = if (selected) colors.surface else colors.textSecondary)
+                            }
+                        }
+                    }
+                }
+            }
+            item {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(tr("Quest list"), style = PawQuestTheme.typography.titleLarge, color = colors.textPrimary,
+                        modifier = Modifier.weight(1f).semantics { heading() })
+                    Text(tr("${state.visibleItems.size} quests"), style = PawQuestTheme.typography.labelMedium, color = colors.textSecondary)
+                }
+            }
             state.notice?.let { item { Notice(it) } }
             state.error?.let { item { Failure(it); Action("Retry", model::refresh, secondary = true) } }
             if (state.loading) item { Loading("Loading your quests…") }
@@ -85,39 +107,84 @@ fun QuestManagementScreen(model: QuestViewModel, modifier: Modifier = Modifier, 
                     Text(tr("Create a quest for something you want to focus on. Choose 5–90 minutes and make time for you."))
                     Text(tr("No quests yet"), style = PawQuestTheme.typography.labelLarge)
                 }
+            } else if (state.visibleItems.isEmpty()) item {
+                Text(tr("Nothing here yet."), color = colors.textSecondary, modifier = Modifier.padding(8.dp))
             }
-            items(state.items.sortedByDescending {focus?.progressForQuest(it.quest.id)!=null}, key = { it.quest.id }) { item ->
-                val active=focus?.progressForQuest(item.quest.id)
-                Panel(highlight=active!=null) {
-                    if(active!=null) QuestCountdown(active)
-                    Text(tr(item.quest.category), style = PawQuestTheme.typography.labelLarge, color = PawQuestTheme.colors.textSecondary)
-                    Text(item.quest.title, style = PawQuestTheme.typography.titleMedium, maxLines = 3, overflow = TextOverflow.Ellipsis)
-                    Text(tr("${item.quest.durationMinutes} min · ${if(item.quest.repeatType == QuestRepeatType.DAILY) "Daily" else "One-time"}"))
-                    Rewards(item.preview)
-                    if(active!=null && resume!=null) Action("Resume Focus",resume)
-                    else Action("View quest", { model.openDetails(item.quest.id) }, secondary = true)
-                }
+            items(state.visibleItems.sortedByDescending {focus?.progressForQuest(it.quest.id)!=null}, key = { it.quest.id }) { item ->
+                QuestRow(item, state.isDone(item), focus?.progressForQuest(item.quest.id), resume,
+                    onOpen = { model.openDetails(item.quest.id) }, onStart = { model.startQuest(item.quest.id) }, enabled = !state.busy)
             }
             item { TextButton(onClick = model::refresh, enabled = !state.loading) { Text(tr("Refresh quests")) } }
+        }
+        val createLabel = tr("Create Quest")
+        Surface(onClick = model::openCreate, shape = PawQuestTheme.shapes.lg, color = colors.primary,
+            shadowElevation = 4.dp, modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp).size(60.dp)
+                .semantics { contentDescription = createLabel; role = Role.Button }) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(com.pawquest.presentation.icons.PawQuestIcons.Plus, null, Modifier.size(28.dp), tint = colors.textPrimary)
+            }
         }
     }
 }
 
-@Composable private fun DailyProgress(state: QuestManagementState, model: QuestViewModel) {
-    Panel {
-        Text(tr("Daily reward progress"), style = PawQuestTheme.typography.titleMedium)
-        when {
-            state.dailyCount != null -> {
-                Text(tr("${state.dailyCount}/5 rewarded sessions today (UTC)"))
-                LinearProgressIndicator(progress = { state.dailyCount.coerceIn(0,5) / 5f },
-                    modifier = Modifier.fillMaxWidth(), color = PawQuestTheme.colors.primaryDark,
-                    trackColor = PawQuestTheme.colors.primaryContainer)
+@Composable private fun TodayQuestProgress(state: QuestManagementState, model: QuestViewModel) {
+    val colors = PawQuestTheme.colors
+    val total = state.todayItems.size
+    val done = state.doneCount
+    Surface(shape = PawQuestTheme.shapes.xl, color = colors.petXpContainer, modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(tr("Today's quests").uppercase(), style = PawQuestTheme.typography.labelSmall, color = colors.petXpDark)
+            Text("$done / $total", style = PawQuestTheme.typography.headlineLarge, color = colors.textPrimary)
+            Text(tr(if (total > 0 && done == total) "All done for today!" else "Keep going, you're doing great!"),
+                style = PawQuestTheme.typography.bodyMedium, color = colors.textSecondary)
+            LinearProgressIndicator(progress = { if (total == 0) 0f else done.toFloat() / total },
+                modifier = Modifier.fillMaxWidth().height(8.dp), color = colors.petXp, trackColor = colors.surface)
+            when {
+                state.dailyCount != null -> Text(tr("${state.dailyCount}/5 rewarded sessions today (UTC)"),
+                    style = PawQuestTheme.typography.labelSmall, color = colors.textSecondary)
+                state.progressError -> TextButton(onClick = { model.refreshProgress() }) { Text(tr("Retry progress")) }
+                else -> Unit
             }
-            state.progressError -> {
-                Text(tr("Daily progress is unavailable."))
-                TextButton(onClick = { model.refreshProgress() }) { Text(tr("Retry progress")) }
+        }
+    }
+}
+
+@Composable private fun QuestRow(item: QuestUiItem, done: Boolean, active: QuestFocusProgress?, resume: (()->Unit)?,
+    onOpen: () -> Unit, onStart: () -> Unit, enabled: Boolean) {
+    val colors = PawQuestTheme.colors
+    Surface(onClick = onOpen, shape = PawQuestTheme.shapes.xl,
+        color = if (active != null) colors.primaryContainer else colors.surface,
+        border = BorderStroke(if (active != null) 2.dp else 1.dp, if (active != null) colors.primaryDark else colors.borderLight.copy(alpha = .12f)),
+        modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            if (active != null) QuestCountdown(active)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                com.pawquest.presentation.home.CategoryBadge(item.quest.category)
+                Column(Modifier.weight(1f)) {
+                    Text(item.quest.title, style = PawQuestTheme.typography.titleMedium.copy(
+                        textDecoration = if (done) TextDecoration.LineThrough else null),
+                        color = if (done) colors.textMuted else colors.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    Text(tr("${item.quest.durationMinutes} min · ${tr(displayCategory(item.quest.category))}") +
+                        if (item.quest.repeatType == QuestRepeatType.DAILY) " · " + tr("Daily") else "",
+                        style = PawQuestTheme.typography.labelMedium, color = colors.textSecondary)
+                }
+                when {
+                    active != null && resume != null -> PawQuestButton("Resume Focus", resume, size = ButtonSize.Small)
+                    done -> Surface(shape = PawQuestTheme.shapes.md, color = colors.successContainer) {
+                        Text(tr("✓ Done"), Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                            style = PawQuestTheme.typography.labelMedium, color = colors.successDark)
+                    }
+                    else -> {
+                        val label = tr("Start focus")
+                        Surface(onClick = onStart, enabled = enabled, shape = PawQuestTheme.shapes.md, color = colors.hungerContainer,
+                            modifier = Modifier.size(48.dp).semantics { contentDescription = label; role = Role.Button }) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text("▶", style = PawQuestTheme.typography.titleMedium, color = colors.hungerDark)
+                            }
+                        }
+                    }
+                }
             }
-            else -> Text(tr("Loading daily progress…"))
         }
     }
 }
@@ -148,6 +215,7 @@ fun QuestManagementScreen(model: QuestViewModel, modifier: Modifier = Modifier, 
         CategorySelector(form.category, !state.busy, model::editCategory)
         Text(tr("Duration · ${form.durationMinutes} minutes"), style = PawQuestTheme.typography.titleMedium)
         Text(tr("5–90 minutes"), color = PawQuestTheme.colors.textSecondary)
+        DurationPresets(form.durationMinutes, !state.busy, model::editDuration)
         Slider(value = form.durationMinutes.toFloat(), onValueChange = { model.editDuration(it.toInt()) },
             valueRange = 5f..90f, steps = 84, enabled = !state.busy, modifier = Modifier.fillMaxWidth()
                 .semantics { contentDescription = tr("Duration in minutes") },
@@ -199,14 +267,39 @@ fun QuestManagementScreen(model: QuestViewModel, modifier: Modifier = Modifier, 
 }
 
 @Composable private fun CategorySelector(value: String, enabled: Boolean, onSelect: (String) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    Box {
-        OutlinedButton(onClick = { expanded = true }, enabled = enabled, modifier = Modifier.fillMaxWidth()) {
-            Text(tr("Category: ${tr(value)}"), color = PawQuestTheme.colors.textPrimary)
+    val colors = PawQuestTheme.colors
+    val current = displayCategory(value)
+    Text(tr("Category"), style = PawQuestTheme.typography.titleMedium)
+    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        QuestCategories.forEach { category ->
+            val selected = current == category
+            Surface(onClick = { onSelect(category) }, enabled = enabled, shape = PawQuestTheme.shapes.pill,
+                color = if (selected) colors.primaryContainer else colors.surface,
+                border = BorderStroke(if (selected) 2.dp else 1.dp, if (selected) colors.primaryDark else colors.borderLight.copy(alpha = .25f)),
+                modifier = Modifier.heightIn(min = 44.dp).semantics { this.selected = selected; role = Role.RadioButton }) {
+                Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    com.pawquest.presentation.home.CategoryBadge(category, Modifier.size(28.dp))
+                    Text(tr(category), style = PawQuestTheme.typography.labelLarge, color = colors.textPrimary)
+                }
+            }
         }
-        DropdownMenu(expanded, onDismissRequest = { expanded = false }) {
-            (listOf("Focus", "Study", "Work", "Health", "Personal", "Other") + value).distinct().forEach { category ->
-                DropdownMenuItem(text = { Text(tr(category)) }, onClick = { onSelect(category); expanded = false })
+    }
+}
+
+@Composable private fun DurationPresets(value: Int, enabled: Boolean, onSelect: (Int) -> Unit) {
+    val colors = PawQuestTheme.colors
+    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        listOf(15, 25, 45, 60).forEach { minutes ->
+            val selected = value == minutes
+            Surface(onClick = { onSelect(minutes) }, enabled = enabled, shape = PawQuestTheme.shapes.pill,
+                color = if (selected) colors.textPrimary else colors.surface,
+                border = BorderStroke(1.dp, colors.borderLight.copy(alpha = if (selected) 1f else .25f)),
+                modifier = Modifier.heightIn(min = 44.dp).semantics { this.selected = selected }) {
+                Box(Modifier.padding(horizontal = 16.dp, vertical = 10.dp), contentAlignment = Alignment.Center) {
+                    Text(tr("$minutes min"), style = PawQuestTheme.typography.labelLarge,
+                        color = if (selected) colors.surface else colors.textPrimary)
+                }
             }
         }
     }
@@ -219,7 +312,7 @@ fun QuestManagementScreen(model: QuestViewModel, modifier: Modifier = Modifier, 
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
         if (item == null) { Text(tr("This quest is no longer available.")); return@Column }
         Title(item.quest.title, systemCopy = false)
-        Text(tr("${tr(item.quest.category)} · ${if(item.quest.repeatType == QuestRepeatType.DAILY) "Daily" else "One-time"}"))
+        Text(tr("${tr(displayCategory(item.quest.category))} · ${if(item.quest.repeatType == QuestRepeatType.DAILY) "Daily" else "One-time"}"))
         Text(tr("${item.quest.durationMinutes} minutes"), style = PawQuestTheme.typography.titleMedium)
         item.quest.dueAt?.let {Text(tr("Due ${QuestDeadlineInput.format(it)} (${TimeZone.currentSystemDefault().id})"))}
         if(item.quest.repeatType==QuestRepeatType.DAILY) Text(tr("Due each local day at midnight"))
