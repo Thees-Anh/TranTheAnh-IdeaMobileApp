@@ -17,6 +17,8 @@ import kotlin.time.Instant
 @Serializable private data class SessionRecord(val id: String,
     @SerialName("quest_id") val questId: String, @SerialName("ends_at") val endsAt: String)
 
+@Serializable private data class CompletedRecord(@SerialName("quest_id") val questId: String, @SerialName("reward_day") val rewardDay: String)
+
 class SupabaseQuestSessionRepository(private val client: SupabaseClient) : QuestSessionRepository {
     private suspend fun <T> request(block: suspend () -> T): T {
         client.auth.awaitInitialization()
@@ -36,6 +38,24 @@ class SupabaseQuestSessionRepository(private val client: SupabaseClient) : Quest
     }
     override suspend fun dailyRewardCount(): Int = request {
         client.postgrest.rpc("quest_daily_reward_count").decodeAs<Int>()
+    }
+    override suspend fun completedQuests(dailyIds: Collection<String>, oneTimeIds: Collection<String>,
+        today: kotlinx.datetime.LocalDate): com.pawquest.domain.repository.QuestCompletions = request {
+        val userId = checkNotNull(client.auth.currentUserOrNull()).id
+        suspend fun finished(ids: Collection<String>, day: kotlinx.datetime.LocalDate?): List<CompletedRecord> =
+            if (ids.isEmpty()) emptyList()
+            else client.postgrest["quest_sessions"].select(io.github.jan.supabase.postgrest.query.Columns.list("quest_id", "reward_day")) {
+                filter {
+                    eq("user_id", userId)
+                    isIn("status", listOf("completed", "claimed"))
+                    isIn("quest_id", ids.toList())
+                    if (day != null) eq("reward_day", day.toString())
+                }
+                limit(1000)
+            }.decodeList<CompletedRecord>()
+        val rows = finished(dailyIds, today) + finished(oneTimeIds, null)
+        com.pawquest.domain.repository.QuestCompletions(rows.map { it.questId }.toSet(),
+            rows.filter { it.rewardDay == today.toString() }.map { it.questId }.toSet())
     }
 }
 

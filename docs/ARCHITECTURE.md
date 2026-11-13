@@ -232,11 +232,15 @@ no artificial delay or fake feature activity is added.
 
 ## Navigation policy
 
-Five `Destination` entries define stable route IDs and display labels: Pet Home,
-Quests, Shop, Inventory, and Profile. Pet Home is the initial destination.
-Selection is stored with `rememberSaveable` as a route string so Android saved
-state can restore it after recreation/process death. Unknown saved routes fall
-back to Pet Home. Tapping a tab replaces the visible top-level destination;
+Four habit-first `Destination` entries define stable route IDs and display labels:
+Home, Quests, Pet Room and Explore. Home (today's progress and next quest) is the
+initial destination. Selection is stored with `rememberSaveable` as a route string so
+Android saved state can restore it after recreation/process death. Legacy routes from
+notifications, widgets and older builds map to the new tabs (`pet_home` -> Pet Room,
+`shop` -> Explore, `inventory` -> Pet Room wardrobe, `profile` -> Home); unknown saved
+routes fall back to Home. Settings/account and the progress dashboard are bottom sheets
+opened from the avatar button and Home's "View progress" link. See
+`docs/superpowers/specs/2026-11-13-habit-first-navigation-design.md`. Tapping a tab replaces the visible top-level destination;
 reselecting it retains its ViewModel. Tabs do not build a history stack.
 Android Back follows the host's normal behavior and leaves the Activity.
 

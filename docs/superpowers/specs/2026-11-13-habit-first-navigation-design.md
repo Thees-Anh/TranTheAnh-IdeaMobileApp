@@ -1,6 +1,6 @@
 # Habit-first navigation redesign
 
-Date: 2026-11-13 · Status: approved in conversation (option B, phased)
+Date: 2026-11-13 · Status: implemented (phases 1-3), verified on emulator
 
 ## Intent
 
@@ -35,6 +35,7 @@ Source: the user's HTML prototype screenshots (Home, Quests, Pet Room, Explore, 
 
 ## Decisions (builder's calls, marked)
 
+- *Call:* Home/Quests "today" counts exclude one-time quests finished on an earlier day; those still show as Done in the list.
 - *Call:* "Done today" per quest is derived from the user's own `quest_sessions` rows (status completed/claimed): daily quests count when `reward_day` is today (UTC, same day rule as the habit calendar and reward limits); one-time quests count once completed on any day. Read-only select under the existing `sessions_read_own` RLS policy.
 - *Call:* Pet Room shows the room first and the wardrobe as a second segment ("Room" / "Wardrobe") in the same tab, because the room renderer fills the viewport and the inventory is a lazy grid; nesting them in one scroll would break both.
 - *Call:* Explore cards map to existing features: Bistro → Food shop, Cozy Shop → decor/accessory shard exchange, Mystery Box → item case, Lucky Wheel → wheel, Exchange → pet shard exchange, Collection → pet collection. There is no separate Coins decor shop today.

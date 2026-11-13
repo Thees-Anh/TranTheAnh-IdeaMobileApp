@@ -157,7 +157,7 @@ private fun ProtectedApp(
     }
     LaunchedEffect(focusState.session?.status,focusState.snapshot?.eligible) {
         if (focusState.session?.status == FocusStatus.CLAIMED) { quests.refreshProgress(); pet.refresh() }
-        else if(focusState.snapshot?.eligible==true) pet.refresh()
+        else if(focusState.snapshot?.eligible==true) { pet.refresh(); quests.refreshProgress() }
     }
     val shop = viewModel<com.pawquest.presentation.shop.ShopViewModel>(key = "shop-catalog") {
         container.koin.get<com.pawquest.presentation.shop.ShopViewModel>()
@@ -256,7 +256,17 @@ private fun ProtectedApp(
         onNavigate = { selectedRoute = it.route },
         onRetry = model::retry,
         homeContent = { modifier ->
-            com.pawquest.presentation.home.TodayScreen(modifier)
+            com.pawquest.presentation.home.TodayScreen(
+                displayName = account.displayName,
+                coins = currentCoins,
+                quests = questState,
+                onStartQuest = quests::startQuest,
+                onSeeAllQuests = { quests.selectFilter(com.pawquest.presentation.quests.QuestFilter.ALL); selectedRoute = Destination.Quests.route },
+                onCreateQuest = { quests.openCreate(); selectedRoute = Destination.Quests.route },
+                onVisitRoom = { petRoomTab = com.pawquest.presentation.home.PetRoomTab.ROOM.name; selectedRoute = Destination.PetRoom.route },
+                onOpenProgress = { progress.refresh(); progressOpen = true },
+                modifier = modifier,
+            )
         },
         questContent = { QuestManagementScreen(quests, it, if(focusState.session!=null || focusState.error!=null) focus::show else null,focusState) },
         petRoomContent = { modifier ->

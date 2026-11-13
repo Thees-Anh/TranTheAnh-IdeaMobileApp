@@ -35,7 +35,10 @@ class QuestViewModelTest {
         var count = 0
         var starts = 0
         var fail = false
+        var completions = QuestCompletions()
         override suspend fun dailyRewardCount(): Int { delay(1); if(fail) error("offline"); return count }
+        override suspend fun completedQuests(dailyIds: Collection<String>, oneTimeIds: Collection<String>,
+            today: kotlinx.datetime.LocalDate) = completions
         override suspend fun start(questId: String): StartedQuestSession {
             starts++
             return StartedQuestSession("session",questId,time)
@@ -44,6 +47,38 @@ class QuestViewModelTest {
     private fun model(repo: Repository, sessions: Sessions) = QuestViewModel(
         GetQuests(repo), CreateQuest(repo), UpdateQuest(repo), DeleteQuest(repo),sessions)
 
+    @Test fun todayProgressFiltersAndDirectStartFollowCompletions() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            fun quest(n: Int, repeat: QuestRepeatType, category: String = "Study") =
+                Quest("20000000-0000-0000-0000-00000000000$n","owner","Quest $n","",category,25,repeat,time)
+            val daily=quest(1,QuestRepeatType.DAILY); val dailyDone=quest(2,QuestRepeatType.DAILY)
+            val oneTimeOld=quest(3,QuestRepeatType.ONE_TIME,"Focus"); val oneTimeToday=quest(4,QuestRepeatType.ONE_TIME)
+            val repo=Repository().apply { values=listOf(daily,dailyDone,oneTimeOld,oneTimeToday) }
+            val sessions=Sessions().apply {
+                completions=QuestCompletions(setOf(dailyDone.id,oneTimeOld.id,oneTimeToday.id),setOf(dailyDone.id,oneTimeToday.id))
+            }
+            val model=model(repo,sessions)
+            advanceUntilIdle()
+            val state=model.state.value
+            // A one-time quest finished on an earlier day leaves today's tally but still shows as done.
+            assertEquals(listOf(daily.id,dailyDone.id,oneTimeToday.id),state.todayItems.map { it.quest.id })
+            assertEquals(2,state.doneCount)
+            assertEquals(daily.id,state.nextQuest?.quest?.id)
+            model.selectFilter(QuestFilter.TO_DO)
+            assertEquals(listOf(daily.id),model.state.value.visibleItems.map { it.quest.id })
+            model.selectFilter(QuestFilter.DONE)
+            assertEquals(setOf(dailyDone.id,oneTimeOld.id,oneTimeToday.id),model.state.value.visibleItems.map { it.quest.id }.toSet())
+            model.selectFilter(QuestFilter.DAILY)
+            assertEquals(listOf(daily.id,dailyDone.id),model.state.value.visibleItems.map { it.quest.id })
+            assertEquals("Other",displayCategory("Focus")); assertEquals("Health",displayCategory("health"))
+            model.startQuest(daily.id)
+            assertEquals(daily.id,model.state.value.requestedFocusQuestId)
+            model.consumeFocusRequest(); model.startQuest("unknown")
+            assertNull(model.state.value.requestedFocusQuestId)
+            assertEquals(0,sessions.starts)
+        } finally { Dispatchers.resetMain() }
+    }
     @Test fun loadRetryAndUnknownProgressDoNotPretendToBeZero() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {

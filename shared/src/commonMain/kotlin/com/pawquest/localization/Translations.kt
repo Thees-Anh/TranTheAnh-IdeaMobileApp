@@ -943,4 +943,39 @@ Hello, friend!|Xin chào, bạn!
 One small step is still progress.|Một bước nhỏ cũng là tiến bộ.
 Today's quests will appear here.|Nhiệm vụ hôm nay sẽ hiển thị ở đây.
 Shops and activities will appear here.|Cửa hàng và hoạt động sẽ hiển thị ở đây.
+Hello, {0}!|Xin chào, {0}!
+{0} day streak|{0} ngày streak
+Today's progress|Tiến độ hôm nay
+{0}/{1} quests|{0}/{1} nhiệm vụ
+Plan your first quest|Lên kế hoạch cho nhiệm vụ đầu tiên
+All done for today!|Hôm nay xong hết rồi!
+Let's begin|Bắt đầu thôi
+Little by little|Tiến từng chút một
+You can do it!|Bạn làm được mà!
+Your first quest is waiting.|Nhiệm vụ đầu tiên đang chờ bạn.
++{0}/{1} Coins|+{0}/{1} Xu
+What's next?|Tiếp theo là gì?
+See all|Xem tất cả
+Little motivation|Động lực nhỏ
+View progress|Xem tiến độ
+Your pet|Thú cưng của bạn
+I could use a little care today.|Hôm nay tớ cần được chăm một chút.
+Let's do something great together today!|Cùng nhau làm một điều tuyệt vời hôm nay nhé!
+Needs care · Visit room →|Cần chăm sóc · Ghé thăm phòng →
+Visit room →|Ghé thăm phòng →
+Create a quest for something you want to do today.|Tạo một nhiệm vụ cho điều bạn muốn làm hôm nay.
+Every quest is done. Enjoy your rest!|Mọi nhiệm vụ đã xong. Nghỉ ngơi thôi!
+{0} min · {1}|{0} phút · {1}
+Start focus|Bắt đầu tập trung
+{0} more days to the {1} badge|Còn {0} ngày nữa để đạt huy hiệu {1}
+{0} day streak · Best {1}|{0} ngày streak · Cao nhất {1}
+completed|đã hoàn thành
+not completed|chưa hoàn thành
+Every achievement starts with one small step.|Mọi thành tựu đều bắt đầu từ một bước nhỏ.
+To do|Cần làm
+Quest list|Danh sách nhiệm vụ
+{0} quests|{0} nhiệm vụ
+Today's quests|Nhiệm vụ hôm nay
+Keep going, you're doing great!|Tiếp tục nhé, bạn làm tốt lắm!
+✓ Done|✓ Xong
 """

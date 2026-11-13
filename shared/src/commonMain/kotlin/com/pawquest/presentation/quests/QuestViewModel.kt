@@ -11,10 +11,17 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.datetime.toLocalDateTime
 
 enum class QuestPage { LIST, CREATE, EDIT, DETAILS }
+enum class QuestFilter(val label: String) { ALL("All"), TO_DO("To do"), DONE("Completed"), DAILY("Daily") }
+
+/** Fixed categories offered when creating a quest. Older free-text categories display as "Other". */
+val QuestCategories = listOf("Study", "Work", "Health", "Other")
+fun displayCategory(raw: String): String = QuestCategories.firstOrNull { it.equals(raw.trim(), ignoreCase = true) } ?: "Other"
+
 data class QuestForm(
-    val title: String = "", val description: String = "", val category: String = "Focus",
+    val title: String = "", val description: String = "", val category: String = "Study",
     val durationMinutes: Int = 25, val repeatType: QuestRepeatType = QuestRepeatType.ONE_TIME,
     val titleError: String? = null, val descriptionError: String? = null, val categoryError: String? = null,
     val preview: QuestRewardPreview = questRewardPreview(25),
@@ -29,8 +36,24 @@ data class QuestManagementState(
     val dailyCount: Int? = null, val progressError: Boolean = false,
     val deleteConfirmation: Boolean = false, val discardConfirmation: Boolean = false,
     val requestedFocusQuestId: String? = null,
+    /** Quests finished today (daily) or ever (one-time); empty until the server answers. */
+    val completedIds: Set<String> = emptySet(),
+    val completedTodayIds: Set<String> = emptySet(),
+    val filter: QuestFilter = QuestFilter.ALL,
 ) {
     val selected get() = items.firstOrNull { it.quest.id == selectedId }
+    fun isDone(item: QuestUiItem) = item.quest.id in completedIds
+    /** Today's list: everything except one-time quests already finished on an earlier day. */
+    val todayItems get() = items.filter { !isDone(it) || it.quest.repeatType == QuestRepeatType.DAILY || it.quest.id in completedTodayIds }
+    val doneCount get() = todayItems.count(::isDone)
+    val visibleItems get() = when (filter) {
+        QuestFilter.ALL -> items.sortedBy(::isDone)
+        QuestFilter.TO_DO -> items.filterNot(::isDone)
+        QuestFilter.DONE -> items.filter(::isDone)
+        QuestFilter.DAILY -> items.filter { it.quest.repeatType == QuestRepeatType.DAILY }.sortedBy(::isDone)
+    }
+    /** Suggested next quest: daily habits first, then the newest one-time quest. */
+    val nextQuest get() = items.filterNot(::isDone).sortedBy { it.quest.repeatType != QuestRepeatType.DAILY }.firstOrNull()
 }
 
 class QuestViewModel(
@@ -53,6 +76,7 @@ class QuestViewModel(
             try {
                 val items = getQuests().map { QuestUiItem(it, questRewardPreview(it.durationMinutes)) }
                 mutableState.value = state.value.copy(loading = false, items = items)
+                refreshCompletions()
             } catch (cancelled: CancellationException) { throw cancelled }
             catch (error: Exception) { mutableState.value = state.value.copy(loading = false, error = message(error)) }
         }
@@ -65,6 +89,28 @@ class QuestViewModel(
         }
         catch (cancelled: CancellationException) { throw cancelled }
         catch (_: Exception) { mutableState.value = state.value.copy(dailyCount = null, progressError = true) }
+        refreshCompletions()
+    }
+    private var completionJob: Job? = null
+    private fun refreshCompletions() {
+        completionJob?.cancel()
+        completionJob = viewModelScope.launch {
+            val items = state.value.items
+            try {
+                val today = kotlin.time.Clock.System.now().toLocalDateTime(kotlinx.datetime.TimeZone.UTC).date
+                val (daily, oneTime) = items.partition { it.quest.repeatType == QuestRepeatType.DAILY }
+                val done = sessions.completedQuests(daily.map { it.quest.id }, oneTime.map { it.quest.id }, today)
+                mutableState.value = state.value.copy(completedIds = done.done, completedTodayIds = done.doneToday)
+            } catch (cancelled: CancellationException) { throw cancelled }
+            // Unknown completion keeps the last known marks; the list itself still works.
+            catch (_: Exception) { }
+        }
+    }
+    fun selectFilter(filter: QuestFilter) { mutableState.value = state.value.copy(filter = filter) }
+    /** Starts Focus straight from a list row or the Home suggestion. */
+    fun startQuest(id: String) {
+        if (state.value.busy || state.value.items.none { it.quest.id == id }) return
+        mutableState.value = state.value.copy(requestedFocusQuestId = id)
     }
     fun openCreate() {
         if (state.value.busy) return
