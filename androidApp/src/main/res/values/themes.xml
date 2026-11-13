@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Launch window before Compose draws; Compose then applies the in-app appearance choice. -->
+    <style name="Theme.PawQuest" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/pawquest_window</item>
+    </style>
+    <color name="pawquest_window">#FFF9F5</color>
+</resources>

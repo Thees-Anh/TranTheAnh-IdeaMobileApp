@@ -1,0 +1,171 @@
+<!-- Vật phẩm: #furn-window -->
+<g id="furn-window" class="room-item item-visible">
+                                <!-- Khung vòm ngoài -->
+                                <path d="M 235 55 C 235 12, 365 12, 365 55 L 365 155 L 235 155 Z" fill="#BAE6FD" stroke="#4B2412" stroke-width="5" stroke-linejoin="round"></path>
+                                <!-- Cầu vồng pastel -->
+                                <path d="M 248 135 C 260 75, 340 75, 352 135" fill="none" stroke="#FDA4AF" stroke-width="7" opacity="0.85"></path>
+                                <path d="M 255 135 C 265 85, 335 85, 345 135" fill="none" stroke="#FDE047" stroke-width="7" opacity="0.85"></path>
+                                <path d="M 262 135 C 270 95, 330 95, 338 135" fill="none" stroke="#A7F3D0" stroke-width="7" opacity="0.85"></path>
+                                <!-- Mặt trời nhỏ & Mây trôi -->
+                                <circle cx="272" cy="58" r="13" fill="#FDE047" stroke="#4B2412" stroke-width="3.5"></circle>
+                                <g class="window-cloud">
+                                    <path d="M 295 96 C 287 96, 285 86, 293 83 C 296 75, 310 75, 314 82 C 322 79, 330 85, 327 93 C 333 95, 331 102, 323 102 L 295 102 Z" fill="#FFFFFF" stroke="#4B2412" stroke-width="3" stroke-linejoin="round"></path>
+                                </g>
+                                <!-- Nan cửa sổ chữ thập -->
+                                <line x1="300" y1="23" x2="300" y2="155" stroke="#FFF7FB" stroke-width="6"></line>
+                                <line x1="300" y1="23" x2="300" y2="155" stroke="#4B2412" stroke-width="3.5"></line>
+                                <line x1="235" y1="95" x2="365" y2="95" stroke="#FFF7FB" stroke-width="6"></line>
+                                <line x1="235" y1="95" x2="365" y2="95" stroke="#4B2412" stroke-width="3.5"></line>
+                                <!-- Rèm cửa hồng hai bên -->
+                                <path d="M 235 45 C 260 55, 265 95, 248 148 L 232 148 Z" fill="#F472B6" stroke="#4B2412" stroke-width="4" stroke-linejoin="round"></path>
+                                <path d="M 365 45 C 340 55, 335 95, 352 148 L 368 148 Z" fill="#F472B6" stroke="#4B2412" stroke-width="4" stroke-linejoin="round"></path>
+                                <!-- Bệ cửa sổ gỗ -->
+                                <rect x="226" y="150" width="148" height="14" rx="6" fill="#FFF7FB" stroke="#4B2412" stroke-width="4.5"></rect>
+                            </g>
+
+<!-- Vật phẩm: #furn-clock -->
+<g id="furn-clock" class="room-item item-visible">
+                                <!-- Quả lắc đung đưa phía dưới -->
+                                <g id="clock-pendulum">
+                                    <line x1="430" y1="125" x2="430" y2="164" stroke="#4B2412" stroke-width="4" stroke-linecap="round"></line>
+                                    <circle cx="430" cy="166" r="10" fill="#FACC15" stroke="#4B2412" stroke-width="3.8"></circle>
+                                </g>
+                                <!-- Thân đồng hồ đầu mèo -->
+                                <path d="M 404 82 L 400 58 L 418 70 Q 430 66 442 70 L 460 58 L 456 82 C 464 94, 462 118, 448 126 C 436 132, 424 132, 412 126 C 398 118, 396 94, 404 82 Z" fill="#FDBA74" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round"></path>
+                                <circle cx="430" cy="100" r="21" fill="#FFFBEB" stroke="#4B2412" stroke-width="3.8"></circle>
+                                <!-- Kim đồng hồ -->
+                                <line x1="430" y1="100" x2="430" y2="87" stroke="#4B2412" stroke-width="3.5" stroke-linecap="round"></line>
+                                <line x1="430" y1="100" x2="441" y2="104" stroke="#F43F5E" stroke-width="3.2" stroke-linecap="round"></line>
+                                <circle cx="430" cy="100" r="3" fill="#4B2412"></circle>
+                            </g>
+
+<!-- Vật phẩm: #furn-lights -->
+<g id="furn-lights" class="room-item item-visible">
+                                <!-- Dây treo -->
+                                <path d="M 15 18 Q 160 65 300 22 Q 440 65 585 18" fill="none" stroke="#4B2412" stroke-width="3.5" stroke-linecap="round"></path>
+                                <!-- Các bóng đèn ngôi sao & tròn phát sáng -->
+                                <g class="led-bulb-odd">
+                                    <circle cx="85" cy="40" r="9" fill="#FEF08A" stroke="#4B2412" stroke-width="3"></circle>
+                                    <circle cx="225" cy="40" r="9" fill="#FBCFE8" stroke="#4B2412" stroke-width="3"></circle>
+                                    <circle cx="375" cy="40" r="9" fill="#BAE6FD" stroke="#4B2412" stroke-width="3"></circle>
+                                    <circle cx="515" cy="40" r="9" fill="#FEF08A" stroke="#4B2412" stroke-width="3"></circle>
+                                </g>
+                                <g class="led-bulb-even">
+                                    <polygon points="155,36 159,44 168,45 161,51 163,60 155,55 147,60 149,51 142,45 151,44" fill="#FDE047" stroke="#4B2412" stroke-width="2.8" stroke-linejoin="round"></polygon>
+                                    <polygon points="300,18 304,26 313,27 306,33 308,42 300,37 292,42 294,33 287,27 296,26" fill="#FDE047" stroke="#4B2412" stroke-width="2.8" stroke-linejoin="round"></polygon>
+                                    <polygon points="445,36 449,44 458,45 451,51 453,60 445,55 437,60 439,51 432,45 441,44" fill="#FDE047" stroke="#4B2412" stroke-width="2.8" stroke-linejoin="round"></polygon>
+                                </g>
+                            </g>
+
+<!-- Vật phẩm: #furn-bookshelf -->
+<g id="furn-bookshelf" class="room-item item-visible">
+                                <!-- Tấm gỗ kệ -->
+                                <rect x="34" y="112" width="136" height="12" rx="5" fill="#FBBF24" stroke="#4B2412" stroke-width="4"></rect>
+                                <path d="M 48 124 L 48 138 L 60 124 Z" fill="#D97706" stroke="#4B2412" stroke-width="3.5" stroke-linejoin="round"></path>
+                                <path d="M 156 124 L 156 138 L 144 124 Z" fill="#D97706" stroke="#4B2412" stroke-width="3.5" stroke-linejoin="round"></path>
+                                <!-- Sách xếp màu pastel -->
+                                <rect x="44" y="76" width="15" height="36" rx="3" fill="#F472B6" stroke="#4B2412" stroke-width="3.5"></rect>
+                                <rect x="59" y="82" width="15" height="30" rx="3" fill="#60A5FA" stroke="#4B2412" stroke-width="3.5"></rect>
+                                <rect x="78" y="78" width="15" height="34" rx="3" fill="#34D399" stroke="#4B2412" stroke-width="3.5" transform="rotate(10 85 95)"></rect>
+                                <!-- Chậu xương rồng nhỏ trên kệ -->
+                                <polygon points="124,96 152,96 147,112 129,112" fill="#FB7185" stroke="#4B2412" stroke-width="3.5" stroke-linejoin="round"></polygon>
+                                <path d="M 131 96 C 131 74, 145 74, 145 96 Z" fill="#4ADE80" stroke="#4B2412" stroke-width="3.5"></path>
+                                <circle cx="138" cy="76" r="4.5" fill="#F43F5E" stroke="#4B2412" stroke-width="2.5"></circle>
+                            </g>
+
+<!-- Vật phẩm: #furn-cat-tree -->
+<g id="furn-cat-tree" class="room-item item-visible">
+                                <!-- Đế trụ -->
+                                <ellipse cx="92" cy="312" rx="52" ry="15" fill="#F9A8D4" stroke="#4B2412" stroke-width="4.5"></ellipse>
+                                <!-- Cột dây thừng cào móng -->
+                                <rect x="78" y="182" width="28" height="126" rx="6" fill="#FDE68A" stroke="#4B2412" stroke-width="4.2"></rect>
+                                <line x1="78" y1="205" x2="106" y2="215" stroke="#D97706" stroke-width="3"></line>
+                                <line x1="78" y1="230" x2="106" y2="240" stroke="#D97706" stroke-width="3"></line>
+                                <line x1="78" y1="255" x2="106" y2="265" stroke="#D97706" stroke-width="3"></line>
+                                <!-- Nhà hộp tròn ở giữa -->
+                                <rect x="52" y="232" width="68" height="50" rx="16" fill="#DDD6FE" stroke="#4B2412" stroke-width="4.2"></rect>
+                                <circle cx="86" cy="258" r="15" fill="#4B2412"></circle>
+                                <!-- Bệ nằm hình đám mây trên đỉnh -->
+                                <path d="M 55 182 C 42 182, 42 162, 58 160 C 66 148, 114 148, 122 160 C 138 162, 138 182, 125 182 Z" fill="#FFF7FB" stroke="#4B2412" stroke-width="4.2" stroke-linejoin="round"></path>
+                                <!-- Bóng bông đung đưa -->
+                                <g id="cat-tree-toy">
+                                    <line x1="122" y1="180" x2="122" y2="212" stroke="#4B2412" stroke-width="3"></line>
+                                    <circle cx="122" cy="216" r="9.5" fill="#F43F5E" stroke="#4B2412" stroke-width="3.5"></circle>
+                                </g>
+                            </g>
+
+<!-- Vật phẩm: #furn-bed -->
+<g id="furn-bed" class="room-item item-visible">
+                                <ellipse cx="495" cy="340" rx="64" ry="24" fill="#F472B6" stroke="#4B2412" stroke-width="4.5"></ellipse>
+                                <path d="M 436 332 L 446 296 L 472 316 L 495 290 L 518 316 L 544 296 L 554 332 Z" fill="#FBCFE8" stroke="#4B2412" stroke-width="4.2" stroke-linejoin="round"></path>
+                                <ellipse cx="495" cy="342" rx="46" ry="15" fill="#FFF1F2" stroke="#4B2412" stroke-width="3.5"></ellipse>
+                                <circle cx="446" cy="294" r="5" fill="#FACC15" stroke="#4B2412" stroke-width="2.5"></circle>
+                                <circle cx="495" cy="288" r="6" fill="#FACC15" stroke="#4B2412" stroke-width="2.5"></circle>
+                                <circle cx="544" cy="294" r="5" fill="#FACC15" stroke="#4B2412" stroke-width="2.5"></circle>
+                            </g>
+
+<!-- Vật phẩm: #furn-plant -->
+<g id="furn-plant" class="room-item item-visible">
+                                <!-- Lá cây xanh mát -->
+                                <path d="M 526 248 C 495 225, 495 190, 522 188 C 538 188, 542 220, 526 248 Z" fill="#22C55E" stroke="#4B2412" stroke-width="4"></path>
+                                <path d="M 538 248 C 555 215, 585 218, 578 244 C 572 260, 548 258, 538 248 Z" fill="#4ADE80" stroke="#4B2412" stroke-width="4"></path>
+                                <path d="M 532 246 C 520 205, 552 175, 566 202 C 575 220, 550 242, 532 246 Z" fill="#16A34A" stroke="#4B2412" stroke-width="4"></path>
+                                <!-- Chậu sứ mặt cười -->
+                                <polygon points="508,244 562,244 554,288 516,288" fill="#FFFBEB" stroke="#4B2412" stroke-width="4.2" stroke-linejoin="round"></polygon>
+                                <rect x="503" y="236" width="64" height="12" rx="5" fill="#FDE68A" stroke="#4B2412" stroke-width="4"></rect>
+                                <circle cx="525" cy="264" r="3" fill="#4B2412"></circle>
+                                <circle cx="545" cy="264" r="3" fill="#4B2412"></circle>
+                                <path d="M 531 268 Q 535 273 539 268" fill="none" stroke="#4B2412" stroke-width="2.8" stroke-linecap="round"></path>
+                            </g>
+
+<!-- Vật phẩm: #furn-tea-table -->
+<g id="furn-tea-table" class="room-item item-visible">
+                                <!-- Chân bàn -->
+                                <rect x="392" y="388" width="12" height="24" rx="4" fill="#B45309" stroke="#4B2412" stroke-width="4"></rect>
+                                <rect x="492" y="388" width="12" height="24" rx="4" fill="#B45309" stroke="#4B2412" stroke-width="4"></rect>
+                                <!-- Mặt bàn gỗ -->
+                                <ellipse cx="448" cy="382" rx="68" ry="20" fill="#FBBF24" stroke="#4B2412" stroke-width="4.5"></ellipse>
+                                <!-- Khăn trải bàn nhỏ -->
+                                <ellipse cx="448" cy="380" rx="46" ry="12" fill="#FFF1F2" stroke="#4B2412" stroke-width="3"></ellipse>
+                                <!-- Ấm trà hồng -->
+                                <path d="M 412 368 C 402 364, 402 352, 412 352" fill="none" stroke="#4B2412" stroke-width="4" stroke-linecap="round"></path>
+                                <ellipse cx="426" cy="364" rx="16" ry="13" fill="#F472B6" stroke="#4B2412" stroke-width="3.8"></ellipse>
+                                <path d="M 440 362 L 450 354" stroke="#F472B6" stroke-width="6" stroke-linecap="round"></path>
+                                <path d="M 440 362 L 450 354" stroke="#4B2412" stroke-width="3.8" stroke-linecap="round"></path>
+                                <circle cx="426" cy="350" r="4" fill="#FDE047" stroke="#4B2412" stroke-width="3"></circle>
+                                <!-- Khói ấm trà bốc lên -->
+                                <path class="tea-steam-1" d="M 424 342 Q 418 332 426 324" fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round"></path>
+                                <path class="tea-steam-2" d="M 436 344 Q 442 334 434 326" fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round"></path>
+                                <!-- Đĩa bánh Macaron -->
+                                <ellipse cx="472" cy="376" rx="18" ry="6" fill="#FFFFFF" stroke="#4B2412" stroke-width="3.2"></ellipse>
+                                <ellipse cx="466" cy="372" rx="7" ry="4.5" fill="#A7F3D0" stroke="#4B2412" stroke-width="2.8"></ellipse>
+                                <ellipse cx="478" cy="372" rx="7" ry="4.5" fill="#DDD6FE" stroke="#4B2412" stroke-width="2.8"></ellipse>
+                            </g>
+
+<!-- Vật phẩm: #furn-gramophone -->
+<g id="furn-gramophone" class="room-item item-visible">
+                                <!-- Tủ gỗ nhỏ -->
+                                <rect x="64" y="346" width="68" height="44" rx="8" fill="#D97706" stroke="#4B2412" stroke-width="4.2"></rect>
+                                <rect x="74" y="356" width="48" height="24" rx="4" fill="#FDE68A" stroke="#4B2412" stroke-width="3.2"></rect>
+                                <!-- Đĩa than đen đang quay -->
+                                <ellipse cx="98" cy="344" rx="26" ry="7" fill="#1E293B" stroke="#4B2412" stroke-width="3.5"></ellipse>
+                                <ellipse cx="98" cy="344" rx="9" ry="3" fill="#F43F5E"></ellipse>
+                                <!-- Loa kèn đồng vàng cổ điển -->
+                                <path d="M 112 342 Q 134 326 124 304 L 154 286 C 166 296, 166 322, 152 330 L 122 336 Z" fill="#FACC15" stroke="#4B2412" stroke-width="4" stroke-linejoin="round"></path>
+                                <ellipse cx="153" cy="308" rx="8" ry="20" transform="rotate(-10 153 308)" fill="#F59E0B" stroke="#4B2412" stroke-width="3.8"></ellipse>
+                                <!-- Nốt nhạc bay lên -->
+                                <text class="music-note-1" x="148" y="274" font-size="22" font-weight="900" fill="#F43F5E" stroke="#4B2412" stroke-width="1">♪</text>
+                                <text class="music-note-2" x="172" y="262" font-size="24" font-weight="900" fill="#8B5CF6" stroke="#4B2412" stroke-width="1">♫</text>
+                            </g>
+
+<!-- Vật phẩm: #furn-lamp -->
+<g id="furn-lamp" class="room-item item-visible">
+                                <!-- Hào quang ánh sáng vàng ấm -->
+                                <circle class="lamp-glow" cx="452" cy="186" r="32" fill="#FEF08A"></circle>
+                                <!-- Đế đèn & Thân cây uốn cong -->
+                                <ellipse cx="475" cy="292" rx="24" ry="8" fill="#A7F3D0" stroke="#4B2412" stroke-width="4"></ellipse>
+                                <path d="M 475 290 L 475 185 C 475 152, 445 152, 448 175" fill="none" stroke="#10B981" stroke-width="6" stroke-linecap="round"></path>
+                                <path d="M 475 290 L 475 185 C 475 152, 445 152, 448 175" fill="none" stroke="#4B2412" stroke-width="4.2" stroke-linecap="round"></path>
+                                <!-- Chao đèn hình bông hoa chuông -->
+                                <path d="M 448 170 C 432 172, 430 194, 438 198 C 445 194, 448 198, 456 198 C 464 194, 462 172, 448 170 Z" fill="#FEF9C3" stroke="#4B2412" stroke-width="4" stroke-linejoin="round"></path>
+                            </g>

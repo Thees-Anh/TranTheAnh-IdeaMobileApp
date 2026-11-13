@@ -1,0 +1,9 @@
+<resources>
+    <string name="widget_label">PawQuest · Bạn nhỏ</string>
+    <string name="widget_description">Thú cưng, thức ăn, nước, chuỗi ngày và nhiệm vụ hôm nay. Chạm để mở PawQuest.</string>
+    <string name="widget_sign_in">Đăng nhập để xem thú cưng</string>
+    <string name="widget_food_unknown">Thức ăn: —</string>
+    <string name="widget_water_unknown">Nước: —</string>
+    <string name="widget_open_app">Chạm để mở ứng dụng</string>
+    <string name="widget_refresh">Cập nhật tiện ích</string>
+</resources>

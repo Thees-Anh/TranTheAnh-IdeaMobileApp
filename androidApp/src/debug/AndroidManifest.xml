@@ -1,0 +1,6 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:networkSecurityConfig="@xml/pawquest_debug_network_security">
+        <activity android:name=".branding.BrandingPreviewActivity" android:exported="true"
+            android:screenOrientation="portrait" android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+    </application>
+</manifest>

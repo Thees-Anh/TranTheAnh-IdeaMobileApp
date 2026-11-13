@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawQuest Lucky Wheel Studio — Vòng Quay May Mắn 8 Ô (Smooth 5.5s Deceleration)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style id="lucky-wheel-styles">
+        * {
+            font-family: 'Quicksand', sans-serif;
+            user-select: none;
+        }
+        code, pre, .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+            user-select: text;
+        }
+        body {
+            background-color: #FFF5F8;
+            color: #4A2511;
+        }
+
+        /* =========================================================
+           1. PHONG CÁCH KAWAII PASTEL & NÚT BẤM
+           ========================================================= */
+        .kawaii-card {
+            border: 3px solid #4A2511;
+            box-shadow: 0 6px 0 rgba(74, 37, 17, 0.15);
+        }
+        .kawaii-btn {
+            border: 2.5px solid #4A2511;
+            box-shadow: 0 3.5px 0 #4A2511;
+            transition: all 0.12s ease;
+        }
+        .kawaii-btn:hover:not(:disabled) {
+            transform: translateY(-1.5px);
+            box-shadow: 0 5px 0 #4A2511;
+        }
+        .kawaii-btn:active:not(:disabled), .kawaii-btn.active-btn {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #4A2511;
+        }
+        .kawaii-btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        /* =========================================================
+           2. ANIMATION VÒNG QUAY 8 Ô, KIM VẬT LÝ & ZOOM HỒI HỘP
+           ========================================================= */
+        #lucky-wheel-rotor {
+            transform-origin: 250px 250px;
+            will-change: transform;
+        }
+
+        /* Kim chỉ chân mèo ở đỉnh vòng quay (12 giờ) uốn theo chốt vật lý */
+        #wheel-top-pointer {
+            transform-origin: 250px 26px;
+            will-change: transform;
+            transition: transform 0.06s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* Đèn LED viền vòng quay nhấp nháy luân phiên */
+        @keyframes rimLedBlinkA {
+            0%, 100% { fill: #FEF08A; filter: drop-shadow(0 0 5px #FACC15); }
+            50% { fill: #F472B6; filter: none; }
+        }
+        @keyframes rimLedBlinkB {
+            0%, 100% { fill: #F472B6; filter: none; }
+            50% { fill: #FEF08A; filter: drop-shadow(0 0 5px #FACC15); }
+        }
+        .led-bulb-even { animation: rimLedBlinkA 0.9s infinite; }
+        .led-bulb-odd { animation: rimLedBlinkB 0.9s infinite; }
+
+        /* Hiệu ứng phát sáng cho Ô 8 Jackpot */
+        @keyframes jackpotPulse {
+            0%, 100% { opacity: 0.88; }
+            50% { opacity: 1; filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.95)); }
+        }
+        .jackpot-wedge-glow {
+            animation: jackpotPulse 1.5s ease-in-out infinite;
+        }
+
+        /* =========================================================
+           3. ANIMATION THÚ CƯNG MỞ KHÓA & BÓNG ĐEN BÍ ẨN
+           ========================================================= */
+        @keyframes petHappyBounce {
+            0%, 100% { transform: translateY(0px) scale(1, 1); }
+            50% { transform: translateY(-6px) scale(1.03, 0.97); }
+        }
+        .pet-unlocked-bounce {
+            animation: petHappyBounce 2.2s ease-in-out infinite;
+        }
+        .pet-locked-silhouette {
+            filter: brightness(0) saturate(100%) invert(18%) sepia(25%) saturate(1100%) hue-rotate(335deg) brightness(90%) contrast(90%) opacity(0.35);
+        }
+
+        /* Hiệu ứng lật thẻ chọn 1 trong 3 thú cưng khi trúng Ô 8 */
+        @keyframes cardRoulettePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        .roulette-active-card {
+            border-color: #F59E0B !important;
+            background: linear-gradient(135deg, #FEF9C3 0%, #FDE047 100%) !important;
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.95) !important;
+            animation: cardRoulettePulse 0.25s ease-in-out infinite;
+        }
+
+        ::-webkit-scrollbar { width: 7px; height: 7px; }
+        ::-webkit-scrollbar-track { background: #181825; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb { background: #f472b6; border-radius: 6px; }
+    </style>
+</head>
+<body class="min-h-screen p-3 md:p-5 flex flex-col items-center">
+
+    <!-- ================= HEADER & THANH TÀI NGUYÊN ================= -->
+    <header class="w-full max-w-7xl mb-4 bg-white rounded-3xl px-4 py-3 kawaii-card flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-300 via-pink-300 to-purple-400 border-2 border-[#4A2511] flex items-center justify-center text-2xl shadow-inner">
+                🎡
+            </div>
+            <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <h1 class="text-lg md:text-xl font-extrabold text-[#4A2511] tracking-tight">
+                        PawQuest Lucky Wheel Studio — Vòng Quay May Mắn 8 Ô
+                    </h1>
+                    <span class="bg-emerald-500 text-white border border-[#4A2511] text-[11px] font-extrabold px-2.5 py-0.5 rounded-full">
+                        ⏱️ Giảm Tốc Mượt 5.5s Chuẩn Vật Lý
+                    </span>
+                </div>
+                <p class="text-xs text-[#8c5233] font-semibold">
+                    Quay mượt 5.5 giây với đường cong giảm tốc tự nhiên (Ease-Out), xoay chậm dần ở 2 giây cuối và dừng êm ái tại ô trúng thưởng!
+                </p>
+            </div>
+        </div>
+
+        <!-- Thanh tài nguyên người chơi -->
+        <div class="flex items-center gap-2 flex-wrap">
+            <!-- Vé Vòng Quay -->
+            <div class="bg-amber-100 border-2 border-[#4A2511] px-2.5 py-1 rounded-2xl flex items-center gap-1.5">
+                <span class="text-base">🎫</span>
+                <div class="leading-tight">
+                    <div class="text-[9px] font-bold text-[#8c5233] uppercase">Vé Quay</div>
+                    <div id="res-tickets" class="text-xs font-extrabold text-[#4A2511]">15</div>
+                </div>
+                <button onclick="addFreeTickets()" class="ml-1 bg-amber-300 hover:bg-amber-400 border border-[#4A2511] text-[10px] font-extrabold px-1.5 py-0.5 rounded-lg" title="Cộng thêm 5 vé test">
+                    +5
+                </button>
+            </div>
+
+            <!-- Thức ăn (Food) -->
+            <div class="bg-rose-50 border-2 border-[#4A2511] px-2.5 py-1 rounded-2xl flex items-center gap-1.5">
+                <span class="text-base">🍖</span>
+                <div class="leading-tight">
+                    <div class="text-[9px] font-bold text-[#8c5233] uppercase">Food</div>
+                    <div id="res-food" class="text-xs font-extrabold text-[#4A2511]">5</div>
+                </div>
+            </div>
+
+            <!-- Coins -->
+            <div class="bg-yellow-50 border-2 border-[#4A2511] px-2.5 py-1 rounded-2xl flex items-center gap-1.5">
+                <span class="text-base">🪙</span>
+                <div class="leading-tight">
+                    <div class="text-[9px] font-bold text-[#8c5233] uppercase">Coins</div>
+                    <div id="res-coins" class="text-xs font-extrabold text-[#4A2511]">250</div>
+                </div>
+            </div>
+
+            <!-- Pet Shards -->
+            <div class="bg-purple-50 border-2 border-[#4A2511] px-2.5 py-1 rounded-2xl flex items-center gap-1.5">
+                <span class="text-base">🧩</span>
+                <div class="leading-tight">
+                    <div class="text-[9px] font-bold text-[#8c5233] uppercase">Pet Shards</div>
+                    <div id="res-shards" class="text-xs font-extrabold text-purple-800">15</div>
+                </div>
+            </div>
+
+            <!-- Bật/Tắt Âm thanh -->
+            <button id="sound-toggle-btn" onclick="toggleSound()" class="kawaii-btn bg-pink-100 text-[#4A2511] text-xs font-extrabold px-2.5 py-1.5 rounded-xl">
+                🔊 BẬT
+            </button>
+
+            <!-- Chế độ hiển thị màn hình -->
+            <div class="flex items-center gap-1 bg-pink-50 p-1 rounded-2xl border-2 border-[#4A2511]">
+                <button id="layout-split" onclick="setWorkspaceLayout('split')" class="kawaii-btn active-btn bg-pink-300 text-[#4A2511] text-xs font-extrabold px-2 py-1 rounded-xl">
+                    🪟 Chia đôi
+                </button>
+                <button id="layout-preview" onclick="setWorkspaceLayout('preview')" class="kawaii-btn bg-white text-[#4A2511] text-xs font-extrabold px-2 py-1 rounded-xl">
+                    🎡 Phóng to
+                </button>
+                <button id="layout-code" onclick="setWorkspaceLayout('code')" class="kawaii-btn bg-white text-[#4A2511] text-xs font-extrabold px-2 py-1 rounded-xl">
+                    💻 Xem Code
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================= MAIN WORKSPACE ================= -->
+    <main class="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1">
+
+        <!-- =================================================================
+             CỘT TRÁI: VÒNG QUAY MAY MẮN HỒI HỘP + BỘ SƯU TẬP 3 THÚ CƯNG (7 CỘT)
+             ================================================================= -->
+        <section id="left-preview-pane" class="lg:col-span-7 flex flex-col gap-4">
+
+            <!-- KHỐI 1: SÂN KHẤU VÒNG QUAY MAY MẮN 8 Ô & BỘ ĐIỀU KHIỂN -->
+            <div class="bg-white rounded-3xl kawaii-card overflow-hidden flex flex-col">
+
+                <!-- Thanh điều khiển Vị trí dừng trong ô & Ép Ô Trúng Thưởng -->
+                <div class="bg-gradient-to-r from-[#3b1d5e] via-[#58287F] to-[#7B2869] text-white px-3.5 py-2.5 border-b-2 border-[#4A2511] flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="text-[11px] text-amber-200 font-bold">📍 Vị trí dừng trong ô:</span>
+                        <select id="stop-style-select" class="bg-slate-900 border border-amber-400 text-amber-200 font-extrabold rounded-xl px-2 py-1 text-[11px] focus:outline-none">
+                            <option value="natural_random">🎲 Ngẫu nhiên tự nhiên trong ô (Chuẩn)</option>
+                            <option value="just_past_pin">✨ Vừa trôi nhẹ qua chốt đầu ô (Sát mép)</option>
+                            <option value="center_slice">🎯 Chính giữa tâm ô phần thưởng</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="text-[11px] text-pink-200 font-bold">🎯 Đích:</span>
+                        <select id="force-slot-select" class="bg-slate-900 border border-pink-400 text-pink-100 font-extrabold rounded-xl px-2 py-1 text-[11px] focus:outline-none">
+                            <option value="random">🎲 Ngẫu nhiên chuẩn tỷ lệ (100%)</option>
+                            <option value="0">Ô 1: Food (25%)</option>
+                            <option value="1">Ô 2: 50 Coins (20%)</option>
+                            <option value="2">Ô 3: 5 Pet Shards (18%)</option>
+                            <option value="3">Ô 4: 10 Pet Shards (12%)</option>
+                            <option value="4">Ô 5: 1 Lucky Wheel Ticket (10%)</option>
+                            <option value="5">Ô 6: 20 Pet Shards (8%)</option>
+                            <option value="6">Ô 7: 50 Pet Shards (5%)</option>
+                            <option value="7">👑 Ô 8: Mở khóa thú cưng (2% - JACKPOT)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- SÂN KHẤU CHÍNH: VÒNG QUAY + BẢNG TỶ LỆ TRỰC TIẾP -->
+                <div id="wheel-stage-backdrop" class="relative bg-gradient-to-b from-[#FFE5F1] via-[#F9D8FF] to-[#E9D5FF] p-4 grid grid-cols-1 md:grid-cols-12 gap-4 items-center transition-all">
+
+                    <!-- CỘT VÒNG QUAY SVG (7 CỘT) -->
+                    <div class="md:col-span-7 flex flex-col items-center justify-center relative">
+
+                        <!-- HUD Báo Trạng Thái Tốc Độ & Ô Đang Trỏ Tới Theo Thời Gian Thực -->
+                        <div class="w-full flex items-center justify-between gap-2 mb-1.5 px-1">
+                            <div id="live-phase-badge" class="bg-white/95 border-2 border-[#4A2511] px-2.5 py-0.5 rounded-full text-[11px] font-extrabold text-[#4A2511] flex items-center gap-1.5 shadow-sm">
+                                <span id="phase-dot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                <span id="phase-text">Sẵn sàng quay (5.5s)</span>
+                            </div>
+                            <div class="bg-[#4A2511] text-amber-200 border-2 border-[#4A2511] px-2.5 py-0.5 rounded-full text-[11px] font-extrabold flex items-center gap-1.5 shadow-sm">
+                                <span>Kim chỉ:</span>
+                                <span id="live-pointing-slot" class="text-white font-mono">Ô 1 (Food)</span>
+                            </div>
+                        </div>
+
+                        <!-- Khung Vòng Quay -->
+                        <div id="wheel-camera-rig" class="relative w-full max-w-[350px] aspect-square flex items-center justify-center">
+                            <svg id="lucky-wheel-svg" viewBox="0 0 500 520" class="w-full h-full overflow-visible drop-shadow-md" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <!-- Gradient Cầu Vồng Hoàng Kim cho Ô 8: Mở khóa thú cưng (2%) -->
+                                    <linearGradient id="jackpotSliceGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#FEF08A" />
+                                        <stop offset="35%" stop-color="#F59E0B" />
+                                        <stop offset="70%" stop-color="#EC4899" />
+                                        <stop offset="100%" stop-color="#8B5CF6" />
+                                    </linearGradient>
+                                    <!-- Gradient Vành Vàng Ngoài -->
+                                    <linearGradient id="goldRimGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" stop-color="#FDE047" />
+                                        <stop offset="100%" stop-color="#D97706" />
+                                    </linearGradient>
+                                </defs>
+
+                                <!-- CHÂN ĐẾ GỖ ĐỠ VÒNG QUAY -->
+                                <g id="wheel-stand-base">
+                                    <ellipse cx="250" cy="494" rx="135" ry="18" fill="#A78BFA" opacity="0.45" />
+                                    <path d="M 155 490 L 195 395 L 305 395 L 345 490 Z" fill="#F472B6" stroke="#4A2511" stroke-width="6" stroke-linejoin="round" />
+                                    <rect x="135" y="476" width="230" height="24" rx="12" fill="#FACC15" stroke="#4A2511" stroke-width="6" />
+                                </g>
+
+                                <!-- VÀNH NGOÀI CỐ ĐỊNH + 16 BÓNG ĐÈN LED CARNIVAL -->
+                                <g id="wheel-outer-frame">
+                                    <circle cx="250" cy="250" r="218" fill="#4A2511" />
+                                    <circle cx="250" cy="250" r="210" fill="url(#goldRimGrad)" stroke="#4A2511" stroke-width="6" />
+                                    <circle cx="250" cy="250" r="192" fill="#FFFDF9" stroke="#4A2511" stroke-width="5" />
+                                    <!-- 16 Bóng đèn LED được render bằng JS -->
+                                    <g id="wheel-led-bulbs"></g>
+                                </g>
+
+                                <!-- =========================================================
+                                     ĐĨA QUAY 8 Ô ĐỀU NHAU (#lucky-wheel-rotor)
+                                     Mỗi ô rộng đúng 45 độ (360 / 8 = 45°)
+                                     ========================================================= -->
+                                <g id="lucky-wheel-rotor">
+                                    <!-- 8 Múi quạt SVG + Icon + 8 Chốt vàng vật lý -->
+                                    <g id="wheel-wedges-group"></g>
+                                    <g id="wheel-pegs-group"></g>
+                                </g>
+
+                                <!-- TÂM VÒNG QUAY HÌNH ĐỆM CHÂN MÈO VÀNG (CENTER PAW HUB) -->
+                                <g id="wheel-center-hub">
+                                    <circle cx="250" cy="250" r="42" fill="#4A2511" />
+                                    <circle cx="250" cy="250" r="36" fill="#FEF08A" stroke="#F59E0B" stroke-width="5" />
+                                    <!-- Đệm thịt hồng ở tâm -->
+                                    <ellipse cx="250" cy="257" rx="11" ry="8.5" fill="#FB7185" />
+                                    <circle cx="235" cy="242" r="5" fill="#FB7185" />
+                                    <circle cx="245" cy="237" r="5" fill="#FB7185" />
+                                    <circle cx="255" cy="237" r="5" fill="#FB7185" />
+                                    <circle cx="265" cy="242" r="5" fill="#FB7185" />
+                                </g>
+
+                                <!-- KIM CHỈ CHÂN MÈO CỐ ĐỊNH Ở ĐỈNH 12 GIỜ (#wheel-top-pointer)
+                                     Có khả năng bị chốt vàng đẩy cong sang trái rồi bật tách lại -->
+                                <g id="wheel-top-pointer">
+                                    <polygon points="250,72 227,22 273,22" fill="#F43F5E" stroke="#4A2511" stroke-width="6" stroke-linejoin="round" />
+                                    <circle cx="250" cy="26" r="19" fill="#FDE047" stroke="#4A2511" stroke-width="5.5" />
+                                    <!-- Họa tiết chân mèo nhỏ trên chốt kim -->
+                                    <circle cx="250" cy="28" r="5.5" fill="#4A2511" />
+                                    <circle cx="243" cy="20" r="2.8" fill="#4A2511" />
+                                    <circle cx="250" cy="18" r="2.8" fill="#4A2511" />
+                                    <circle cx="257" cy="20" r="2.8" fill="#4A2511" />
+                                </g>
+                            </svg>
+                        </div>
+
+                        <!-- Dòng trạng thái mô tả -->
+                        <div id="wheel-status-banner" class="mt-1.5 bg-white/95 border-2 border-[#4A2511] px-3.5 py-1 rounded-full text-xs font-extrabold text-[#4A2511] shadow-sm text-center">
+                            ✨ Bấm "Quay Ngay" để trải nghiệm vòng quay 5.5s giảm tốc mượt mà!
+                        </div>
+                    </div>
+
+                    <!-- CỘT BẢNG TỶ LỆ 8 Ô & NÚT TEST NHANH (5 CỘT) -->
+                    <div class="md:col-span-5 bg-white/95 rounded-2xl p-3 border-2 border-[#4A2511] flex flex-col justify-between h-full">
+                        <div>
+                            <div class="flex items-center justify-between border-b-2 border-pink-100 pb-1.5 mb-2">
+                                <span class="text-xs font-extrabold text-[#4A2511]">📊 Bảng Tỷ Lệ 8 Ô Phần Thưởng</span>
+                                <span id="total-wheel-spins" class="text-[10px] font-extrabold bg-purple-100 text-purple-900 px-2 py-0.5 rounded-full border border-[#4A2511]">
+                                    Đã quay: 0
+                                </span>
+                            </div>
+
+                            <!-- Danh sách 8 Ô hiển thị Tỷ lệ & Số lần trúng -->
+                            <div id="probability-table-rows" class="space-y-1">
+                                <!-- Render tự động từ mảng WHEEL_SLOTS -->
+                            </div>
+                        </div>
+
+                        <!-- Các nút Quay & Test Kịch Bản -->
+                        <div class="mt-3 pt-2 border-t-2 border-pink-100 flex flex-col gap-1.5">
+                            <button id="btn-wheel-spin" onclick="spinLuckyWheel()" class="w-full kawaii-btn bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 text-[#4A2511] text-sm font-extrabold py-2.5 px-3 rounded-2xl flex items-center justify-center gap-1.5">
+                                <span>🎡 QUAY NGAY 5.5s (1 🎫)</span>
+                            </button>
+
+                            <div class="grid grid-cols-2 gap-1.5">
+                                <button id="btn-test-heartbreak" onclick="testNearEdgeGlide()" class="kawaii-btn bg-rose-200 hover:bg-rose-300 text-[#4A2511] text-[11px] font-extrabold py-1.5 px-2 rounded-xl leading-tight" title="Quay chậm dần và vừa đủ lực trôi nhẹ qua chốt Ô 8 sang dừng ở đầu Ô 1">
+                                    ✨ Test Trôi Nhẹ Qua Mép Ô
+                                </button>
+                                <button id="btn-test-jackpot" onclick="forceJackpotTest()" class="kawaii-btn bg-amber-200 hover:bg-amber-300 text-[#4A2511] text-[11px] font-extrabold py-1.5 px-2 rounded-xl leading-tight" title="Quay mượt 5.5s dừng tại Ô 8: Mở khóa thú cưng (2%)">
+                                    👑 Test Trúng Ô 8 (2%)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- =========================================================
+                         MODAL TRAO THƯỞNG & QUAY NGẪU NHIÊN 1 TRONG 3 THÚ CƯNG (Ô 8)
+                         ========================================================= -->
+                    <div id="wheel-reward-modal" class="hidden absolute inset-0 z-40 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+                        <div class="bg-white rounded-3xl p-5 border-4 border-[#4A2511] max-w-md w-full text-center shadow-2xl flex flex-col items-center">
+                            <span id="modal-slot-badge" class="px-3 py-0.5 rounded-full text-xs font-extrabold border-2 border-[#4A2511] bg-amber-300 mb-1.5">
+                                Ô SỐ 1 • TỶ LỆ 25%
+                            </span>
+                            <span id="modal-tease-note" class="text-[11px] font-extrabold text-rose-600 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full mb-2">
+                                💓 Kịch bản: Trôi qua chốt phút chót!
+                            </span>
+
+                            <!-- Khu vực hiển thị Phần thưởng thông thường (Ô 1 -> Ô 7) -->
+                            <div id="normal-reward-view" class="flex flex-col items-center my-2">
+                                <div id="modal-reward-icon" class="w-20 h-20 rounded-3xl bg-pink-100 border-3 border-[#4A2511] flex items-center justify-center text-5xl mb-3 shadow-inner">
+                                    🍖
+                                </div>
+                                <h3 id="modal-reward-title" class="text-xl font-extrabold text-[#4A2511]">
+                                    Nhận được: Food!
+                                </h3>
+                                <p id="modal-reward-subtitle" class="text-xs font-semibold text-[#8c5233] mt-1">
+                                    Đã cộng trực tiếp vào túi đồ PawQuest của bạn.
+                                </p>
+                            </div>
+
+                            <!-- Khu vực ĐẶC BIỆT khi trúng Ô 8: Bốc thăm ngẫu nhiên 1 trong 3 Thú cưng -->
+                            <div id="jackpot-pet-roulette-view" class="hidden w-full flex-col items-center my-1">
+                                <h3 class="text-base font-extrabold text-rose-600 mb-1">
+                                    🎉 JACKPOT 2% — MỞ KHÓA THÚ CƯNG!
+                                </h3>
+                                <p id="jackpot-roulette-status" class="text-xs font-bold text-[#8c5233] mb-3">
+                                    Đang quay ngẫu nhiên 1 trong 3 bé: Thỏ, Chó, Capybara...
+                                </p>
+
+                                <!-- 3 Thẻ Thú Cưng sáng đèn luân phiên -->
+                                <div class="grid grid-cols-3 gap-2 w-full mb-3">
+                                    <div id="roulette-card-bunny" class="p-2 rounded-2xl border-3 border-[#4A2511] bg-pink-50 flex flex-col items-center transition-all">
+                                        <div class="w-16 h-16" id="modal-svg-bunny"></div>
+                                        <span class="text-xs font-extrabold mt-1">🐰 Thỏ Tai Cụp</span>
+                                    </div>
+                                    <div id="roulette-card-dog" class="p-2 rounded-2xl border-3 border-[#4A2511] bg-amber-50 flex flex-col items-center transition-all">
+                                        <div class="w-16 h-16" id="modal-svg-dog"></div>
+                                        <span class="text-xs font-extrabold mt-1">🐶 Chó Đốm</span>
+                                    </div>
+                                    <div id="roulette-card-capy" class="p-2 rounded-2xl border-3 border-[#4A2511] bg-orange-50 flex flex-col items-center transition-all">
+                                        <div class="w-16 h-16" id="modal-svg-capy"></div>
+                                        <span class="text-xs font-extrabold mt-1">🍊 Capybara</span>
+                                    </div>
+                                </div>
+
+                                <div id="jackpot-final-message" class="text-sm font-extrabold text-emerald-700 bg-emerald-100 border-2 border-[#4A2511] px-3 py-1.5 rounded-xl w-full">
+                                    🌟 Đang tìm người bạn đồng hành mới...
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-2 w-full mt-4">
+                                <button onclick="closeWheelModal()" class="flex-1 kawaii-btn bg-emerald-400 hover:bg-emerald-300 text-[#4A2511] text-xs font-extrabold py-2.5 rounded-2xl">
+                                    ✅ Tuyệt vời!
+                                </button>
+                                <button onclick="closeWheelModalAndSpin()" class="flex-1 kawaii-btn bg-amber-300 hover:bg-amber-200 text-[#4A2511] text-xs font-extrabold py-2.5 rounded-2xl">
+                                    🎡 Quay tiếp (1 🎫)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- KHỐI 2: BỘ SƯU TẬP 3 THÚ CƯNG MỞ KHÓA TỪ Ô SỐ 8 (THỎ, CHÓ, CAPYBARA) -->
+            <div class="bg-white rounded-3xl kawaii-card p-4 flex flex-col gap-3">
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-pink-100 pb-2">
+                    <div>
+                        <h2 class="text-sm font-extrabold text-[#4A2511] flex items-center gap-1.5">
+                            <span>🐾 Bộ Sưu Tập Thú Cưng Từ Ô Số 8 (Ngẫu Nhiên 1 Trong 3)</span>
+                        </h2>
+                        <p class="text-xs text-[#8c5233] font-semibold">
+                            Khi quay trúng <strong>Ô 8 (2%)</strong> hoặc đủ <strong>100 Pet Shards</strong>, bạn nhận ngẫu nhiên 1 trong 3 thú cưng dưới đây:
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="craftPetWithShards()" class="kawaii-btn bg-purple-200 hover:bg-purple-300 text-[#4A2511] text-xs font-extrabold px-3 py-1.5 rounded-xl">
+                            🧩 Đổi 100 Shards mở Pet
+                        </button>
+                        <button onclick="resetUnlockedPets()" class="text-xs font-bold text-rose-600 hover:underline px-2">
+                            Khóa lại để Test
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3 Thẻ Thú Cưng (Thỏ, Chó, Capybara) với đồ họa SVG chuẩn mẫu -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="pet-collection-showcase">
+                    <!-- Được render bằng JS với SVG chi tiết -->
+                </div>
+            </div>
+
+        </section>
+
+        <!-- =================================================================
+             CỘT PHẢI: MÃ NGUỒN VẬT LÝ HỒI HỘP & PROMPT CHO CODEX (5 CỘT)
+             ================================================================= -->
+        <section id="right-code-pane" class="lg:col-span-5 flex flex-col">
+            <div class="bg-[#1e1e2e] text-slate-100 rounded-3xl kawaii-card overflow-hidden flex flex-col h-full min-h-[650px]">
+
+                <!-- Thanh Tab Code -->
+                <div class="bg-[#181825] border-b border-slate-700 p-3 flex flex-col gap-2.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-xs font-extrabold text-amber-300 uppercase tracking-wider">💻 Mã Nguồn Vật Lý Hồi Hộp & Prompt Codex</span>
+                        <button onclick="copyActiveCode()" class="kawaii-btn bg-emerald-400 hover:bg-emerald-300 text-[#4A2511] text-xs font-extrabold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
+                            <span>📋 Sao chép mã này</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <button id="code-tab-js" onclick="switchCodeTab('js')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold bg-pink-500 text-white text-left truncate">
+                            💓 1. Vật Lý Hồi Hộp JS
+                        </button>
+                        <button id="code-tab-svg" onclick="switchCodeTab('svg')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold bg-slate-800 text-slate-300 hover:bg-slate-700 text-left truncate">
+                            🎡 2. SVG & Kim Uốn Chốt
+                        </button>
+                        <button id="code-tab-codex" onclick="switchCodeTab('codex')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold bg-slate-800 text-slate-300 hover:bg-slate-700 text-left truncate">
+                            🤖 3. Prompt Cho Codex
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Ghi chú Tab -->
+                <div id="code-banner-desc" class="bg-slate-800/90 border-b border-slate-700 px-4 py-2 text-xs text-pink-200 flex items-center justify-between">
+                    <span>💡 Động cơ đường cong đa pha (Piecewise Suspense Curve) điều khiển 3.5 giây cuối.</span>
+                    <span class="font-mono text-[11px] text-amber-300">SuspenseWheelEngine.js</span>
+                </div>
+
+                <!-- Nội dung Code -->
+                <div class="relative flex-1 overflow-auto p-4 bg-[#1e1e2e]">
+                    <pre class="text-xs leading-relaxed font-mono text-emerald-300 whitespace-pre-wrap break-words"><code id="code-output-box"></code></pre>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Toast thông báo -->
+    <div id="toast-box" class="fixed bottom-5 right-5 z-50 pointer-events-none opacity-0 translate-y-3 transition-all duration-300 bg-[#4A2512] text-amber-100 border-2 border-amber-300 px-4 py-2.5 rounded-2xl shadow-xl text-xs md:text-sm font-extrabold flex items-center gap-2">
+        <span>✨</span>
+        <span id="toast-text">Đã sao chép mã nguồn!</span>
+    </div>
+
+    <script id="lucky-wheel-engine-script">
+        // =========================================================================
+        // 1. CẤU HÌNH 8 Ô PHẦN THƯỞNG VÒNG QUAY (KÍCH THƯỚC BẰNG NHAU 45°/Ô)
+        // =========================================================================
+        const WHEEL_SLOTS = [
+            {
+                slotNumber: 1,
+                id: 'slot_food',
+                name: 'Food',
+                shortLabel: 'Food',
+                probability: 25, // 25%
+                type: 'food',
+                amount: 1,
+                icon: '🍖',
+                fillColor: '#FED7AA', // Cam đào pastel
+                badgeColor: 'bg-orange-200 text-[#4A2511]'
+            },
+            {
+                slotNumber: 2,
+                id: 'slot_coins_50',
+                name: '50 Coins',
+                shortLabel: '50 Coins',
+                probability: 20, // 20%
+                type: 'coins',
+                amount: 50,
+                icon: '🪙',
+                fillColor: '#FEF08A', // Vàng kem
+                badgeColor: 'bg-yellow-200 text-[#4A2511]'
+            },
+            {
+                slotNumber: 3,
+                id: 'slot_shards_5',
+                name: '5 Pet Shards',
+                shortLabel: '5 Shards',
+                probability: 18, // 18%
+                type: 'shards',
+                amount: 5,
+                icon: '🧩',
+                fillColor: '#BAE6FD', // Xanh da trời pastel
+                badgeColor: 'bg-sky-200 text-[#4A2511]'
+            },
+            {
+                slotNumber: 4,
+                id: 'slot_shards_10',
+                name: '10 Pet Shards',
+                shortLabel: '10 Shards',
+                probability: 12, // 12%
+                type: 'shards',
+                amount: 10,
+                icon: '💎',
+                fillColor: '#BBF7D0', // Xanh mint
+                badgeColor: 'bg-emerald-200 text-[#4A2511]'
+            },
+            {
+                slotNumber: 5,
+                id: 'slot_ticket_1',
+                name: '1 Lucky Wheel Ticket',
+                shortLabel: '1 Ticket',
+                probability: 10, // 10%
+                type: 'ticket',
+                amount: 1,
+                icon: '🎫',
+                fillColor: '#E9D5FF', // Tím lavender
+                badgeColor: 'bg-purple-200 text-[#4A2511]'
+            },
+            {
+                slotNumber: 6,
+                id: 'slot_shards_20',
+                name: '20 Pet Shards',
+                shortLabel: '20 Shards',
+                probability: 8, // 8%
+                type: 'shards',
+                amount: 20,
+                icon: '🔮',
+                fillColor: '#FECDD3', // Hồng san hô
+                badgeColor: 'bg-rose-200 text-[#4A2511]'
+            },
+            {
+                slotNumber: 7,
+                id: 'slot_shards_50',
+                name: '50 Pet Shards',
+                shortLabel: '50 Shards',
+                probability: 5, // 5%
+                type: 'shards',
+                amount: 50,
+                icon: '✨',
+                fillColor: '#F5D0FE', // Tím hồng Magenta
+                badgeColor: 'bg-fuchsia-200 text-[#4A2511]'
+            },
+            {
+                slotNumber: 8,
+                id: 'slot_unlock_pet',
+                name: 'Mở khóa thú cưng',
+                shortLabel: 'Mở Khóa Pet',
+                probability: 2, // 2% JACKPOT
+                type: 'unlock_pet',
+                amount: 1,
+                icon: '👑',
+                fillColor: 'url(#jackpotSliceGrad)', // Gradient Hoàng Kim Cầu Vồng
+                badgeColor: 'bg-gradient-to-r from-amber-300 to-pink-300 text-[#4A2511]'
+            }
+        ];
+
+        // =========================================================================
+        // 2. DỮ LIỆU & ĐỒ HỌA SVG 3 THÚ CƯNG TRONG Ô SỐ 8 (THỎ, CHÓ, CAPYBARA)
+        // =========================================================================
+        const UNLOCKABLE_PETS = {
+            bunny: {
+                id: 'bunny',
+                name: 'Thỏ Tai Cụp (Lop Bunny)',
+                shortName: 'Thỏ',
+                unlocked: false,
+                svg: `<svg viewBox="160 80 180 230" class="w-full h-full">
+                    <path d="M 272 126 C 292 120, 310 140, 316 176 C 322 208, 322 238, 306 244 C 294 248, 286 226, 284 196 Z" fill="#FFF5F2" stroke="#4A2511" stroke-width="5.5" stroke-linejoin="round"/>
+                    <ellipse cx="300" cy="206" rx="8" ry="24" fill="#F9CDC8"/>
+                    <path d="M 206 205 C 194 232, 190 264, 198 286 C 204 296, 296 296, 302 286 C 308 264, 302 232, 290 205 Z" fill="#FFF5F2" stroke="#4A2511" stroke-width="5.5"/>
+                    <ellipse cx="250" cy="258" rx="26" ry="30" fill="#F9CDC8"/>
+                    <path d="M 192 168 C 188 128, 216 116, 250 116 C 284 116, 312 128, 308 168 C 312 198, 288 218, 250 218 C 212 218, 188 198, 192 168 Z" fill="#FFF5F2" stroke="#4A2511" stroke-width="5.5"/>
+                    <path d="M 214 126 C 192 122, 174 146, 166 186 C 160 220, 160 242, 176 246 C 190 248, 198 226, 202 192 Z" fill="#FFF5F2" stroke="#4A2511" stroke-width="5.5"/>
+                    <ellipse cx="212" cy="182" rx="12" ry="6.5" fill="#F69B95"/>
+                    <ellipse cx="288" cy="182" rx="12" ry="6.5" fill="#F69B95"/>
+                    <circle cx="226" cy="168" r="6.5" fill="#4A2511"/>
+                    <circle cx="274" cy="168" r="6.5" fill="#4A2511"/>
+                    <path d="M 244 172 L 250 177 L 256 172 M 250 177 L 250 184 M 244 188 L 250 184 L 256 188" fill="none" stroke="#4A2511" stroke-width="4" stroke-linecap="round"/>
+                </svg>`
+            },
+            dog: {
+                id: 'dog',
+                name: 'Cún Đốm Nâu (Puppy)',
+                shortName: 'Chó',
+                unlocked: false,
+                svg: `<svg viewBox="160 80 180 230" class="w-full h-full">
+                    <path d="M 282 126 C 306 122, 326 150, 320 188 C 316 204, 300 202, 294 180 Z" fill="#C59361" stroke="#4A2511" stroke-width="5.5"/>
+                    <path d="M 204 205 C 190 232, 186 264, 196 286 C 202 296, 298 296, 304 286 C 312 264, 306 232, 294 205 Z" fill="#FFF6E0" stroke="#4A2511" stroke-width="5.5"/>
+                    <ellipse cx="250" cy="258" rx="28" ry="31" fill="#F5D0C5"/>
+                    <path d="M 192 168 C 188 128, 216 116, 250 116 C 284 116, 312 128, 308 168 C 312 198, 288 218, 250 218 C 212 218, 188 198, 192 168 Z" fill="#FFF6E0" stroke="#4A2511" stroke-width="5.5"/>
+                    <path d="M 194 164 C 192 132, 216 118, 244 118 C 254 148, 244 186, 196 190 Z" fill="#C59361"/>
+                    <path d="M 218 126 C 194 122, 174 150, 180 188 C 184 204, 200 202, 206 180 Z" fill="#C59361" stroke="#4A2511" stroke-width="5.5"/>
+                    <ellipse cx="212" cy="182" rx="12" ry="6.5" fill="#F69B95"/>
+                    <ellipse cx="288" cy="182" rx="12" ry="6.5" fill="#F69B95"/>
+                    <circle cx="226" cy="168" r="6.5" fill="#4A2511"/>
+                    <circle cx="274" cy="168" r="6.5" fill="#4A2511"/>
+                    <path d="M 240 180 Q 250 188 260 180" fill="none" stroke="#4A2511" stroke-width="4.2" stroke-linecap="round"/>
+                </svg>`
+            },
+            capy: {
+                id: 'capy',
+                name: 'Capybara Đội Quýt',
+                shortName: 'Capybara',
+                unlocked: false,
+                svg: `<svg viewBox="160 70 180 240" class="w-full h-full">
+                    <ellipse cx="212" cy="128" rx="11" ry="14" fill="#9E6F44" stroke="#4A2511" stroke-width="5"/>
+                    <ellipse cx="278" cy="126" rx="10" ry="13" fill="#9E6F44" stroke="#4A2511" stroke-width="5"/>
+                    <path d="M 200 202 C 184 232, 180 266, 192 288 C 202 298, 296 298, 304 286 C 310 262, 304 230, 292 202 Z" fill="#C68F56" stroke="#4A2511" stroke-width="5.5"/>
+                    <path d="M 192 168 C 190 126, 218 116, 254 116 C 290 116, 318 134, 316 170 C 316 202, 290 218, 248 218 C 208 218, 190 202, 192 168 Z" fill="#C68F56" stroke="#4A2511" stroke-width="5.5"/>
+                    <path d="M 262 146 C 262 132, 310 132, 312 164 C 314 194, 294 206, 270 202 Z" fill="#9E6F44"/>
+                    <line x1="222" y1="160" x2="242" y2="158" stroke="#4A2511" stroke-width="5.5" stroke-linecap="round"/>
+                    <ellipse cx="218" cy="174" rx="13" ry="6.5" fill="#F69B95"/>
+                    <!-- Quả quýt trên đầu -->
+                    <ellipse cx="246" cy="105" rx="19" ry="15" fill="#FB923C" stroke="#4A2511" stroke-width="4.5"/>
+                    <path d="M 246 90 C 252 82, 262 84, 258 92 Z" fill="#4ADE80" stroke="#4A2511" stroke-width="3.5"/>
+                </svg>`
+            }
+        };
+
+        // =========================================================================
+        // 3. TRẠNG THÁI NGƯỜI CHƠI & BIẾN VẬT LÝ VÒNG QUAY
+        // =========================================================================
+        let playerResources = {
+            tickets: 15,
+            food: 5,
+            coins: 250,
+            shards: 15
+        };
+
+        let spinCountsBySlot = [0, 0, 0, 0, 0, 0, 0, 0];
+        let totalWheelSpins = 0;
+        let currentWheelRotation = 0; // Góc quay cộng dồn (độ)
+        let isWheelSpinning = false;
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        // =========================================================================
+        // 4. HỆ THỐNG ÂM THANH WEB AUDIO API (TIẾNG GẢY CHỐT, TIM ĐẬP HỒI HỘP & TRÚNG THƯỞNG)
+        // =========================================================================
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) audioCtx = new AudioCtx();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        // Tiếng kim chỉ bật tách qua chốt vàng (thay đổi âm sắc khi quay chậm ở giây cuối)
+        function playPegTickSound(isSlowSuspense = false) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                if (!audioCtx) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = isSlowSuspense ? 'sine' : 'triangle';
+                const startFreq = isSlowSuspense ? 1050 : 820;
+                const endFreq = isSlowSuspense ? 340 : 250;
+                const dur = isSlowSuspense ? 0.055 : 0.032;
+
+                osc.frequency.setValueAtTime(startFreq, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(endFreq, audioCtx.currentTime + dur);
+
+                gain.gain.setValueAtTime(isSlowSuspense ? 0.24 : 0.14, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + dur + 0.005);
+            } catch (e) {}
+        }
+
+        // Tiếng nhịp tim trầm hồi hộp ở 3 giây cuối
+        function playSuspenseHeartbeatSound() {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                if (!audioCtx) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(110, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(48, audioCtx.currentTime + 0.14);
+                gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.16);
+            } catch (e) {}
+        }
+
+        function playRewardFanfare(isJackpot = false) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                if (!audioCtx) return;
+                const notes = isJackpot
+                    ? [523.25, 659.25, 783.99, 1046.5, 1318.5, 1567.98]
+                    : [440, 554.37, 659.25];
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = isJackpot ? 'sine' : 'triangle';
+                    const t = audioCtx.currentTime + idx * 0.085;
+                    osc.frequency.setValueAtTime(freq, t);
+                    gain.gain.setValueAtTime(0.2, t);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.32);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(t);
+                    osc.stop(t + 0.34);
+                });
+            } catch (e) {}
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('sound-toggle-btn').textContent = soundEnabled ? '🔊 BẬT' : '🔇 TẮT';
+        }
+
+        // =========================================================================
+        // 5. VẼ VÒNG QUAY SVG 8 Ô BẰNG NHAU (MỖI Ô 45 ĐỘ, Ô 1 Ở ĐỈNH 12 GIỜ)
+        // =========================================================================
+        function renderWheelSVG() {
+            const wedgesGroup = document.getElementById('wheel-wedges-group');
+            const pegsGroup = document.getElementById('wheel-pegs-group');
+            const ledsGroup = document.getElementById('wheel-led-bulbs');
+
+            const cx = 250, cy = 250, radius = 190;
+            const sliceAngle = 45; // 360 / 8 = 45 độ mỗi ô
+
+            let wedgesHtml = '';
+            let pegsHtml = '';
+
+            WHEEL_SLOTS.forEach((slot, index) => {
+                // Ô 1 (index 0) có tâm nằm ở 0 độ (12 giờ), nên góc bắt đầu là -22.5° đến +22.5°
+                const startDeg = index * sliceAngle - 22.5;
+                const endDeg = startDeg + sliceAngle;
+                const midDeg = index * sliceAngle;
+
+                const startRad = (startDeg - 90) * (Math.PI / 180);
+                const endRad = (endDeg - 90) * (Math.PI / 180);
+
+                const x1 = cx + radius * Math.cos(startRad);
+                const y1 = cy + radius * Math.sin(startRad);
+                const x2 = cx + radius * Math.cos(endRad);
+                const y2 = cy + radius * Math.sin(endRad);
+
+                const pathData = `M ${cx} ${cy} L ${x1.toFixed(2)} ${y1.toFixed(2)} A ${radius} ${radius} 0 0 1 ${x2.toFixed(2)} ${y2.toFixed(2)} Z`;
+
+                wedgesHtml += `
+                    <g class="${slot.slotNumber === 8 ? 'jackpot-wedge-glow' : ''}">
+                        <path d="${pathData}" fill="${slot.fillColor}" stroke="#4A2511" stroke-width="4.5" stroke-linejoin="round" />
+                        <g transform="translate(${cx}, ${cy}) rotate(${midDeg})">
+                            <text x="0" y="-144" text-anchor="middle" fill="${slot.slotNumber === 8 ? '#FFFFFF' : '#4A2511'}" font-size="11" font-weight="800">
+                                Ô ${slot.slotNumber} (${slot.probability}%)
+                            </text>
+                            <text x="0" y="-106" text-anchor="middle" font-size="28">
+                                ${slot.icon}
+                            </text>
+                            <text x="0" y="-76" text-anchor="middle" fill="${slot.slotNumber === 8 ? '#FEF08A' : '#4A2511'}" font-size="11.5" font-weight="800">
+                                ${slot.shortLabel}
+                            </text>
+                        </g>
+                    </g>
+                `;
+
+                // Chốt vàng vật lý (Peg) gắn ở ranh giới mỗi ô (-22.5° + index * 45°)
+                const pegX = cx + (radius - 2) * Math.cos(startRad);
+                const pegY = cy + (radius - 2) * Math.sin(startRad);
+                pegsHtml += `
+                    <g>
+                        <circle cx="${pegX.toFixed(2)}" cy="${pegY.toFixed(2)}" r="7.5" fill="#FDE047" stroke="#4A2511" stroke-width="3.5" />
+                        <circle cx="${pegX.toFixed(2)}" cy="${pegY.toFixed(2)}" r="2.5" fill="#FFF" />
+                    </g>
+                `;
+            });
+
+            wedgesGroup.innerHTML = wedgesHtml;
+            pegsGroup.innerHTML = pegsHtml;
+
+            // Vẽ 16 bóng đèn LED trên vành vàng ngoài
+            let ledsHtml = '';
+            for (let i = 0; i < 16; i++) {
+                const angleRad = (i * 22.5 - 90) * (Math.PI / 180);
+                const lx = cx + 201 * Math.cos(angleRad);
+                const ly = cy + 201 * Math.sin(angleRad);
+                const cls = i % 2 === 0 ? 'led-bulb-even' : 'led-bulb-odd';
+                ledsHtml += `<circle cx="${lx.toFixed(2)}" cy="${ly.toFixed(2)}" r="5" class="${cls}" stroke="#4A2511" stroke-width="2" />`;
+            }
+            ledsGroup.innerHTML = ledsHtml;
+        }
+
+        // =========================================================================
+        // 6. ĐỘNG CƠ VẬT LÝ GIẢM TỐC ĐƠN ĐIỆU MƯỢT MÀ TRONG 5.5 GIÂY
+        //    (Hoàn toàn liên tục, không bao giờ dừng rồi nhảy thêm ô)
+        // =========================================================================
+        function rollWeightedSlotIndex(forcedValue = 'random') {
+            if (forcedValue !== 'random') {
+                return parseInt(forcedValue, 10);
+            }
+            const rand = Math.random() * 100;
+            let cumulative = 0;
+            for (let i = 0; i < WHEEL_SLOTS.length; i++) {
+                cumulative += WHEEL_SLOTS[i].probability;
+                if (rand < cumulative) return i;
+            }
+            return 0;
+        }
+
+        // Xác định Ô hiện tại đang nằm ngay dưới kim chỉ 12 giờ dựa vào góc quay `deg`
+        function getPointedSlotIndexFromAngle(deg) {
+            const norm = ((deg % 360) + 360) % 360;
+            // Khi đĩa quay thuận chiều kim đồng hồ một góc `norm`, điểm trên đĩa nằm tại 12h là `(360 - norm) % 360`
+            const wheelLocalAngleAtTop = (360 - norm) % 360;
+            return Math.floor(((wheelLocalAngleAtTop + 22.5) % 360) / 45);
+        }
+
+        // Tính góc uốn nhẹ của Kim chỉ (#wheel-top-pointer) khi 1 trong 8 chốt vàng đi ngang qua đỉnh 12 giờ
+        function computePointerPinBendAngle(wheelDeg, angularVelocityDegPerFrame) {
+            if (angularVelocityDegPerFrame <= 0.002) return 0;
+            const norm = ((wheelDeg % 360) + 360) % 360;
+            const wheelLocalAtTop = (360 - norm) % 360;
+            const shifted = (wheelLocalAtTop - 22.5 + 360) % 45;
+            // Khi chốt vàng tiến sát đỉnh 12 giờ (vùng 6.5 độ trước khi bật qua chốt)
+            if (shifted > 38.5) {
+                const contactProgress = (shifted - 38.5) / (45 - 38.5); // 0 -> 1
+                const speedScale = Math.min(1, Math.max(0.35, angularVelocityDegPerFrame / 4));
+                return -24 * contactProgress * speedScale;
+            }
+            return 0;
+        }
+
+        /**
+         * Hàm Giảm Tốc Vật Lý Tự Nhiên Duy Nhất (Single Smooth Monotonic Ease-Out)
+         * `f(t) = 1 - (1 - t)^4.2`
+         * - Đạo hàm (vận tốc góc) luôn dương và giảm dần đều về 0 tại t = 1.
+         * - Trong 1.5 - 2 giây cuối, vòng quay trôi chậm dần một cách tự nhiên qua các ô cuối
+         *   và dừng êm ái đúng vị trí đích mà KHÔNG BAO GIỜ khựng lại rồi tăng tốc nhảy sang ô khác.
+         */
+        function smoothDecelerationEaseOut(t) {
+            return 1 - Math.pow(1 - t, 4.2);
+        }
+
+        function spinLuckyWheel(customConfig = null) {
+            if (isWheelSpinning) return;
+            if (playerResources.tickets < 1) {
+                showToast('🎫 Bạn đã hết Vé Quay! Hãy bấm nút [+5] trên thanh tài nguyên nhé.');
+                return;
+            }
+
+            // Trừ 1 vé quay
+            playerResources.tickets -= 1;
+            updateResourceBarUI();
+
+            isWheelSpinning = true;
+            document.getElementById('btn-wheel-spin').disabled = true;
+            document.getElementById('btn-test-heartbreak').disabled = true;
+            document.getElementById('btn-test-jackpot').disabled = true;
+            document.getElementById('wheel-reward-modal').classList.add('hidden');
+
+            // 1. Chọn Ô trúng thưởng theo bảng xác suất trọng số
+            const forcedVal = customConfig?.forceSlot ?? document.getElementById('force-slot-select').value;
+            const winningIndex = rollWeightedSlotIndex(forcedVal);
+            const winningSlot = WHEEL_SLOTS[winningIndex];
+
+            // 2. Chọn vị trí dừng tự nhiên bên trong múi 45° của ô trúng thưởng (-22.5° đến +22.5°)
+            const stopStyle = customConfig?.stopStyle ?? document.getElementById('stop-style-select').value;
+            let stopOffsetInsideSlice = 0;
+            let stopNoteText = '';
+
+            if (stopStyle === 'just_past_pin') {
+                // Dừng ở đầu ô (-16.5° đến -12.5° so với tâm ô, cách chốt vừa vượt qua khoảng 6° - 10°)
+                // Vì vòng quay đang giảm tốc mượt ở giây cuối, người chơi sẽ thấy nó trôi chậm qua ô trước,
+                // vừa đủ quán tính vượt nhẹ qua chốt ranh giới rồi dừng êm ái ngay đầu ô trúng thưởng.
+                stopOffsetInsideSlice = -16 + Math.random() * 4;
+                const prevSlotIdx = (winningIndex + 1) % 8;
+                stopNoteText = `✨ Vòng quay giảm tốc mượt, vừa đủ đà lướt qua mép [Ô ${prevSlotIdx + 1}] và dừng êm tại [Ô ${winningSlot.slotNumber}]!`;
+            } else if (stopStyle === 'center_slice') {
+                stopOffsetInsideSlice = (Math.random() - 0.5) * 4;
+                stopNoteText = `🎯 Vòng quay giảm tốc 5.5s và dừng chính giữa [Ô ${winningSlot.slotNumber}: ${winningSlot.name}]!`;
+            } else {
+                // Ngẫu nhiên tự nhiên trong phạm vi [-16.5°, +16.5°] của múi quạt 45° (bao gồm cả vị trí gần mép chốt)
+                stopOffsetInsideSlice = (Math.random() * 33) - 16.5;
+                stopNoteText = `🎡 Vòng quay giảm tốc tự nhiên 5.5s và dừng tại [Ô ${winningSlot.slotNumber}: ${winningSlot.name}]!`;
+            }
+
+            // 3. Tính góc đích tuyệt đối (Quay 6 vòng đầy đủ + góc tới đích trong 5.5 giây)
+            const sliceCenterTargetMod = (360 - (winningIndex * 45)) % 360;
+            const startAngle = currentWheelRotation;
+            const currentMod = ((startAngle % 360) + 360) % 360;
+
+            const desiredFinalMod = (sliceCenterTargetMod + stopOffsetInsideSlice + 360) % 360;
+            let deltaMod = (desiredFinalMod - currentMod + 360) % 360;
+            // Đảm bảo luôn có quãng đường góc đủ dài
+            if (deltaMod < 90) deltaMod += 360;
+
+            const fullSpins = 6 * 360; // 6 vòng quay mượt trong 5.5 giây
+            const finalTargetAngle = startAngle + fullSpins + deltaMod;
+            const totalAngleDelta = finalTargetAngle - startAngle;
+
+            // Thời gian quay từ 5.3 đến 5.8 giây (trung bình 5.5 giây)
+            const totalDurationMs = customConfig?.durationMs || (5300 + Math.random() * 500);
+
+            const rotor = document.getElementById('lucky-wheel-rotor');
+            const pointer = document.getElementById('wheel-top-pointer');
+            const phaseDot = document.getElementById('phase-dot');
+            const phaseText = document.getElementById('phase-text');
+            const liveSlotEl = document.getElementById('live-pointing-slot');
+            const statusBanner = document.getElementById('wheel-status-banner');
+
+            rotor.style.transition = 'none';
+
+            let startTime = null;
+            let prevAngle = startAngle;
+            let lastPegBucket = Math.floor((((360 - (startAngle % 360)) % 360) + 22.5) / 45);
+
+            function stepSmoothWheel(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const elapsed = timestamp - startTime;
+                const t = Math.min(elapsed / totalDurationMs, 1);
+
+                // Duy nhất một hàm giảm tốc liên tục từ t=0 đến t=1
+                const progress = smoothDecelerationEaseOut(t);
+                const currentAngle = startAngle + totalAngleDelta * progress;
+
+                const angularVelocity = currentAngle - prevAngle;
+                prevAngle = currentAngle;
+                currentWheelRotation = currentAngle;
+
+                // 1. Xoay đĩa quay
+                rotor.style.transform = `rotate(${currentAngle.toFixed(2)}deg)`;
+
+                // 2. Độ nảy nhẹ của kim chỉ khi chốt vàng lướt qua
+                const pointerBend = computePointerPinBendAngle(currentAngle, angularVelocity);
+                pointer.style.transform = `rotate(${pointerBend.toFixed(2)}deg)`;
+
+                // 3. Phát tiếng tách mỗi khi một chốt vàng (cách nhau 45°) đi qua đỉnh 12 giờ
+                const norm = ((currentAngle % 360) + 360) % 360;
+                const wheelLocalAtTop = (360 - norm) % 360;
+                const currentPegBucket = Math.floor(((wheelLocalAtTop + 22.5) % 360) / 45);
+
+                if (currentPegBucket !== lastPegBucket) {
+                    lastPegBucket = currentPegBucket;
+                    playPegTickSound(t > 0.65);
+                }
+
+                // 4. Cập nhật hiển thị ô hiện tại dưới kim chỉ
+                const pointedIdx = getPointedSlotIndexFromAngle(currentAngle);
+                const pointedSlot = WHEEL_SLOTS[pointedIdx];
+                liveSlotEl.textContent = `Ô ${pointedSlot.slotNumber} (${pointedSlot.shortLabel})`;
+
+                if (t < 0.62) {
+                    phaseDot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-ping';
+                    phaseText.textContent = '🌀 Đang quay...';
+                    statusBanner.textContent = `🎡 Vòng quay đang xoay mượt...`;
+                } else if (t < 1) {
+                    phaseDot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-pulse';
+                    phaseText.textContent = '⏳ Đang chậm dần...';
+                    statusBanner.textContent = `⏳ Đang trôi chậm dần qua [Ô ${pointedSlot.slotNumber}: ${pointedSlot.name}]...`;
+                }
+
+                if (t < 1) {
+                    requestAnimationFrame(stepSmoothWheel);
+                } else {
+                    // Dừng hẳn êm ái tại đúng vị trí đích
+                    pointer.style.transform = 'rotate(0deg)';
+                    phaseDot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+                    phaseText.textContent = `🎯 Dừng tại Ô ${winningSlot.slotNumber}!`;
+                    statusBanner.textContent = stopNoteText;
+
+                    totalWheelSpins += 1;
+                    spinCountsBySlot[winningIndex] += 1;
+                    renderProbabilityTable(winningIndex);
+
+                    setTimeout(() => {
+                        handleSlotReward(winningSlot, stopNoteText);
+                        isWheelSpinning = false;
+                        document.getElementById('btn-wheel-spin').disabled = false;
+                        document.getElementById('btn-test-heartbreak').disabled = false;
+                        document.getElementById('btn-test-jackpot').disabled = false;
+                    }, 300);
+                }
+            }
+
+            requestAnimationFrame(stepSmoothWheel);
+        }
+
+        // Nút Test: Vòng quay giảm tốc mượt trong 5.5s, trôi chậm qua Ô 8 rồi vừa đủ đà lướt nhẹ qua chốt dừng ở đầu Ô 1
+        function testNearEdgeGlide() {
+            document.getElementById('stop-style-select').value = 'just_past_pin';
+            document.getElementById('force-slot-select').value = '0';
+            spinLuckyWheel({
+                forceSlot: '0',
+                stopStyle: 'just_past_pin',
+                durationMs: 5600
+            });
+        }
+
+        // Nút Test: Quay mượt 5.5s trúng Ô 8 (Mở khóa thú cưng 2%)
+        function forceJackpotTest() {
+            document.getElementById('stop-style-select').value = 'just_past_pin';
+            document.getElementById('force-slot-select').value = '7';
+            spinLuckyWheel({
+                forceSlot: '7',
+                stopStyle: 'just_past_pin',
+                durationMs: 5600
+            });
+        }
+
+        // =========================================================================
+        // 7. XỬ LÝ PHẦN THƯỞNG & NGHI THỨC QUAY NGẪU NHIÊN 1 TRONG 3 THÚ CƯNG (Ô 8)
+        // =========================================================================
+        function handleSlotReward(slot, teaseDescription = '') {
+            const modal = document.getElementById('wheel-reward-modal');
+            const badge = document.getElementById('modal-slot-badge');
+            const teaseNote = document.getElementById('modal-tease-note');
+            const normalView = document.getElementById('normal-reward-view');
+            const jackpotView = document.getElementById('jackpot-pet-roulette-view');
+
+            badge.textContent = `Ô SỐ ${slot.slotNumber} • TỶ LỆ ${slot.probability}%`;
+            teaseNote.textContent = teaseDescription || '🎯 Vòng quay đã dừng chính xác!';
+            modal.classList.remove('hidden');
+
+            if (slot.type !== 'unlock_pet') {
+                normalView.classList.remove('hidden');
+                jackpotView.classList.add('hidden');
+                jackpotView.classList.remove('flex');
+
+                if (slot.type === 'food') playerResources.food += slot.amount;
+                if (slot.type === 'coins') playerResources.coins += slot.amount;
+                if (slot.type === 'shards') playerResources.shards += slot.amount;
+                if (slot.type === 'ticket') playerResources.tickets += slot.amount;
+
+                updateResourceBarUI();
+                playRewardFanfare(false);
+
+                document.getElementById('modal-reward-icon').textContent = slot.icon;
+                document.getElementById('modal-reward-title').textContent = `Nhận được: ${slot.name}!`;
+                document.getElementById('modal-reward-subtitle').textContent =
+                    `Chúc mừng bạn đã trúng Ô ${slot.slotNumber} (${slot.probability}%). Vật phẩm đã cộng vào kho!`;
+            } else {
+                // ĐẶC BIỆT Ô 8 (2%): Mở khóa ngẫu nhiên 1 trong 3 thú cưng (Thỏ, Chó, Capybara)
+                normalView.classList.add('hidden');
+                jackpotView.classList.remove('hidden');
+                jackpotView.classList.add('flex');
+
+                playRewardFanfare(true);
+                triggerRandom1Of3PetUnlock();
+            }
+        }
+
+        // Hàm bốc thăm ngẫu nhiên 1 trong 3 thú cưng (Thỏ, Chó, Capybara) với hiệu ứng đèn chạy
+        function triggerRandom1Of3PetUnlock() {
+            const petKeys = ['bunny', 'dog', 'capy'];
+            const lockedKeys = petKeys.filter(k => !UNLOCKABLE_PETS[k].unlocked);
+            const poolToPick = lockedKeys.length > 0 ? lockedKeys : petKeys;
+            const chosenKey = poolToPick[Math.floor(Math.random() * poolToPick.length)];
+            const chosenPet = UNLOCKABLE_PETS[chosenKey];
+            const wasAlreadyUnlocked = chosenPet.unlocked;
+
+            const statusEl = document.getElementById('jackpot-roulette-status');
+            const finalMsgEl = document.getElementById('jackpot-final-message');
+            statusEl.textContent = '🎲 Đang bốc thăm ngẫu nhiên giữa Thỏ, Chó và Capybara...';
+            finalMsgEl.textContent = '🌟 Đang quay chọn thú cưng...';
+
+            let step = 0;
+            const totalSteps = 14;
+            const shuffleTimer = setInterval(() => {
+                const highlightKey = petKeys[step % 3];
+                petKeys.forEach(k => {
+                    document.getElementById(`roulette-card-${k}`).classList.toggle('roulette-active-card', k === highlightKey);
+                });
+                playPegTickSound(false);
+                step++;
+
+                if (step >= totalSteps) {
+                    clearInterval(shuffleTimer);
+                    petKeys.forEach(k => {
+                        document.getElementById(`roulette-card-${k}`).classList.toggle('roulette-active-card', k === chosenKey);
+                    });
+
+                    chosenPet.unlocked = true;
+                    playRewardFanfare(true);
+
+                    if (!wasAlreadyUnlocked) {
+                        statusEl.textContent = `🎊 Chúc mừng! Bạn đã mở khóa thành công [${chosenPet.name}]!`;
+                        finalMsgEl.textContent = `✨ Đã mở khóa: ${chosenPet.name}!`;
+                    } else {
+                        playerResources.shards += 50;
+                        updateResourceBarUI();
+                        statusEl.textContent = `🎊 Trúng [${chosenPet.name}] (Đã sở hữu -> Quy đổi +50 Pet Shards)!`;
+                        finalMsgEl.textContent = `✨ ${chosenPet.name} (+50 Pet Shards)!`;
+                    }
+
+                    renderPetCollectionShowcase();
+                }
+            }, 110);
+        }
+
+        function closeWheelModal() {
+            document.getElementById('wheel-reward-modal').classList.add('hidden');
+        }
+
+        function closeWheelModalAndSpin() {
+            document.getElementById('wheel-reward-modal').classList.add('hidden');
+            spinLuckyWheel();
+        }
+
+        // =========================================================================
+        // 8. CẬP NHẬT UI TÀI NGUYÊN, BẢNG XÁC SUẤT & BỘ SƯU TẬP 3 THÚ CƯNG
+        // =========================================================================
+        function updateResourceBarUI() {
+            document.getElementById('res-tickets').textContent = playerResources.tickets;
+            document.getElementById('res-food').textContent = playerResources.food;
+            document.getElementById('res-coins').textContent = playerResources.coins;
+            document.getElementById('res-shards').textContent = playerResources.shards;
+        }
+
+        function addFreeTickets() {
+            playerResources.tickets += 5;
+            updateResourceBarUI();
+            showToast('🎫 Đã cộng thêm +5 Vé Lucky Wheel miễn phí!');
+        }
+
+        function craftPetWithShards() {
+            if (playerResources.shards < 100) {
+                showToast(`🧩 Cần 100 Pet Shards để đổi thú cưng (Hiện có: ${playerResources.shards}/100).`);
+                return;
+            }
+            playerResources.shards -= 100;
+            updateResourceBarUI();
+            handleSlotReward(WHEEL_SLOTS[7], '🧩 Đổi thành công 100 Pet Shards!');
+        }
+
+        function resetUnlockedPets() {
+            Object.values(UNLOCKABLE_PETS).forEach(p => p.unlocked = false);
+            renderPetCollectionShowcase();
+            showToast('🔒 Đã khóa lại 3 thú cưng để bạn test hiệu ứng mở khóa Ô 8!');
+        }
+
+        function renderProbabilityTable(lastHitIndex = -1) {
+            const container = document.getElementById('probability-table-rows');
+            document.getElementById('total-wheel-spins').textContent = `Đã quay: ${totalWheelSpins}`;
+
+            container.innerHTML = WHEEL_SLOTS.map((slot, idx) => {
+                const isHit = idx === lastHitIndex;
+                return `
+                    <div class="flex items-center justify-between px-2.5 py-1 rounded-xl border ${
+                        isHit ? 'bg-amber-200 border-[#4A2511] font-extrabold scale-[1.02]' : 'bg-pink-50/60 border-pink-200'
+                    } text-xs transition-all">
+                        <div class="flex items-center gap-1.5 min-w-0">
+                            <span class="w-5 h-5 rounded-lg border border-[#4A2511] flex items-center justify-center text-[10px] font-extrabold ${slot.badgeColor}">
+                                ${slot.slotNumber}
+                            </span>
+                            <span class="text-sm">${slot.icon}</span>
+                            <span class="font-bold text-[#4A2511] truncate">${slot.name}</span>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="font-extrabold text-[#8c5233]">${slot.probability}%</span>
+                            <span class="text-[10px] font-mono bg-white border border-pink-300 px-1.5 py-0.5 rounded text-slate-600">
+                                ${spinCountsBySlot[idx]} lần
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderPetCollectionShowcase() {
+            const container = document.getElementById('pet-collection-showcase');
+            container.innerHTML = Object.values(UNLOCKABLE_PETS).map(pet => `
+                <div class="rounded-2xl p-3 border-2 border-[#4A2511] flex items-center gap-3 ${
+                    pet.unlocked ? 'bg-gradient-to-br from-amber-50 to-pink-50' : 'bg-slate-100 opacity-85'
+                }">
+                    <div class="w-16 h-16 rounded-2xl bg-white border-2 border-[#4A2511] p-1 shrink-0 ${
+                        pet.unlocked ? 'pet-unlocked-bounce' : 'pet-locked-silhouette'
+                    }">
+                        ${pet.svg}
+                    </div>
+                    <div class="min-w-0">
+                        <div class="text-xs font-extrabold text-[#4A2511] truncate">${pet.name}</div>
+                        <div class="mt-1">
+                            ${pet.unlocked
+                                ? '<span class="text-[10px] font-extrabold bg-emerald-300 border border-[#4A2511] px-2 py-0.5 rounded-full">✅ Đã mở khóa</span>'
+                                : '<span class="text-[10px] font-extrabold bg-slate-200 border border-[#4A2511] px-2 py-0.5 rounded-full text-slate-600">🔒 Chưa mở (Ô 8 - 2%)</span>'
+                            }
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            ['bunny', 'dog', 'capy'].forEach(k => {
+                const el = document.getElementById(`modal-svg-${k}`);
+                if (el) el.innerHTML = UNLOCKABLE_PETS[k].svg;
+            });
+        }
+
+        // =========================================================================
+        // 9. TRÌNH XUẤT MÃ NGUỒN & PROMPT CHO CODEX
+        // =========================================================================
+        let activeCodeTab = 'js';
+
+        function switchCodeTab(tab) {
+            activeCodeTab = tab;
+            ['js', 'svg', 'codex'].forEach(t => {
+                const btn = document.getElementById(`code-tab-${t}`);
+                btn.className = t === tab
+                    ? 'px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold bg-pink-500 text-white text-left truncate'
+                    : 'px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold bg-slate-800 text-slate-300 hover:bg-slate-700 text-left truncate';
+            });
+            updateCodeOutput();
+        }
+
+        function updateCodeOutput() {
+            const box = document.getElementById('code-output-box');
+            const banner = document.getElementById('code-banner-desc');
+
+            if (activeCodeTab === 'js') {
+                banner.innerHTML = '<span>💓 Động cơ Vật Lý Giảm Tốc Mượt 5.5s (`1 - Math.pow(1 - t, 4.2)`), không dừng-nhảy.</span><span class="font-mono text-[11px] text-amber-300">SmoothWheelEngine.js</span>';
+                box.textContent = document.getElementById('lucky-wheel-engine-script').textContent.trim();
+            } else if (activeCodeTab === 'svg') {
+                banner.innerHTML = '<span>🎡 Toàn bộ mã SVG Vòng Quay 8 Ô, Chốt vàng vật lý & Kim chỉ uốn cong.</span><span class="font-mono text-[11px] text-amber-300">WheelSVG & CSS</span>';
+                const cssText = document.getElementById('lucky-wheel-styles').textContent.trim();
+                const svgText = document.getElementById('lucky-wheel-svg').outerHTML;
+                box.textContent = `/* === 1. MÃ CSS VÒNG QUAY 8 Ô === */\n${cssText}\n\n<!-- === 2. MÃ SVG VÒNG QUAY 8 Ô === -->\n${svgText}`;
+            } else {
+                banner.innerHTML = '<span>🤖 Prompt kỹ thuật đầy đủ để dán trực tiếp vào Codex / Cursor / Copilot.</span><span class="font-mono text-[11px] text-pink-300">Codex Prompt</span>';
+                box.textContent =
+`Hãy lập trình tính năng "Vòng Quay May Mắn 8 Ô (Lucky Wheel)" trong ứng dụng PawQuest với chuyển động giảm tốc vật lý mượt mà trong 5.5 giây theo các thông số sau:
+
+1. Đường cong Giảm tốc Đơn điệu Duy nhất (5.3s – 5.8s):
+- Sử dụng \`requestAnimationFrame\` với hàm giảm tốc liên tục \`smoothDecelerationEaseOut(t) = 1 - Math.pow(1 - t, 4.2)\`.
+- Vận tốc góc giảm dần đều xuyên suốt từ lúc bắt đầu đến khi dừng hẳn tại \`t = 1\` (tuyệt đối không dùng hiệu ứng dừng rồi nhảy thêm ô).
+- Trong 1.5 – 2 giây cuối, vòng quay tự nhiên xoay chậm dần qua các chốt vàng cuối cùng và dừng êm ái tại một vị trí ngẫu nhiên bên trong múi 45° của ô trúng thưởng (\`stopOffsetInsideSlice\` từ \`-16.5°\` đến \`+16.5°\`). Nếu \`stopOffsetInsideSlice\` nằm gần \`-15°\`, người chơi sẽ thấy vòng quay trôi chậm qua ô trước đó và vừa đủ quán tính lướt nhẹ qua chốt ranh giới để dừng ở đầu ô trúng thưởng.
+
+2. Tương tác Kim chỉ & Âm thanh Chốt vàng (8 Pegs cách nhau 45°):
+- Mỗi khi một chốt vàng vượt qua vị trí 12 giờ, phát âm thanh tick bằng Web Audio API và làm nghiêng nhẹ kim chỉ (\`#wheel-top-pointer\`) theo vận tốc góc thực tế.`;
+            }
+        }
+
+        function copyActiveCode() {
+            const text = document.getElementById('code-output-box').textContent;
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            showToast('📋 Đã sao chép mã nguồn Vật Lý Vòng Quay Hồi Hộp vào bộ nhớ tạm!');
+        }
+
+        function setWorkspaceLayout(mode) {
+            const left = document.getElementById('left-preview-pane');
+            const right = document.getElementById('right-code-pane');
+            ['split', 'preview', 'code'].forEach(m => {
+                const btn = document.getElementById(`layout-${m}`);
+                btn.classList.toggle('active-btn', m === mode);
+                btn.classList.toggle('bg-pink-300', m === mode);
+                btn.classList.toggle('bg-white', m !== mode);
+            });
+
+            if (mode === 'split') {
+                left.className = 'lg:col-span-7 flex flex-col gap-4';
+                right.className = 'lg:col-span-5 flex flex-col';
+            } else if (mode === 'preview') {
+                left.className = 'lg:col-span-10 lg:col-start-2 flex flex-col gap-4';
+                right.className = 'hidden';
+            } else {
+                left.className = 'hidden';
+                right.className = 'lg:col-span-12 flex flex-col';
+            }
+        }
+
+        let toastTimer = null;
+        function showToast(msg) {
+            const box = document.getElementById('toast-box');
+            document.getElementById('toast-text').textContent = msg;
+            box.classList.remove('opacity-0', 'translate-y-3');
+            box.classList.add('opacity-100', 'translate-y-0');
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                box.classList.remove('opacity-100', 'translate-y-0');
+                box.classList.add('opacity-0', 'translate-y-3');
+            }, 2600);
+        }
+
+        window.onload = () => {
+            renderWheelSVG();
+            renderProbabilityTable();
+            renderPetCollectionShowcase();
+            updateResourceBarUI();
+            updateCodeOutput();
+        };
+    </script>
+</body>
+</html>

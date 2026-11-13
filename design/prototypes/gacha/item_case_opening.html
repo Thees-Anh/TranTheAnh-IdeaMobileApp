@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawQuest Gacha Studio - Mở Rương Kho Báu & Vòng Quay CS2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style id="pawquest-gacha-styles">
+        * {
+            font-family: 'Quicksand', sans-serif;
+            user-select: none;
+        }
+        code, pre, .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+            user-select: text;
+        }
+        body {
+            background-color: #fdf2f8;
+            color: #4B2412;
+        }
+
+        /* =========================================================
+           1. PHONG CÁCH THẺ KAWAII & 4 CẤP ĐỘ HIẾM (RARITY TIERS)
+           ========================================================= */
+        .kawaii-card {
+            border: 3px solid #4B2412;
+            box-shadow: 0 6px 0 rgba(75, 36, 18, 0.15);
+        }
+        .kawaii-btn {
+            border: 2.5px solid #4B2412;
+            box-shadow: 0 3px 0 #4B2412;
+            transition: all 0.12s ease;
+        }
+        .kawaii-btn:hover:not(:disabled) {
+            transform: translateY(-1.5px);
+            box-shadow: 0 4.5px 0 #4B2412;
+        }
+        .kawaii-btn:active:not(:disabled), .kawaii-btn.active-btn {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #4B2412;
+        }
+        .kawaii-btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        /* Màu sắc 4 Phẩm chất (Common 55%, Rare 30%, Epic 12%, Legendary 3%) */
+        .rarity-common {
+            background: linear-gradient(180deg, #EFF6FF 0%, #DBEAFE 100%);
+            border-color: #3B82F6;
+        }
+        .rarity-rare {
+            background: linear-gradient(180deg, #FAF5FF 0%, #F3E8FF 100%);
+            border-color: #A855F7;
+        }
+        .rarity-epic {
+            background: linear-gradient(180deg, #FDF2F8 0%, #FCE7F3 100%);
+            border-color: #EC4899;
+        }
+        @keyframes legendaryShine {
+            0%, 100% {
+                background-position: 0% 50%;
+                box-shadow: 0 0 15px rgba(245, 158, 11, 0.55), inset 0 0 12px rgba(254, 240, 138, 0.8);
+            }
+            50% {
+                background-position: 100% 50%;
+                box-shadow: 0 0 28px rgba(245, 158, 11, 0.95), inset 0 0 20px rgba(254, 240, 138, 1);
+            }
+        }
+        .rarity-legendary {
+            background: linear-gradient(135deg, #FEF9C3 0%, #FDE047 50%, #F59E0B 100%);
+            background-size: 200% 200%;
+            border-color: #D97706;
+            animation: legendaryShine 2.2s ease infinite;
+        }
+
+        /* =========================================================
+           2. ANIMATION RƯƠNG KHO BÁU (IDLE -> SHAKE -> BURST OPEN)
+           ========================================================= */
+        #gacha-chest-root {
+            transform-origin: 300px 250px;
+        }
+        #chest-lid-group {
+            transform-origin: 300px 158px;
+            transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Rương đứng yên nhấp nhô nhẹ */
+        @keyframes chestIdleFloat {
+            0%, 100% { transform: translateY(0px) scale(1, 1); }
+            50% { transform: translateY(-5px) scale(1.015, 0.985); }
+        }
+        .chest-state-idle #gacha-chest-root {
+            animation: chestIdleFloat 2.8s ease-in-out infinite;
+        }
+
+        /* Rương lắc mạnh chuẩn bị nổ mở (1.15s) */
+        @keyframes chestViolentShake {
+            0% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+            15% { transform: translate(-8px, 4px) rotate(-6deg) scale(1.08, 0.92); }
+            30% { transform: translate(9px, -6px) rotate(7deg) scale(0.94, 1.07); }
+            45% { transform: translate(-10px, 2px) rotate(-8deg) scale(1.09, 0.91); }
+            60% { transform: translate(10px, -4px) rotate(8deg) scale(0.95, 1.06); }
+            75% { transform: translate(-12px, 3px) rotate(-10deg) scale(1.12, 0.88); }
+            90% { transform: translate(8px, -10px) rotate(6deg) scale(0.92, 1.12); }
+            100% { transform: translate(0, 0) rotate(0deg) scale(1, 1); }
+        }
+        .chest-state-shaking #gacha-chest-root {
+            animation: chestViolentShake 1.1s ease-in-out infinite;
+        }
+
+        /* Rương bật nắp phát sáng */
+        .chest-state-opened #chest-lid-group {
+            transform: translateY(-28px) rotate(-18deg) scale(1.04);
+        }
+        @keyframes chestLightRaysSpin {
+            0% { transform: rotate(0deg) scale(0.9); opacity: 0.75; }
+            50% { transform: rotate(180deg) scale(1.08); opacity: 1; }
+            100% { transform: rotate(360deg) scale(0.9); opacity: 0.75; }
+        }
+        #chest-light-burst {
+            transform-origin: 300px 168px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .chest-state-opened #chest-light-burst,
+        .chest-state-shaking #chest-light-burst {
+            opacity: 1;
+            animation: chestLightRaysSpin 6s linear infinite;
+        }
+
+        /* =========================================================
+           3. DẢI THẺ QUAY NGANG KIỂU CS2 (HORIZONTAL ROULETTE REEL)
+           ========================================================= */
+        .cs2-viewport {
+            position: relative;
+            overflow: hidden;
+            background: rgba(31, 19, 43, 0.92);
+            border: 3.5px solid #4B2412;
+            box-shadow: inset 0 0 28px rgba(0, 0, 0, 0.65), 0 8px 0 rgba(75, 36, 18, 0.2);
+        }
+        /* Hiệu ứng mờ 2 mép trái phải của hộp quay CS2 */
+        .cs2-viewport::before,
+        .cs2-viewport::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 64px;
+            z-index: 20;
+            pointer-events: none;
+        }
+        .cs2-viewport::before {
+            left: 0;
+            background: linear-gradient(90deg, rgba(24, 15, 34, 0.95) 0%, rgba(24, 15, 34, 0) 100%);
+        }
+        .cs2-viewport::after {
+            right: 0;
+            background: linear-gradient(270deg, rgba(24, 15, 34, 0.95) 0%, rgba(24, 15, 34, 0) 100%);
+        }
+
+        /* Dải băng chuyền chứa 65 thẻ vật phẩm */
+        #cs2-reel-track {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            will-change: transform;
+        }
+
+        /* Kích thước cố định mỗi thẻ trên dải CS2: 116px + gap 10px = 126px pitch */
+        .cs2-reel-card {
+            width: 116px;
+            height: 132px;
+            flex-shrink: 0;
+            border-radius: 16px;
+            border-width: 3px;
+            border-style: solid;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 6px;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .cs2-reel-card.winning-card-highlight {
+            transform: scale(1.08);
+            z-index: 15;
+            box-shadow: 0 0 25px rgba(250, 204, 21, 0.95);
+        }
+
+        /* Con trỏ cố định ở tâm dải quay */
+        @keyframes pointerPulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.08); }
+        }
+        .cs2-center-pointer {
+            position: absolute;
+            top: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 30;
+            pointer-events: none;
+            animation: pointerPulse 1.2s ease-in-out infinite;
+        }
+        .cs2-center-laser {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 3px;
+            transform: translateX(-50%);
+            background: linear-gradient(180deg, #FACC15 0%, #FB7185 50%, #FACC15 100%);
+            box-shadow: 0 0 10px #FACC15;
+            z-index: 25;
+            pointer-events: none;
+        }
+
+        /* =========================================================
+           4. ANIMATION THÚ CƯNG & 24 VẬT PHẨM TRONG PHÒNG THỬ ĐỒ
+           ========================================================= */
+        #pet-body-rig {
+            transform-origin: 300px 330px;
+            animation: petBreath 3s ease-in-out infinite;
+        }
+        #pet-head-rig {
+            transform-origin: 300px 235px;
+            animation: petTilt 3s ease-in-out infinite;
+        }
+        @keyframes petBreath {
+            0%, 100% { transform: scale(1, 1) translateY(0px); }
+            50% { transform: scale(1.02, 0.985) translateY(2px); }
+        }
+        @keyframes petTilt {
+            0%, 100% { transform: rotate(-1.8deg); }
+            50% { transform: rotate(2deg) translateY(2px); }
+        }
+
+        /* Hiệu ứng cho 4 vật phẩm Epic/Legendary mới */
+        @keyframes haloOrbit {
+            0%, 100% { transform: translateY(0px) rotate(-2deg); }
+            50% { transform: translateY(-6px) rotate(2deg); }
+        }
+        #acc-celestial-halo {
+            transform-origin: 300px 95px;
+            animation: haloOrbit 2.4s ease-in-out infinite;
+        }
+        @keyframes fountainFlow {
+            0%, 100% { transform: scaleY(1); opacity: 0.85; }
+            50% { transform: scaleY(1.08); opacity: 1; }
+        }
+        .fountain-water {
+            transform-origin: 112px 330px;
+            animation: fountainFlow 1.5s ease-in-out infinite;
+        }
+        @keyframes throneFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+        #furn-magic-throne {
+            animation: throneFloat 3.2s ease-in-out infinite;
+        }
+
+        /* Ẩn/Hiện vật phẩm trong phòng */
+        .room-item, .pet-acc, .pet-model { display: none; }
+        .room-item.item-visible, .pet-acc.item-visible, .pet-model.pet-active { display: block; }
+
+        ::-webkit-scrollbar { width: 7px; height: 7px; }
+        ::-webkit-scrollbar-track { background: #181825; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb { background: #f472b6; border-radius: 6px; }
+    </style>
+</head>
+<body class="min-h-screen p-3 md:p-5 flex flex-col items-center">
+
+    <!-- ================= HEADER ================= -->
+    <header class="w-full max-w-7xl mb-4 bg-white rounded-3xl px-4 py-3 kawaii-card flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-300 via-pink-300 to-purple-300 border-2 border-[#4B2412] flex items-center justify-center text-2xl shadow-inner">
+                🎁
+            </div>
+            <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <h1 class="text-lg md:text-xl font-extrabold text-[#4B2412] tracking-tight">
+                        PawQuest Gacha Studio — Mở Rương Kho Báu & Vòng Quay CS2
+                    </h1>
+                    <span class="bg-amber-300 border border-[#4B2412] text-[#4B2412] text-[11px] font-extrabold px-2.5 py-0.5 rounded-full">
+                        24 Vật Phẩm • 4 Bậc Hiếm Chuẩn Tỷ Lệ
+                    </span>
+                </div>
+                <p class="text-xs text-[#8c5233] font-semibold">
+                    Common 55% • Rare 30% • Epic 12% • Legendary 3% — Kết hợp Mở Rương, Dải Quay Ngang CS2 & Trang Bị Thú Cưng
+                </p>
+            </div>
+        </div>
+
+        <!-- Ví Xu, Âm thanh & Chuyển đổi giao diện -->
+        <div class="flex items-center gap-2 flex-wrap">
+            <!-- Ví Xu người chơi -->
+            <div class="bg-amber-100 border-2 border-[#4B2412] px-3 py-1.5 rounded-2xl flex items-center gap-2">
+                <span class="text-base">🪙</span>
+                <span id="user-coins" class="text-sm font-extrabold text-[#4B2412]">1,500</span>
+                <button onclick="addFreeCoins()" title="Nhận thêm 500 Xu test" class="bg-amber-300 hover:bg-amber-400 border border-[#4B2412] text-[10px] font-extrabold px-1.5 py-0.5 rounded-lg">
+                    +500
+                </button>
+            </div>
+
+            <!-- Nút bật/tắt âm thanh tick CS2 -->
+            <button id="sound-toggle-btn" onclick="toggleSound()" class="kawaii-btn bg-pink-100 text-[#4B2412] text-xs font-extrabold px-3 py-1.5 rounded-xl">
+                🔊 Âm thanh: BẬT
+            </button>
+
+            <!-- Nút chuyển đổi chế độ xem -->
+            <div class="flex items-center gap-1.5 bg-pink-50 p-1 rounded-2xl border-2 border-[#4B2412]">
+                <button id="layout-split" onclick="setWorkspaceLayout('split')" class="kawaii-btn active-btn bg-pink-300 text-[#4B2412] text-xs font-extrabold px-2.5 py-1 rounded-xl">
+                    🪟 Chia đôi
+                </button>
+                <button id="layout-preview" onclick="setWorkspaceLayout('preview')" class="kawaii-btn bg-white text-[#4B2412] text-xs font-extrabold px-2.5 py-1 rounded-xl">
+                    🎰 Phóng to Gacha
+                </button>
+                <button id="layout-code" onclick="setWorkspaceLayout('code')" class="kawaii-btn bg-white text-[#4B2412] text-xs font-extrabold px-2.5 py-1 rounded-xl">
+                    💻 Chỉ xem Code
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================= MAIN WORKSPACE ================= -->
+    <main class="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1">
+
+        <!-- =================================================================
+             CỘT TRÁI: SÂN KHẤU MỞ RƯƠNG CS2 + PHÒNG THỬ ĐỒ TRỰC TIẾP (7 CỘT)
+             ================================================================= -->
+        <section id="left-preview-pane" class="lg:col-span-7 flex flex-col gap-4">
+
+            <!-- KHỐI 1: SÂN KHẤU MỞ RƯƠNG KHO BÁU & DẢI QUAY NGANG CS2 -->
+            <div class="bg-white rounded-3xl kawaii-card overflow-hidden flex flex-col">
+
+                <!-- Thanh tỷ lệ Rarity & Bộ nút Test Ép Rarity cho Developer -->
+                <div class="bg-gradient-to-r from-indigo-950 via-purple-950 to-pink-950 text-white px-4 py-2.5 border-b-2 border-[#4B2412] flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 flex-wrap text-[11px] font-extrabold">
+                        <span class="px-2 py-0.5 rounded-full bg-blue-500/30 border border-blue-400 text-blue-200">Common: 55%</span>
+                        <span class="px-2 py-0.5 rounded-full bg-purple-500/30 border border-purple-400 text-purple-200">Rare: 30%</span>
+                        <span class="px-2 py-0.5 rounded-full bg-pink-500/30 border border-pink-400 text-pink-200">Epic: 12%</span>
+                        <span class="px-2 py-0.5 rounded-full bg-amber-500/30 border border-amber-400 text-amber-200">Legendary: 3%</span>
+                    </div>
+
+                    <!-- Chế độ ép kết quả để test hiệu ứng -->
+                    <div class="flex items-center gap-1 text-[11px]">
+                        <span class="text-pink-200 font-bold mr-1">🎯 Chế độ Test:</span>
+                        <select id="force-rarity-select" class="bg-slate-900 border border-pink-400 text-amber-200 font-extrabold rounded-lg px-2 py-1 text-[11px] focus:outline-none">
+                            <option value="random">🎲 Ngẫu nhiên chuẩn (55/30/12/3%)</option>
+                            <option value="common">🔵 Ép ra Common (55%)</option>
+                            <option value="rare">🟣 Ép ra Rare (30%)</option>
+                            <option value="epic">🌸 Ép ra Epic (12%)</option>
+                            <option value="legendary">👑 Ép ra Legendary (3%)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- VÙNG SÂN KHẤU CHÍNH: RƯƠNG KHO BÁU + HỘP QUAY NGANG CS2 -->
+                <div id="gacha-stage-container" class="relative w-full bg-gradient-to-b from-[#2E1A47] via-[#432360] to-[#63327E] p-4 flex flex-col items-center justify-between min-h-[370px] overflow-hidden">
+
+                    <!-- Hạt sao lấp lánh nền -->
+                    <div class="absolute inset-0 pointer-events-none opacity-40" style="background-image: radial-gradient(#FDE047 1.5px, transparent 1.5px), radial-gradient(#F472B6 1.5px, transparent 1.5px); background-size: 48px 48px; background-position: 0 0, 24px 24px;"></div>
+
+                    <!-- Trạng thái hướng dẫn trên đỉnh sân khấu -->
+                    <div class="relative z-10 w-full flex items-center justify-between text-xs font-extrabold text-pink-100 mb-1">
+                        <span id="gacha-status-badge" class="bg-black/40 border border-pink-400/40 px-3 py-1 rounded-full">
+                            ✨ Sẵn sàng mở Rương Kho Báu PawQuest!
+                        </span>
+                        <span class="bg-black/40 border border-amber-400/40 text-amber-300 px-3 py-1 rounded-full">
+                            Đã mở: <strong id="total-spins-count">0</strong> rương
+                        </span>
+                    </div>
+
+                    <!-- =========================================================
+                         DẢI BĂNG CHUYỀN CS2 (CS2 CASE REEL VIEWPORT)
+                         Chạy ngang dưới con trỏ cố định ở chính giữa
+                         ========================================================= -->
+                    <div id="cs2-spinner-wrapper" class="relative z-20 w-full max-w-[580px] my-1 transition-all duration-300">
+                        <div id="cs2-viewport-box" class="cs2-viewport w-full h-[156px] rounded-2xl flex items-center">
+
+                            <!-- Con trỏ cố định ở chính giữa (Center Paw Pointer) -->
+                            <div class="cs2-center-pointer flex flex-col items-center">
+                                <div class="bg-amber-400 border-2 border-[#4B2412] text-[#4B2412] px-2.5 py-0.5 rounded-b-xl shadow-md flex items-center gap-1 text-[10px] font-extrabold">
+                                    <span>🐾</span><span>THƯỞNG</span>
+                                </div>
+                                <div class="w-0 h-0 border-l-[9px] border-l-transparent border-r-[9px] border-r-transparent border-t-[11px] border-t-[#FACC15]"></div>
+                            </div>
+
+                            <!-- Tia laser dọc cố định ở tâm -->
+                            <div class="cs2-center-laser"></div>
+
+                            <!-- Mũi tên dưới đáy dải quay -->
+                            <div class="absolute bottom-0 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
+                                <div class="w-0 h-0 border-l-[9px] border-l-transparent border-r-[9px] border-r-transparent border-b-[11px] border-b-[#FACC15]"></div>
+                            </div>
+
+                            <!-- Dải thẻ chạy ngang (#cs2-reel-track) -->
+                            <div id="cs2-reel-track" class="pl-[240px]">
+                                <!-- Các thẻ vật phẩm sẽ được sinh tự động bằng JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- =========================================================
+                         RƯƠNG KHO BÁU KAWAII VECTOR SVG (CHEST STAGE)
+                         ========================================================= -->
+                    <div id="chest-svg-container" class="relative z-10 w-64 h-40 -mt-1 flex items-center justify-center chest-state-idle">
+                        <svg viewBox="0 0 600 320" class="w-full h-full overflow-visible" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Chùm tia sáng hoàng kim phát ra khi mở rương -->
+                            <g id="chest-light-burst">
+                                <polygon points="300,168 150,10 210,10" fill="#FDE047" opacity="0.45" />
+                                <polygon points="300,168 270,0 330,0" fill="#FEF08A" opacity="0.65" />
+                                <polygon points="300,168 390,10 450,10" fill="#FDE047" opacity="0.45" />
+                                <polygon points="300,168 490,70 530,120" fill="#F472B6" opacity="0.4" />
+                                <polygon points="300,168 70,120 110,70" fill="#F472B6" opacity="0.4" />
+                                <circle cx="300" cy="168" r="95" fill="#FEF08A" opacity="0.5" />
+                            </g>
+
+                            <!-- Bóng đổ chiếc rương trên thảm -->
+                            <ellipse cx="300" cy="276" rx="135" ry="24" fill="#190D26" opacity="0.55" />
+
+                            <g id="gacha-chest-root">
+                                <!-- THÂN DƯỚI RƯƠNG KHO BÁU -->
+                                <g id="chest-base-group">
+                                    <!-- Khối hộp hồng đậm -->
+                                    <path d="M 185 162 L 415 162 L 402 268 C 400 276, 392 280, 382 280 L 218 280 C 208 280, 200 276, 198 268 Z" fill="#F472B6" stroke="#4B2412" stroke-width="8" stroke-linejoin="round" />
+                                    <!-- Lòng rương phát sáng vàng khi mở nắp -->
+                                    <ellipse cx="300" cy="162" rx="108" ry="18" fill="#FEF08A" stroke="#4B2412" stroke-width="5" />
+                                    <!-- Khung nẹp vàng bo viền thân rương -->
+                                    <path d="M 185 162 L 212 162 L 222 280 L 198 268 Z" fill="#FACC15" stroke="#4B2412" stroke-width="7" stroke-linejoin="round" />
+                                    <path d="M 415 162 L 388 162 L 378 280 L 402 268 Z" fill="#FACC15" stroke="#4B2412" stroke-width="7" stroke-linejoin="round" />
+                                    <rect x="196" y="256" width="208" height="22" rx="8" fill="#FACC15" stroke="#4B2412" stroke-width="7" />
+                                    <!-- Họa tiết ngôi sao lấp lánh trên mặt rương -->
+                                    <polygon points="248,210 253,220 264,222 256,230 258,240 248,234 238,240 240,230 232,222 243,220" fill="#FEF08A" />
+                                    <polygon points="352,210 357,220 368,222 360,230 362,240 352,234 342,240 344,230 336,222 347,220" fill="#FEF08A" />
+                                </g>
+
+                                <!-- NẮP RƯƠNG KHO BÁU (#chest-lid-group) -->
+                                <g id="chest-lid-group">
+                                    <!-- Vòm nắp hồng -->
+                                    <path d="M 178 164 C 178 92, 422 92, 422 164 Z" fill="#FB7185" stroke="#4B2412" stroke-width="8" stroke-linejoin="round" />
+                                    <!-- Nẹp vàng vòm nắp -->
+                                    <path d="M 178 164 C 178 105, 220 98, 220 164 Z" fill="#FACC15" stroke="#4B2412" stroke-width="7" stroke-linejoin="round" />
+                                    <path d="M 422 164 C 422 105, 380 98, 380 164 Z" fill="#FACC15" stroke="#4B2412" stroke-width="7" stroke-linejoin="round" />
+                                    <rect x="174" y="150" width="252" height="20" rx="8" fill="#FACC15" stroke="#4B2412" stroke-width="7" />
+                                    <!-- Vương miện nhỏ đính trên đỉnh rương -->
+                                    <path d="M 275 106 L 268 78 L 288 92 L 300 72 L 312 92 L 332 78 L 325 106 Z" fill="#FDE047" stroke="#4B2412" stroke-width="6" stroke-linejoin="round" />
+                                </g>
+
+                                <!-- Ổ KHÓA HÌNH CHÂN MÈO VÀNG Ở CHÍNH GIỮA -->
+                                <g id="chest-lock-plate">
+                                    <rect x="274" y="144" width="52" height="58" rx="16" fill="#FDE047" stroke="#4B2412" stroke-width="7" />
+                                    <!-- Hình đệm chân mèo (Paw Print Keyhole) -->
+                                    <ellipse cx="300" cy="178" rx="9" ry="7" fill="#4B2412" />
+                                    <circle cx="288" cy="166" r="4" fill="#4B2412" />
+                                    <circle cx="296" cy="162" r="4" fill="#4B2412" />
+                                    <circle cx="304" cy="162" r="4" fill="#4B2412" />
+                                    <circle cx="312" cy="166" r="4" fill="#4B2412" />
+                                </g>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- =========================================================
+                         MODAL NỔ PHẦN THƯỞNG (REWARD REVEAL OVERLAY)
+                         ========================================================= -->
+                    <div id="reward-reveal-modal" class="hidden absolute inset-0 z-40 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-4 text-center animate-fadeIn">
+                        <div id="reward-modal-card" class="max-w-sm w-full rounded-3xl p-5 border-4 border-[#4B2412] bg-white shadow-2xl flex flex-col items-center relative">
+                            <span id="reward-rarity-badge" class="px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider border-2 border-[#4B2412] mb-2">
+                                LEGENDARY • 3%
+                            </span>
+                            <div id="reward-icon-box" class="w-24 h-24 rounded-3xl border-3 border-[#4B2412] flex items-center justify-center text-5xl mb-3 shadow-inner">
+                                👑
+                            </div>
+                            <h3 id="reward-item-name" class="text-lg font-extrabold text-[#4B2412]">
+                                Vương Miện Hoàng Gia
+                            </h3>
+                            <p id="reward-item-desc" class="text-xs font-semibold text-[#8c5233] mt-1 mb-4">
+                                Phụ kiện đội đầu lấp lánh cho thú cưng
+                            </p>
+
+                            <div class="flex items-center gap-2 w-full">
+                                <button id="btn-equip-now" onclick="equipWonItemAndClose()" class="flex-1 kawaii-btn bg-emerald-400 hover:bg-emerald-300 text-[#4B2412] text-xs font-extrabold py-2.5 px-3 rounded-2xl">
+                                    ✨ Trang bị & Xem ngay
+                                </button>
+                                <button onclick="closeRewardModalAndSpinAgain()" class="flex-1 kawaii-btn bg-amber-300 hover:bg-amber-200 text-[#4B2412] text-xs font-extrabold py-2.5 px-3 rounded-2xl">
+                                    🎰 Quay tiếp (100 🪙)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- THANH NÚT BẤM MỞ RƯƠNG & QUAY NHANH -->
+                <div class="bg-amber-50 border-t-3 border-[#4B2412] p-3.5 flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button id="btn-spin-main" onclick="startGachaSpin(false)" class="kawaii-btn bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 text-[#4B2412] text-sm font-extrabold px-5 py-2.5 rounded-2xl flex items-center gap-2">
+                            <span>🗝️ Mở Rương Kho Báu (100 🪙)</span>
+                        </button>
+                        <button id="btn-spin-fast" onclick="startGachaSpin(true)" class="kawaii-btn bg-pink-200 hover:bg-pink-300 text-[#4B2412] text-xs font-extrabold px-3.5 py-2.5 rounded-2xl flex items-center gap-1.5">
+                            <span>⚡ Mở Nhanh (2s)</span>
+                        </button>
+                    </div>
+
+                    <div class="text-xs font-bold text-[#8c5233]">
+                        Mẹo: Bạn có thể chọn <strong>"🎯 Chế độ Test"</strong> ở góc trên để ép nổ Legendary (3%)!
+                    </div>
+                </div>
+            </div>
+
+            <!-- KHỐI 2: PHÒNG THỬ ĐỒ TRỰC TIẾP TRÊN 4 THÚ CƯNG & KHO 24 VẬT PHẨM -->
+            <div class="bg-white rounded-3xl kawaii-card overflow-hidden flex flex-col">
+                <div class="bg-pink-50 border-b-2 border-[#4B2412] px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-extrabold text-[#4B2412]">🏠 Phòng Thú Cưng & Kho 24 Vật Phẩm Gacha</span>
+                        <span id="unlocked-counter" class="bg-emerald-200 border border-[#4B2412] text-[#4B2412] text-[11px] font-extrabold px-2 py-0.5 rounded-full">
+                            Đang trang bị: 5 món
+                        </span>
+                    </div>
+
+                    <!-- Đổi thú cưng -->
+                    <div class="flex items-center gap-1">
+                        <button onclick="selectPet('cat')" id="pet-btn-cat" class="kawaii-btn active-btn bg-amber-300 text-[#4B2412] text-xs font-extrabold px-2 py-1 rounded-xl">🐱 Mèo</button>
+                        <button onclick="selectPet('dog')" id="pet-btn-dog" class="kawaii-btn bg-white text-[#4B2412] text-xs font-extrabold px-2 py-1 rounded-xl">🐶 Cún</button>
+                        <button onclick="selectPet('capy')" id="pet-btn-capy" class="kawaii-btn bg-white text-[#4B2412] text-xs font-extrabold px-2 py-1 rounded-xl">🍊 Capy</button>
+                        <button onclick="selectPet('bunny')" id="pet-btn-bunny" class="kawaii-btn bg-white text-[#4B2412] text-xs font-extrabold px-2 py-1 rounded-xl">🐰 Thỏ</button>
+                    </div>
+                </div>
+
+                <!-- Khung xem trước căn phòng & thú cưng (thu gọn) + Danh sách 24 vật phẩm theo Rarity -->
+                <div class="grid grid-cols-1 md:grid-cols-12">
+                    <!-- Căn phòng SVG trực tiếp (6 cột) -->
+                    <div class="md:col-span-6 bg-[#FFD9EC] border-b md:border-b-0 md:border-r-2 border-[#4B2412] flex items-center justify-center relative">
+                        <svg id="pawquest-room-svg" viewBox="0 0 600 440" class="w-full h-full max-h-[290px] block" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <pattern id="roomCarpetPattern" width="56" height="40" patternUnits="userSpaceOnUse">
+                                    <rect width="56" height="40" fill="#B59BF0"/>
+                                    <path d="M 0 20 L 56 20" stroke="#9F82E4" stroke-width="5"/>
+                                    <path d="M 28 0 L 28 40" stroke="#9F82E4" stroke-width="5"/>
+                                </pattern>
+                            </defs>
+
+                            <!-- Nền phòng & Thảm tím -->
+                            <rect x="0" y="0" width="600" height="270" fill="#FFE0F0" />
+                            <rect x="0" y="256" width="600" height="14" fill="#FFF7FB" stroke="#4B2412" stroke-width="4" />
+                            <rect x="0" y="270" width="600" height="170" fill="#F3C69F" />
+                            <polygon points="85,295 515,295 535,395 65,395" fill="url(#roomCarpetPattern)" stroke="#4B2412" stroke-width="4" stroke-linejoin="round" />
+
+                            <!-- NỘI THẤT HẬU CẢNH (Bao gồm cả 2 món Legendary mới: Đài phun nước Sakura & Ngai vàng Ngân Hà) -->
+                            <g id="room-furniture-back-layer">
+                                <!-- Cửa sổ cầu vồng (#furn-window) -->
+                                <g id="furn-window" class="room-item item-visible">
+                                    <path d="M 240 50 C 240 12, 360 12, 360 50 L 360 148 L 240 148 Z" fill="#BAE6FD" stroke="#4B2412" stroke-width="5" />
+                                    <path d="M 252 135 C 265 80, 335 80, 348 135" fill="none" stroke="#FDA4AF" stroke-width="8" />
+                                    <path d="M 260 135 C 270 90, 330 90, 340 135" fill="none" stroke="#FDE047" stroke-width="8" />
+                                    <rect x="232" y="144" width="136" height="12" rx="5" fill="#FFF7FB" stroke="#4B2412" stroke-width="4" />
+                                </g>
+                                <!-- Đồng hồ mèo (#furn-clock) -->
+                                <g id="furn-clock" class="room-item">
+                                    <circle cx="435" cy="95" r="24" fill="#FDBA74" stroke="#4B2412" stroke-width="4.5" />
+                                    <circle cx="435" cy="95" r="17" fill="#FFFBEB" stroke="#4B2412" stroke-width="3.5" />
+                                    <line x1="435" y1="95" x2="435" y2="84" stroke="#4B2412" stroke-width="3.5" />
+                                    <line x1="435" y1="95" x2="444" y2="99" stroke="#F43F5E" stroke-width="3.5" />
+                                </g>
+                                <!-- Đèn LED sao (#furn-lights) -->
+                                <g id="furn-lights" class="room-item item-visible">
+                                    <path d="M 20 18 Q 160 60 300 20 Q 440 60 580 18" fill="none" stroke="#4B2412" stroke-width="3.5" />
+                                    <circle cx="100" cy="38" r="9" fill="#FEF08A" stroke="#4B2412" stroke-width="3" />
+                                    <circle cx="220" cy="38" r="9" fill="#FBCFE8" stroke="#4B2412" stroke-width="3" />
+                                    <circle cx="380" cy="38" r="9" fill="#BAE6FD" stroke="#4B2412" stroke-width="3" />
+                                    <circle cx="500" cy="38" r="9" fill="#FEF08A" stroke="#4B2412" stroke-width="3" />
+                                </g>
+                                <!-- Kệ sách gỗ (#furn-bookshelf) -->
+                                <g id="furn-bookshelf" class="room-item">
+                                    <rect x="40" y="110" width="125" height="12" rx="5" fill="#FBBF24" stroke="#4B2412" stroke-width="4" />
+                                    <rect x="52" y="76" width="15" height="34" rx="3" fill="#F472B6" stroke="#4B2412" stroke-width="3.5" />
+                                    <rect x="68" y="82" width="15" height="28" rx="3" fill="#60A5FA" stroke="#4B2412" stroke-width="3.5" />
+                                </g>
+                                <!-- Trụ cào móng (#furn-cat-tree) -->
+                                <g id="furn-cat-tree" class="room-item">
+                                    <ellipse cx="92" cy="312" rx="48" ry="14" fill="#F9A8D4" stroke="#4B2412" stroke-width="4" />
+                                    <rect x="78" y="185" width="26" height="124" rx="6" fill="#FDE68A" stroke="#4B2412" stroke-width="4" />
+                                    <rect x="54" y="232" width="64" height="46" rx="14" fill="#DDD6FE" stroke="#4B2412" stroke-width="4" />
+                                </g>
+                                <!-- [NEW LEGENDARY] Đài Phun Nước Pha Lê Hoa Anh Đào (#furn-sakura-fountain) -->
+                                <g id="furn-sakura-fountain" class="room-item">
+                                    <ellipse cx="112" cy="342" rx="58" ry="20" fill="#FBCFE8" stroke="#4B2412" stroke-width="4.5" />
+                                    <ellipse cx="112" cy="338" rx="48" ry="14" fill="#7DD3FC" stroke="#4B2412" stroke-width="3.5" />
+                                    <path class="fountain-water" d="M 112 250 C 82 268, 82 325, 92 338 L 132 338 C 142 325, 142 268, 112 250 Z" fill="#BAE6FD" opacity="0.85" />
+                                    <ellipse cx="112" cy="272" rx="36" ry="11" fill="#F472B6" stroke="#4B2412" stroke-width="4" />
+                                    <polygon points="112,215 126,242 112,265 98,242" fill="#FDE047" stroke="#4B2412" stroke-width="4" />
+                                </g>
+                                <!-- [NEW LEGENDARY] Ngai Vàng Mèo Ngân Hà Lơ Lửng (#furn-magic-throne) -->
+                                <g id="furn-magic-throne" class="room-item">
+                                    <ellipse cx="300" cy="348" rx="95" ry="24" fill="#FACC15" stroke="#4B2412" stroke-width="5" />
+                                    <path d="M 218 332 C 195 220, 235 125, 300 125 C 365 125, 405 220, 382 332 Z" fill="#7C3AED" stroke="#FACC15" stroke-width="6" />
+                                    <circle cx="240" cy="155" r="8" fill="#FDE047" />
+                                    <circle cx="360" cy="155" r="8" fill="#FDE047" />
+                                </g>
+                                <!-- Đệm ngủ Vương miện (#furn-bed) -->
+                                <g id="furn-bed" class="room-item">
+                                    <ellipse cx="495" cy="340" rx="58" ry="22" fill="#F472B6" stroke="#4B2412" stroke-width="4.5" />
+                                    <path d="M 442 332 L 452 298 L 474 316 L 495 292 L 516 316 L 538 298 L 548 332 Z" fill="#FBCFE8" stroke="#4B2412" stroke-width="4" />
+                                </g>
+                                <!-- Chậu cây Monstera (#furn-plant) -->
+                                <g id="furn-plant" class="room-item item-visible">
+                                    <path d="M 530 246 C 505 215, 520 185, 545 202 C 565 215, 550 242, 530 246 Z" fill="#22C55E" stroke="#4B2412" stroke-width="4" />
+                                    <polygon points="510,244 558,244 550,286 518,286" fill="#FFFBEB" stroke="#4B2412" stroke-width="4" />
+                                </g>
+                                <!-- Đèn Hoa Linh Lan (#furn-lamp) -->
+                                <g id="furn-lamp" class="room-item">
+                                    <ellipse cx="475" cy="292" rx="22" ry="8" fill="#A7F3D0" stroke="#4B2412" stroke-width="4" />
+                                    <path d="M 475 290 L 475 185 C 475 155, 445 155, 448 175" fill="none" stroke="#4B2412" stroke-width="4.5" />
+                                    <circle cx="448" cy="184" r="14" fill="#FEF08A" stroke="#4B2412" stroke-width="3.8" />
+                                </g>
+                            </g>
+
+                            <!-- SÂN KHẤU THÚ CƯNG & 12 PHỤ KIỆN -->
+                            <g id="pet-root-stage">
+                                <ellipse cx="300" cy="336" rx="74" ry="16" fill="#7D68AE" opacity="0.65" />
+                                <g id="pet-body-rig">
+                                    <!-- Cánh thiên thần (#acc-wings) -->
+                                    <g id="acc-wings" class="pet-acc">
+                                        <path d="M 255 256 C 205 215, 175 232, 192 264 C 178 272, 195 296, 248 286 Z" fill="#FFFFFF" stroke="#4B2412" stroke-width="4.5" />
+                                        <path d="M 345 256 C 395 215, 425 232, 408 264 C 422 272, 405 296, 352 286 Z" fill="#FFFFFF" stroke="#4B2412" stroke-width="4.5" />
+                                    </g>
+
+                                    <!-- 4 MẪU THÂN THÚ CƯNG -->
+                                    <g id="body-cat" class="pet-model pet-active">
+                                        <path d="M 250 322 C 215 322, 195 304, 180 320 C 170 330, 186 340, 205 334 C 224 328, 238 334, 255 332 Z" fill="#FFFDF9" stroke="#4B2412" stroke-width="5" />
+                                        <path d="M 255 242 C 240 266, 234 302, 244 326 C 250 336, 350 336, 354 322 C 360 298, 354 266, 342 242 Z" fill="#FFFDF9" stroke="#4B2412" stroke-width="5.2" />
+                                        <path d="M 254 248 C 240 270, 238 298, 246 318 C 266 316, 278 296, 274 272 Z" fill="#F6B26B" />
+                                    </g>
+                                    <g id="body-dog" class="pet-model">
+                                        <path d="M 252 240 C 238 266, 232 302, 242 326 C 248 336, 352 336, 358 326 C 366 302, 360 266, 346 240 Z" fill="#FFF6E0" stroke="#4B2412" stroke-width="5.2" />
+                                        <ellipse cx="300" cy="296" rx="30" ry="34" fill="#F5D0C5" />
+                                    </g>
+                                    <g id="body-capy" class="pet-model">
+                                        <path d="M 248 238 C 230 268, 226 304, 238 328 C 248 338, 350 338, 358 326 C 364 300, 358 266, 346 238 Z" fill="#C68F56" stroke="#4B2412" stroke-width="5.2" />
+                                    </g>
+                                    <g id="body-bunny" class="pet-model">
+                                        <path d="M 254 240 C 238 266, 232 302, 240 326 C 246 336, 354 336, 360 326 C 366 302, 360 266, 346 240 Z" fill="#FFF5F2" stroke="#4B2412" stroke-width="5.2" />
+                                        <ellipse cx="302" cy="296" rx="30" ry="35" fill="#F9CDC8" />
+                                    </g>
+
+                                    <!-- [NEW EPIC] Áo Choàng Kimono Hoa Anh Đào (#acc-sakura-kimono) -->
+                                    <g id="acc-sakura-kimono" class="pet-acc">
+                                        <path d="M 248 246 L 352 246 L 362 326 C 325 334, 275 334, 238 326 Z" fill="#F472B6" stroke="#4B2412" stroke-width="4.8" stroke-linejoin="round" />
+                                        <path d="M 272 246 L 304 288 L 328 246" fill="none" stroke="#FEF08A" stroke-width="6" />
+                                        <rect x="246" y="282" width="108" height="20" rx="6" fill="#FACC15" stroke="#4B2412" stroke-width="4" />
+                                        <circle cx="272" cy="312" r="6" fill="#FBCFE8" />
+                                        <circle cx="328" cy="310" r="6" fill="#FBCFE8" />
+                                    </g>
+
+                                    <!-- Balo & Bóng bay (#acc-backpack) -->
+                                    <g id="acc-backpack" class="pet-acc">
+                                        <path d="M 262 248 Q 300 282 346 308" fill="none" stroke="#EA580C" stroke-width="7" />
+                                        <path d="M 352 284 Q 378 225 372 162" fill="none" stroke="#4B2412" stroke-width="3" stroke-dasharray="4 3" />
+                                        <circle cx="372" cy="148" r="18" fill="#FB7185" stroke="#4B2412" stroke-width="4" />
+                                    </g>
+
+                                    <!-- Nơ chuông vàng (#acc-bowtie) -->
+                                    <g id="acc-bowtie" class="pet-acc item-visible">
+                                        <path d="M 255 244 Q 300 262 345 244" fill="none" stroke="#EF4444" stroke-width="8" stroke-linecap="round" />
+                                        <polygon points="300,252 276,238 276,264" fill="#F43F5E" stroke="#4B2412" stroke-width="4" />
+                                        <polygon points="300,252 324,238 324,264" fill="#F43F5E" stroke="#4B2412" stroke-width="4" />
+                                        <circle cx="300" cy="254" r="10" fill="#FACC15" stroke="#4B2412" stroke-width="4" />
+                                    </g>
+
+                                    <!-- Khăn len (#acc-scarf) -->
+                                    <g id="acc-scarf" class="pet-acc">
+                                        <path d="M 248 238 Q 300 260 352 238 C 358 248, 354 260, 342 262 Q 300 276 256 262 Z" fill="#FB7185" stroke="#4B2412" stroke-width="4.5" />
+                                        <path d="M 316 254 L 312 296 L 336 294 L 338 250 Z" fill="#F43F5E" stroke="#4B2412" stroke-width="4" />
+                                    </g>
+
+                                    <!-- ĐẦU 4 THÚ CƯNG -->
+                                    <g id="pet-head-rig">
+                                        <g id="head-cat" class="pet-model pet-active">
+                                            <path d="M 244 176 L 234 132 L 278 148 Z" fill="#F6B26B" stroke="#4B2412" stroke-width="5.2" />
+                                            <path d="M 356 176 L 366 132 L 322 148 Z" fill="#FFFDF9" stroke="#4B2412" stroke-width="5.2" />
+                                            <path d="M 236 196 C 232 154, 264 140, 300 140 C 336 140, 368 154, 364 196 C 368 228, 342 250, 300 250 C 258 250, 232 228, 236 196 Z" fill="#FFFDF9" stroke="#4B2412" stroke-width="5.2" />
+                                            <path d="M 238 192 C 236 156, 264 142, 296 142 C 298 176, 286 206, 240 212 Z" fill="#F6B26B" />
+                                            <path d="M 236 196 C 232 154, 264 140, 300 140" fill="none" stroke="#4B2412" stroke-width="5.2" />
+                                            <ellipse cx="260" cy="212" rx="14" ry="7.5" fill="#F69B95" />
+                                            <ellipse cx="340" cy="212" rx="14" ry="7.5" fill="#F69B95" />
+                                            <circle cx="274" cy="198" r="7.5" fill="#4B2412" />
+                                            <circle cx="326" cy="198" r="7.5" fill="#4B2412" />
+                                            <path d="M 292 208 Q 300 214 308 208" fill="none" stroke="#4B2412" stroke-width="4.5" stroke-linecap="round" />
+                                        </g>
+                                        <g id="head-dog" class="pet-model">
+                                            <path d="M 336 146 C 362 142, 384 174, 378 214 C 374 232, 356 230, 350 206 Z" fill="#C59361" stroke="#4B2412" stroke-width="5.2" />
+                                            <path d="M 238 196 C 234 152, 264 138, 300 138 C 336 138, 366 152, 362 196 C 366 228, 340 250, 300 250 C 260 250, 234 228, 238 196 Z" fill="#FFF6E0" stroke="#4B2412" stroke-width="5.2" />
+                                            <path d="M 264 146 C 238 142, 216 174, 222 214 C 226 232, 244 230, 250 206 Z" fill="#C59361" stroke="#4B2412" stroke-width="5.2" />
+                                            <circle cx="274" cy="194" r="7.5" fill="#4B2412" />
+                                            <circle cx="326" cy="194" r="7.5" fill="#4B2412" />
+                                            <path d="M 288 210 Q 300 218 312 210" fill="none" stroke="#4B2412" stroke-width="4.5" />
+                                        </g>
+                                        <g id="head-capy" class="pet-model">
+                                            <ellipse cx="252" cy="148" rx="12" ry="15" fill="#9E6F44" stroke="#4B2412" stroke-width="5" />
+                                            <ellipse cx="326" cy="146" rx="11" ry="14" fill="#9E6F44" stroke="#4B2412" stroke-width="5" />
+                                            <path d="M 238 198 C 236 150, 264 138, 304 138 C 344 138, 374 158, 372 198 C 372 232, 344 250, 298 250 C 256 250, 236 232, 238 198 Z" fill="#C68F56" stroke="#4B2412" stroke-width="5.2" />
+                                            <path d="M 312 168 C 312 152, 366 152, 368 188 C 370 222, 348 236, 322 232 Z" fill="#9E6F44" />
+                                            <line x1="268" y1="184" x2="288" y2="182" stroke="#4B2412" stroke-width="6" stroke-linecap="round" />
+                                        </g>
+                                        <g id="head-bunny" class="pet-model">
+                                            <path d="M 326 144 C 350 138, 370 162, 378 202 C 386 238, 386 272, 368 278 C 354 282, 344 256, 342 224 Z" fill="#FFF5F2" stroke="#4B2412" stroke-width="5.2" />
+                                            <path d="M 238 196 C 234 152, 264 138, 300 138 C 336 138, 366 152, 362 196 C 366 228, 340 250, 300 250 C 260 250, 234 228, 238 196 Z" fill="#FFF5F2" stroke="#4B2412" stroke-width="5.2" />
+                                            <path d="M 264 148 C 240 144, 220 170, 210 216 C 202 254, 202 276, 219 280 C 234 283, 244 258, 248 220 Z" fill="#FFF5F2" stroke="#4B2412" stroke-width="5.2" />
+                                            <circle cx="276" cy="196" r="7.2" fill="#4B2412" />
+                                            <circle cx="334" cy="194" r="6.8" fill="#4B2412" />
+                                        </g>
+
+                                        <!-- PHỤ KIỆN ĐẦU & MẶT -->
+                                        <!-- Vương miện (#acc-crown) -->
+                                        <g id="acc-crown" class="pet-acc item-visible">
+                                            <path d="M 272 142 L 266 108 L 286 124 L 300 100 L 314 124 L 334 108 L 328 142 Z" fill="#FACC15" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round" />
+                                        </g>
+                                        <!-- [NEW LEGENDARY] Vòng Hào Quang Tinh Tú (#acc-celestial-halo) -->
+                                        <g id="acc-celestial-halo" class="pet-acc">
+                                            <ellipse cx="300" cy="92" rx="56" ry="14" fill="none" stroke="#FDE047" stroke-width="8" />
+                                            <ellipse cx="300" cy="92" rx="56" ry="14" fill="none" stroke="#4B2412" stroke-width="3.5" />
+                                            <polygon points="300,66 306,78 318,80 309,88 311,100 300,94 289,100 291,88 282,80 294,78" fill="#38BDF8" stroke="#4B2412" stroke-width="2.5" />
+                                            <circle cx="236" cy="92" r="7" fill="#F472B6" stroke="#4B2412" stroke-width="2.5" />
+                                            <circle cx="364" cy="92" r="7" fill="#F472B6" stroke="#4B2412" stroke-width="2.5" />
+                                        </g>
+                                        <!-- Mũ phù thủy (#acc-wizard-hat) -->
+                                        <g id="acc-wizard-hat" class="pet-acc">
+                                            <ellipse cx="300" cy="140" rx="54" ry="13" fill="#7C3AED" stroke="#4B2412" stroke-width="4.5" />
+                                            <path d="M 262 138 C 272 95, 292 68, 326 56 C 314 82, 322 108, 338 138 Z" fill="#8B5CF6" stroke="#4B2412" stroke-width="4.5" />
+                                        </g>
+                                        <!-- Mầm cây (#acc-sprout) -->
+                                        <g id="acc-sprout" class="pet-acc">
+                                            <path d="M 300 138 Q 302 114 298 102" fill="none" stroke="#4B2412" stroke-width="4.5" />
+                                            <ellipse cx="288" cy="106" rx="10" ry="6" fill="#4ADE80" stroke="#4B2412" stroke-width="3.5" />
+                                            <ellipse cx="310" cy="106" rx="10" ry="6" fill="#22C55E" stroke="#4B2412" stroke-width="3.5" />
+                                        </g>
+                                        <!-- Tai nghe (#acc-headphones) -->
+                                        <g id="acc-headphones" class="pet-acc">
+                                            <path d="M 228 194 C 224 122, 376 122, 372 194" fill="none" stroke="#F472B6" stroke-width="9" />
+                                            <ellipse cx="230" cy="194" rx="12" ry="20" fill="#38BDF8" stroke="#4B2412" stroke-width="4" />
+                                            <ellipse cx="370" cy="194" rx="12" ry="20" fill="#38BDF8" stroke="#4B2412" stroke-width="4" />
+                                        </g>
+                                        <!-- Kính ngôi sao (#acc-glasses) -->
+                                        <g id="acc-glasses" class="pet-acc">
+                                            <line x1="242" y1="192" x2="358" y2="192" stroke="#4B2412" stroke-width="4" />
+                                            <circle cx="274" cy="194" r="16" fill="#FB7185" stroke="#4B2412" stroke-width="4" />
+                                            <circle cx="328" cy="194" r="16" fill="#38BDF8" stroke="#4B2412" stroke-width="4" />
+                                        </g>
+                                        <!-- Kính quý tộc (#acc-monocle) -->
+                                        <g id="acc-monocle" class="pet-acc">
+                                            <circle cx="328" cy="195" r="16" fill="#E0F2FE" fill-opacity="0.6" stroke="#FACC15" stroke-width="4.5" />
+                                        </g>
+                                    </g>
+                                </g>
+                            </g>
+
+                            <!-- NỘI THẤT TIỀN CẢNH -->
+                            <g id="room-furniture-front-layer">
+                                <!-- Bàn trà (#furn-tea-table) -->
+                                <g id="furn-tea-table" class="room-item item-visible">
+                                    <ellipse cx="458" cy="384" rx="62" ry="18" fill="#FBBF24" stroke="#4B2412" stroke-width="4" />
+                                    <ellipse cx="442" cy="368" rx="14" ry="11" fill="#F472B6" stroke="#4B2412" stroke-width="3.5" />
+                                </g>
+                                <!-- Máy đĩa than (#furn-gramophone) -->
+                                <g id="furn-gramophone" class="room-item">
+                                    <rect x="64" y="346" width="62" height="40" rx="8" fill="#D97706" stroke="#4B2412" stroke-width="4" />
+                                    <circle cx="142" cy="308" r="16" fill="#FACC15" stroke="#4B2412" stroke-width="4" />
+                                </g>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- Kho 24 Vật phẩm chia theo Rarity để bật/tắt nhanh (6 cột) -->
+                    <div class="md:col-span-6 p-3 flex flex-col justify-between bg-white max-h-[290px] overflow-y-auto">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-extrabold text-[#4B2412]">📦 Bấm vào vật phẩm để Bật/Tắt trên Phòng:</span>
+                            <button onclick="equipAllItems(false)" class="text-[11px] font-extrabold text-rose-600 hover:underline">Tháo hết</button>
+                        </div>
+                        <div id="inventory-24-grid" class="grid grid-cols-2 gap-1.5">
+                            <!-- Sinh tự động 24 vật phẩm kèm nhãn Common/Rare/Epic/Legendary -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- =================================================================
+             CỘT PHẢI: TRÌNH XEM MÃ NGUỒN GACHA CS2 & PROMPT CODEX (5 CỘT)
+             ================================================================= -->
+        <section id="right-code-pane" class="lg:col-span-5 flex flex-col">
+            <div class="bg-[#1e1e2e] text-slate-100 rounded-3xl kawaii-card overflow-hidden flex flex-col h-full min-h-[640px]">
+
+                <!-- Thanh chọn Tab Code -->
+                <div class="bg-[#181825] border-b border-slate-700 p-3 flex flex-col gap-2.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-xs font-extrabold text-amber-300 uppercase tracking-wider">💻 Mã Nguồn Gacha CS2 & Prompt Codex</span>
+                        <button onclick="copyCurrentCode()" class="kawaii-btn bg-emerald-400 hover:bg-emerald-300 text-[#4B2412] text-xs font-extrabold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
+                            <span>📋 Sao chép mã này</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <button id="code-tab-logic" onclick="switchCodeTab('logic')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold bg-pink-500 text-white text-left truncate">
+                            🎰 1. Thuật Toán CS2
+                        </button>
+                        <button id="code-tab-svg" onclick="switchCodeTab('svg')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold bg-slate-800 text-slate-300 hover:bg-slate-700 text-left truncate">
+                            🎁 2. SVG Rương & Đồ
+                        </button>
+                        <button id="code-tab-codex" onclick="switchCodeTab('codex')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold bg-slate-800 text-slate-300 hover:bg-slate-700 text-left truncate">
+                            🤖 3. Prompt Codex
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Banner giải thích -->
+                <div id="code-info-banner" class="bg-slate-800/90 border-b border-slate-700 px-4 py-2 text-xs text-pink-200 flex items-center justify-between">
+                    <span>💡 Thuật toán RNG theo trọng số (55/30/12/3%) & Vật lý giảm tốc băng chuyền CS2.</span>
+                    <span class="font-mono text-[11px] text-amber-300">CS2 Reel Engine</span>
+                </div>
+
+                <!-- Khung hiển thị mã nguồn -->
+                <div class="relative flex-1 overflow-auto p-4 bg-[#1e1e2e]">
+                    <pre class="text-xs leading-relaxed font-mono text-emerald-300 whitespace-pre-wrap break-words"><code id="code-display-area"></code></pre>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Toast thông báo -->
+    <div id="toast-box" class="fixed bottom-5 right-5 z-50 pointer-events-none opacity-0 translate-y-3 transition-all duration-300 bg-[#4B2412] text-amber-100 border-2 border-amber-300 px-4 py-2.5 rounded-2xl shadow-xl text-xs md:text-sm font-extrabold flex items-center gap-2">
+        <span>✨</span>
+        <span id="toast-text">Đã sao chép mã nguồn!</span>
+    </div>
+
+    <script id="gacha-engine-script">
+        // =========================================================================
+        // 1. CẤU HÌNH TỶ LỆ 4 BẬC HIẾM (COMMON 55%, RARE 30%, EPIC 12%, LEGENDARY 3%)
+        // =========================================================================
+        const RARITY_CONFIG = {
+            common: {
+                key: 'common',
+                label: 'COMMON',
+                chance: 55, // 55%
+                colorHex: '#3B82F6',
+                badgeBg: 'bg-blue-500 text-white',
+                cardClass: 'rarity-common'
+            },
+            rare: {
+                key: 'rare',
+                label: 'RARE',
+                chance: 30, // 30%
+                colorHex: '#A855F7',
+                badgeBg: 'bg-purple-600 text-white',
+                cardClass: 'rarity-rare'
+            },
+            epic: {
+                key: 'epic',
+                label: 'EPIC',
+                chance: 12, // 12%
+                colorHex: '#EC4899',
+                badgeBg: 'bg-pink-500 text-white',
+                cardClass: 'rarity-epic'
+            },
+            legendary: {
+                key: 'legendary',
+                label: 'LEGENDARY',
+                chance: 3, // 3%
+                colorHex: '#F59E0B',
+                badgeBg: 'bg-amber-400 text-[#4B2412]',
+                cardClass: 'rarity-legendary'
+            }
+        };
+
+        // =========================================================================
+        // 2. DANH SÁCH 24 VẬT PHẨM (20 MÓN GỐC + 4 MÓN EPIC/LEGENDARY ĐẶC BIỆT MỚI)
+        // =========================================================================
+        const GACHA_ITEMS_POOL = [
+            // --- COMMON (55% - 6 Vật phẩm) ---
+            { id: 'acc-sprout', name: 'Mầm Cây Hoa Anh Đào', icon: '🌱', category: 'acc', rarity: 'common', active: false, desc: 'Mầm lá non rung rinh trên đỉnh đầu' },
+            { id: 'acc-bowtie', name: 'Nơ Đỏ Chuông Vàng', icon: '🔔', category: 'acc', rarity: 'common', active: true, desc: 'Vòng cổ nơ đỏ kèm chuông vàng may mắn' },
+            { id: 'acc-scarf', name: 'Khăn Len Mùa Đông', icon: '🧣', category: 'acc', rarity: 'common', active: false, desc: 'Khăn choàng len ấm áp kẻ sọc' },
+            { id: 'furn-plant', name: 'Chậu Cây Mặt Cười', icon: '🪴', category: 'furn', rarity: 'common', active: true, desc: 'Cây Monstera trong chậu sứ mặt cười' },
+            { id: 'furn-bookshelf', name: 'Kệ Sách Gỗ Pastel', icon: '📚', category: 'furn', rarity: 'common', active: false, desc: 'Kệ sách treo tường kèm xương rồng' },
+            { id: 'furn-lights', name: 'Dây Đèn LED Sao', icon: '✨', category: 'furn', rarity: 'common', active: true, desc: 'Dây đèn ngôi sao nhấp nháy ấm áp' },
+
+            // --- RARE (30% - 6 Vật phẩm) ---
+            { id: 'acc-glasses', name: 'Kính Mát Ngôi Sao', icon: '🤩', category: 'acc', rarity: 'rare', active: false, desc: 'Kính mát 2 màu hình ngôi sao' },
+            { id: 'acc-backpack', name: 'Balo Cà Rốt & Bóng Bay', icon: '🎈', category: 'acc', rarity: 'rare', active: false, desc: 'Túi đeo chéo cà rốt & bóng bay tim' },
+            { id: 'acc-monocle', name: 'Kính Đơn Quý Tộc', icon: '🧐', category: 'acc', rarity: 'rare', active: false, desc: 'Kính đơn dây xích vàng & ria mép' },
+            { id: 'furn-clock', name: 'Đồng Hồ Mèo Quả Lắc', icon: '⏰', category: 'furn', rarity: 'rare', active: false, desc: 'Đồng hồ treo tường hình đầu mèo' },
+            { id: 'furn-tea-table', name: 'Bàn Trà & Macaron', icon: '🍵', category: 'furn', rarity: 'rare', active: true, desc: 'Bàn trà gỗ thấp & ấm trà bốc khói' },
+            { id: 'furn-lamp', name: 'Đèn Ngủ Hoa Linh Lan', icon: '💡', category: 'furn', rarity: 'rare', active: false, desc: 'Đèn cây hoa chuông tỏa nắng ấm' },
+
+            // --- EPIC (12% - 6 Vật phẩm, có 1 món mới) ---
+            { id: 'acc-wizard-hat', name: 'Mũ Phù Thủy Huyền Bí', icon: '🧙', category: 'acc', rarity: 'epic', active: false, desc: 'Mũ phù thủy tím đính sao vàng' },
+            { id: 'acc-headphones', name: 'Tai Nghe Gaming RGB', icon: '🎧', category: 'acc', rarity: 'epic', active: false, desc: 'Tai nghe chụp tai pastel phát sáng' },
+            { id: 'furn-cat-tree', name: 'Trụ Cào Móng 3 Tầng', icon: '🧶', category: 'furn', rarity: 'epic', active: false, desc: 'Nhà cây 3 tầng có bóng bông lắc lư' },
+            { id: 'furn-gramophone', name: 'Máy Đĩa Than Cổ Điển', icon: '🎶', category: 'furn', rarity: 'epic', active: false, desc: 'Máy phát nhạc đĩa than bay nốt nhạc' },
+            { id: 'furn-window', name: 'Cửa Sổ Cầu Vồng Đôi', icon: '🌈', category: 'furn', rarity: 'epic', active: true, desc: 'Cửa sổ vòm ngắm cầu vồng & mây trôi' },
+            { id: 'acc-sakura-kimono', name: 'Kimono Hoa Anh Đào', icon: '👘', category: 'acc', rarity: 'epic', active: false, isNew: true, desc: '[MỚI - EPIC] Áo choàng Kimono lụa hồng thắt đai vàng' },
+
+            // --- LEGENDARY (3% - 6 Vật phẩm, có 3 món thần thoại mới) ---
+            { id: 'acc-crown', name: 'Vương Miện Hoàng Gia', icon: '👑', category: 'acc', rarity: 'legendary', active: true, desc: 'Vương miện vàng ròng đính ngọc bích' },
+            { id: 'acc-wings', name: 'Đôi Cánh Thiên Thần', icon: '🪽', category: 'acc', rarity: 'legendary', active: false, desc: 'Đôi cánh trắng muốt vẫy nhịp nhàng' },
+            { id: 'furn-bed', name: 'Đệm Ngủ Vương Miện', icon: '🛋️', category: 'furn', rarity: 'legendary', active: false, desc: 'Giường nhung hồng vương giả êm ái' },
+            { id: 'acc-celestial-halo', name: 'Hào Quang Tinh Tú', icon: '🌟', category: 'acc', rarity: 'legendary', active: false, isNew: true, desc: '[MỚI - LEGENDARY] Vòng hào quang sao trời lơ lửng trên đầu' },
+            { id: 'furn-sakura-fountain', name: 'Đài Phun Nước Pha Lê', icon: '⛲', category: 'furn', rarity: 'legendary', active: false, isNew: true, desc: '[MỚI - LEGENDARY] Đài phun nước ngọc bích chảy tràn liên tục' },
+            { id: 'furn-magic-throne', name: 'Ngai Vàng Mèo Ngân Hà', icon: '🪐', category: 'furn', rarity: 'legendary', active: false, isNew: true, desc: '[MỚI - LEGENDARY] Ngai vàng hoàng gia lơ lửng giữa tinh vân' }
+        ];
+
+        // =========================================================================
+        // 3. HỆ THỐNG ÂM THANH WEB AUDIO API (TIẾNG RƯƠNG MỞ & TIẾNG TICK CS2)
+        // =========================================================================
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) audioCtx = new AudioContextClass();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Tiếng "Tick" mỗi khi 1 thẻ vật phẩm lướt qua con trỏ tâm CS2
+        function playReelTickSound(pitchMultiplier = 1) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                if (!audioCtx) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(680 * pitchMultiplier, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(220, audioCtx.currentTime + 0.035);
+
+                gain.gain.setValueAtTime(0.14, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.035);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.04);
+            } catch (e) {}
+        }
+
+        // Tiếng nổ mở rương & chiến thắng
+        function playWinFanfare(rarity) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                if (!audioCtx) return;
+                const notes = rarity === 'legendary'
+                    ? [523.25, 659.25, 783.99, 1046.5, 1318.5]
+                    : rarity === 'epic'
+                    ? [440, 554.37, 659.25, 880]
+                    : [392, 493.88, 587.33];
+
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = rarity === 'legendary' ? 'sine' : 'triangle';
+                    const startTime = audioCtx.currentTime + idx * 0.09;
+                    osc.frequency.setValueAtTime(freq, startTime);
+
+                    gain.gain.setValueAtTime(0.2, startTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.35);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(startTime);
+                    osc.stop(startTime + 0.36);
+                });
+            } catch (e) {}
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('sound-toggle-btn').textContent = soundEnabled ? '🔊 Âm thanh: BẬT' : '🔇 Âm thanh: TẮT';
+        }
+
+        // =========================================================================
+        // 4. THUẬT TOÁN RNG THEO TRỌNG SỐ (55% / 30% / 12% / 3%) & BĂNG CHUYỀN CS2
+        // =========================================================================
+        const TOTAL_REEL_CARDS = 65;   // Tổng số thẻ sinh ra trên băng chuyền
+        const WINNING_CARD_INDEX = 52; // Vị trí thẻ trúng thưởng dừng lại dưới con trỏ
+        const CARD_WIDTH_PX = 116;     // Chiều rộng 1 thẻ
+        const CARD_GAP_PX = 10;        // Khoảng cách giữa 2 thẻ
+        const CARD_PITCH_PX = CARD_WIDTH_PX + CARD_GAP_PX; // 126px mỗi bước thẻ
+
+        let userCoins = 1500;
+        let totalSpins = 0;
+        let isSpinning = false;
+        let lastWonItem = null;
+        let tickAnimationFrame = null;
+
+        // Hàm bốc thăm bậc hiếm theo đúng xác suất: Common 55%, Rare 30%, Epic 12%, Legendary 3%
+        function rollRarityTier(forcedTier = 'random') {
+            if (forcedTier && forcedTier !== 'random' && RARITY_CONFIG[forcedTier]) {
+                return forcedTier;
+            }
+            const rand = Math.random() * 100;
+            if (rand < 3) return 'legendary';        // 0 -> 3 (3%)
+            if (rand < 3 + 12) return 'epic';        // 3 -> 15 (12%)
+            if (rand < 3 + 12 + 30) return 'rare';   // 15 -> 45 (30%)
+            return 'common';                         // 45 -> 100 (55%)
+        }
+
+        // Lấy ngẫu nhiên 1 vật phẩm thuộc bậc hiếm đã quay trúng
+        function pickRandomItemByRarity(rarityKey) {
+            const candidates = GACHA_ITEMS_POOL.filter(item => item.rarity === rarityKey);
+            return candidates[Math.floor(Math.random() * candidates.length)];
+        }
+
+        // Khởi tạo dải thẻ CS2 ban đầu
+        function buildReelCards(winningItem = null) {
+            const track = document.getElementById('cs2-reel-track');
+            const cardsHtml = [];
+
+            for (let i = 0; i < TOTAL_REEL_CARDS; i++) {
+                let item;
+                if (i === WINNING_CARD_INDEX && winningItem) {
+                    item = winningItem;
+                } else {
+                    const tier = rollRarityTier('random');
+                    item = pickRandomItemByRarity(tier);
+                }
+                const rConf = RARITY_CONFIG[item.rarity];
+
+                cardsHtml.push(`
+                    <div id="reel-card-${i}" class="cs2-reel-card ${rConf.cardClass}">
+                        <div class="w-full flex items-center justify-between">
+                            <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded ${rConf.badgeBg}">
+                                ${rConf.label}
+                            </span>
+                            <span class="text-[10px]">${item.category === 'acc' ? '👑' : '🛋️'}</span>
+                        </div>
+                        <div class="text-3xl my-1 drop-shadow-sm">${item.icon}</div>
+                        <div class="w-full text-center">
+                            <div class="text-[10px] font-extrabold text-[#4B2412] leading-tight line-clamp-2">
+                                ${item.name}
+                            </div>
+                        </div>
+                        <div class="w-full h-1.5 rounded-full mt-0.5" style="background:${rConf.colorHex}"></div>
+                    </div>
+                `);
+            }
+
+            track.style.transition = 'none';
+            track.style.transform = 'translateX(0px)';
+            track.innerHTML = cardsHtml.join('');
+        }
+
+        // =========================================================================
+        // 5. QUY TRÌNH MỞ RƯƠNG 4 GIAI ĐOẠN (CHEST SHAKE -> CS2 ROLL -> REVEAL)
+        // =========================================================================
+        function startGachaSpin(fastMode = false) {
+            if (isSpinning) return;
+            if (userCoins < 100) {
+                showToast('🪙 Bạn không đủ 100 Xu! Hãy bấm nút [+500] trên thanh tiêu đề nhé.');
+                return;
+            }
+
+            // Trừ 100 Xu & khóa nút
+            userCoins -= 100;
+            totalSpins += 1;
+            document.getElementById('user-coins').textContent = userCoins.toLocaleString();
+            document.getElementById('total-spins-count').textContent = totalSpins;
+
+            isSpinning = true;
+            document.getElementById('btn-spin-main').disabled = true;
+            document.getElementById('btn-spin-fast').disabled = true;
+            document.getElementById('reward-reveal-modal').classList.add('hidden');
+
+            // Quyết định vật phẩm trúng thưởng dựa trên tỷ lệ 55/30/12/3% (hoặc chế độ Test)
+            const forcedRarity = document.getElementById('force-rarity-select').value;
+            const wonRarity = rollRarityTier(forcedRarity);
+            lastWonItem = pickRandomItemByRarity(wonRarity);
+
+            // Dựng lại dải 65 thẻ với thẻ chiến thắng đặt tại vị trí WINNING_CARD_INDEX (52)
+            buildReelCards(lastWonItem);
+
+            const chestContainer = document.getElementById('chest-svg-container');
+            const statusBadge = document.getElementById('gacha-status-badge');
+
+            // GIAI ĐOẠN 1: Rương kho báu rung lắc mạnh & mở khóa
+            chestContainer.className = 'relative z-10 w-64 h-40 -mt-1 flex items-center justify-center chest-state-shaking';
+            statusBadge.textContent = '🗝️ Đang mở khóa Rương Kho Báu...';
+            playReelTickSound(0.7);
+
+            const shakeDuration = fastMode ? 450 : 1100;
+            const rollDuration = fastMode ? 1800 : 4800;
+
+            setTimeout(() => {
+                // GIAI ĐOẠN 2: Nắp rương bật mở tung ánh sáng & Bắt đầu trượt dải CS2
+                chestContainer.className = 'relative z-10 w-64 h-40 -mt-1 flex items-center justify-center chest-state-opened';
+                statusBadge.textContent = '🎰 Dải vật phẩm đang quay... Hãy nhìn vào con trỏ giữa!';
+
+                const viewport = document.getElementById('cs2-viewport-box');
+                const track = document.getElementById('cs2-reel-track');
+                const viewportCenter = viewport.clientWidth / 2;
+
+                // Tính tọa độ tâm của thẻ số 52 (padding-left 240px + 52 * 126px + nửa thẻ 58px)
+                const winningCardCenter = 240 + (WINNING_CARD_INDEX * CARD_PITCH_PX) + (CARD_WIDTH_PX / 2);
+
+                // Tạo độ lệch ngẫu nhiên trong phạm vi [-38px, +38px] bên trong thẻ trúng để tạo cảm giác hồi hộp sát mép chuẩn CS2
+                const subCardJitter = (Math.random() - 0.5) * 72;
+                const finalTranslateX = -(winningCardCenter - viewportCenter + subCardJitter);
+
+                // Áp dụng đường cong giảm tốc mượt chuẩn CS2: cubic-bezier(0.10, 0.82, 0.08, 1)
+                track.offsetHeight; // Force reflow
+                track.style.transition = `transform ${rollDuration}ms cubic-bezier(0.10, 0.82, 0.08, 1)`;
+                track.style.transform = `translateX(${finalTranslateX}px)`;
+
+                // Theo dõi vị trí thực tế của dải thẻ bằng requestAnimationFrame để phát tiếng "Tick" mỗi khi qua 1 thẻ
+                let lastTickCardIndex = -1;
+                function trackTickLoop() {
+                    if (!isSpinning) return;
+                    const style = window.getComputedStyle(track);
+                    const matrix = new DOMMatrixReadOnly(style.transform);
+                    const currentX = Math.abs(matrix.m41);
+                    const currentCardIdx = Math.floor((currentX + viewportCenter - 240) / CARD_PITCH_PX);
+
+                    if (currentCardIdx !== lastTickCardIndex && currentCardIdx >= 0) {
+                        lastTickCardIndex = currentCardIdx;
+                        playReelTickSound(0.95 + Math.random() * 0.15);
+                    }
+                    tickAnimationFrame = requestAnimationFrame(trackTickLoop);
+                }
+                tickAnimationFrame = requestAnimationFrame(trackTickLoop);
+
+                // GIAI ĐOẠN 3: Dừng tại phần thưởng & Nổ Modal chúc mừng
+                setTimeout(() => {
+                    if (tickAnimationFrame) cancelAnimationFrame(tickAnimationFrame);
+                    const winCardEl = document.getElementById(`reel-card-${WINNING_CARD_INDEX}`);
+                    if (winCardEl) winCardEl.classList.add('winning-card-highlight');
+
+                    playWinFanfare(lastWonItem.rarity);
+                    showRewardRevealModal(lastWonItem);
+
+                    isSpinning = false;
+                    document.getElementById('btn-spin-main').disabled = false;
+                    document.getElementById('btn-spin-fast').disabled = false;
+                    statusBadge.textContent = `🎉 Chúc mừng! Bạn nhận được: ${lastWonItem.name} (${RARITY_CONFIG[lastWonItem.rarity].label})!`;
+                }, rollDuration + 120);
+
+            }, shakeDuration);
+        }
+
+        // Hiển thị Modal phần thưởng
+        function showRewardRevealModal(item) {
+            const modal = document.getElementById('reward-reveal-modal');
+            const card = document.getElementById('reward-modal-card');
+            const badge = document.getElementById('reward-rarity-badge');
+            const iconBox = document.getElementById('reward-icon-box');
+            const rConf = RARITY_CONFIG[item.rarity];
+
+            badge.className = `px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider border-2 border-[#4B2412] mb-2 ${rConf.badgeBg}`;
+            badge.textContent = `${rConf.label} • TỶ LỆ ${rConf.chance}%`;
+
+            iconBox.className = `w-24 h-24 rounded-3xl border-3 border-[#4B2412] flex items-center justify-center text-5xl mb-3 shadow-inner ${rConf.cardClass}`;
+            iconBox.textContent = item.icon;
+
+            card.className = `max-w-sm w-full rounded-3xl p-5 border-4 border-[#4B2412] bg-white shadow-2xl flex flex-col items-center relative ${item.rarity === 'legendary' ? 'ring-4 ring-amber-300' : ''}`;
+
+            document.getElementById('reward-item-name').textContent = item.name;
+            document.getElementById('reward-item-desc').textContent = item.desc;
+
+            modal.classList.remove('hidden');
+        }
+
+        function equipWonItemAndClose() {
+            if (lastWonItem) {
+                lastWonItem.active = true;
+                syncRoomAndPetItems();
+                renderInventory24Grid();
+                showToast(`✨ Đã trang bị [${lastWonItem.name}] vào Phòng Thú Cưng!`);
+            }
+            document.getElementById('reward-reveal-modal').classList.add('hidden');
+            document.getElementById('chest-svg-container').className = 'relative z-10 w-64 h-40 -mt-1 flex items-center justify-center chest-state-idle';
+        }
+
+        function closeRewardModalAndSpinAgain() {
+            document.getElementById('reward-reveal-modal').classList.add('hidden');
+            startGachaSpin(false);
+        }
+
+        function addFreeCoins() {
+            userCoins += 500;
+            document.getElementById('user-coins').textContent = userCoins.toLocaleString();
+            showToast('🪙 Đã cộng thêm +500 Xu miễn phí để bạn test Gacha!');
+        }
+
+        // =========================================================================
+        // 6. ĐỒNG BỘ PHÒNG THỬ ĐỒ & KHO 24 VẬT PHẨM
+        // =========================================================================
+        function selectPet(petKey) {
+            ['cat', 'dog', 'capy', 'bunny'].forEach(p => {
+                document.getElementById(`body-${p}`).classList.toggle('pet-active', p === petKey);
+                document.getElementById(`head-${p}`).classList.toggle('pet-active', p === petKey);
+                const btn = document.getElementById(`pet-btn-${p}`);
+                btn.classList.toggle('active-btn', p === petKey);
+                btn.classList.toggle('bg-amber-300', p === petKey);
+                btn.classList.toggle('bg-white', p !== petKey);
+            });
+        }
+
+        function toggleInventoryItem(id) {
+            const item = GACHA_ITEMS_POOL.find(i => i.id === id);
+            if (!item) return;
+            item.active = !item.active;
+            syncRoomAndPetItems();
+            renderInventory24Grid();
+        }
+
+        function equipAllItems(state) {
+            GACHA_ITEMS_POOL.forEach(i => i.active = state);
+            syncRoomAndPetItems();
+            renderInventory24Grid();
+        }
+
+        function syncRoomAndPetItems() {
+            let activeCount = 0;
+            GACHA_ITEMS_POOL.forEach(item => {
+                const el = document.getElementById(item.id);
+                if (el) {
+                    el.classList.toggle('item-visible', item.active);
+                    if (item.active) activeCount++;
+                }
+            });
+            document.getElementById('unlocked-counter').textContent = `Đang trang bị: ${activeCount}/24 món`;
+        }
+
+        function renderInventory24Grid() {
+            const container = document.getElementById('inventory-24-grid');
+            // Sắp xếp từ Legendary -> Epic -> Rare -> Common để dễ nhìn
+            const order = { legendary: 1, epic: 2, rare: 3, common: 4 };
+            const sorted = [...GACHA_ITEMS_POOL].sort((a, b) => order[a.rarity] - order[b.rarity]);
+
+            container.innerHTML = sorted.map(item => {
+                const rConf = RARITY_CONFIG[item.rarity];
+                return `
+                    <button onclick="toggleInventoryItem('${item.id}')"
+                        class="p-2 rounded-xl border-2 border-[#4B2412] text-left flex items-center justify-between transition ${
+                            item.active ? rConf.cardClass : 'bg-slate-50 opacity-70 hover:opacity-100'
+                        }">
+                        <div class="flex items-center gap-1.5 min-w-0">
+                            <span class="text-base">${item.icon}</span>
+                            <div class="truncate">
+                                <div class="text-[11px] font-extrabold text-[#4B2412] truncate">${item.name}</div>
+                                <div class="flex items-center gap-1">
+                                    <span class="text-[9px] font-extrabold px-1 rounded ${rConf.badgeBg}">${rConf.label}</span>
+                                    ${item.isNew ? '<span class="text-[9px] font-extrabold text-rose-600">★MỚI</span>' : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-extrabold ml-1 px-1.5 py-0.5 rounded border border-[#4B2412] ${
+                            item.active ? 'bg-emerald-300 text-[#4B2412]' : 'bg-white text-slate-400'
+                        }">
+                            ${item.active ? 'BẬT' : 'TẮT'}
+                        </span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        // =========================================================================
+        // 7. TRÌNH XUẤT MÃ NGUỒN & PROMPT CHO CODEX
+        // =========================================================================
+        let currentCodeTab = 'logic';
+
+        function switchCodeTab(tab) {
+            currentCodeTab = tab;
+            ['logic', 'svg', 'codex'].forEach(t => {
+                const btn = document.getElementById(`code-tab-${t}`);
+                btn.className = t === tab
+                    ? 'px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold bg-pink-500 text-white text-left truncate'
+                    : 'px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold bg-slate-800 text-slate-300 hover:bg-slate-700 text-left truncate';
+            });
+            updateCodeViewer();
+        }
+
+        function updateCodeViewer() {
+            const codeArea = document.getElementById('code-display-area');
+            const banner = document.getElementById('code-info-banner');
+
+            if (currentCodeTab === 'logic') {
+                banner.innerHTML = '<span>🎰 Mã JavaScript xử lý tỷ lệ Gacha (55/30/12/3%) & Vật lý trượt dải thẻ ngang CS2.</span><span class="font-mono text-[11px] text-amber-300">CS2 Roulette JS</span>';
+                codeArea.textContent = document.getElementById('gacha-engine-script').textContent.trim();
+            } else if (currentCodeTab === 'svg') {
+                banner.innerHTML = '<span>🎁 Mã SVG Chiếc Rương Kho Báu & 4 Vật phẩm Epic/Legendary mới.</span><span class="font-mono text-[11px] text-amber-300">Chest & Mythic SVG</span>';
+                const chestSvg = document.getElementById('chest-svg-container').innerHTML.trim();
+                const newItemsSvg = ['acc-sakura-kimono', 'acc-celestial-halo', 'furn-sakura-fountain', 'furn-magic-throne']
+                    .map(id => `<!-- Vật phẩm mới: #${id} -->\n` + document.getElementById(id).outerHTML)
+                    .join('\n\n');
+                codeArea.textContent = `/* === 1. SVG RƯƠNG KHO BÁU PAWQUEST === */\n${chestSvg}\n\n/* === 2. SVG 4 VẬT PHẨM EPIC & LEGENDARY MỚI === */\n${newItemsSvg}`;
+            } else {
+                banner.innerHTML = '<span>🤖 Prompt đầy đủ kèm JSON 24 vật phẩm & cơ chế mở hòm CS2 cho Codex.</span><span class="font-mono text-[11px] text-pink-300">Codex Gacha Prompt</span>';
+                const poolSchema = GACHA_ITEMS_POOL.map(({ id, name, category, rarity, isNew, desc }) => ({
+                    id, name, category, rarity, chance: RARITY_CONFIG[rarity].chance + '%', isNew: !!isNew, desc
+                }));
+                codeArea.textContent =
+`Hãy tích hợp hệ thống "Gacha Mở Rương Kho Báu & Vòng Quay Ngang Kiểu CS2" vào ứng dụng PawQuest của tôi với các thông số kỹ thuật sau:
+
+1. Phân bổ Tỷ lệ 4 Cấp độ Hiếm (Rarity Tiers - Tổng 24 Vật phẩm):
+- Common (55% - Màu Xanh Lam #3B82F6): 6 vật phẩm cơ bản.
+- Rare (30% - Màu Tím #A855F7): 6 vật phẩm hiếm.
+- Epic (12% - Màu Hồng Đậm #EC4899): 6 vật phẩm sử thi (bổ sung Áo Choàng Kimono Hoa Anh Đào #acc-sakura-kimono).
+- Legendary (3% - Màu Vàng Hoàng Kim #F59E0B phát sáng): 6 vật phẩm huyền thoại (bổ sung Vòng Hào Quang Tinh Tú #acc-celestial-halo, Đài Phun Nước Pha Lê #furn-sakura-fountain, Ngai Vàng Mèo Ngân Hà #furn-magic-throne).
+
+2. Cơ chế Animation Mở Rương + Dải Quay Ngang CS2 (4 Giai đoạn):
+- Giai đoạn 1 (1.1s): Khi người chơi bấm "Mở Rương (100 Xu)", rương kho báu (#gacha-chest-root) chạy keyframe \`chestViolentShake\` lắc mạnh kèm hiệu ứng squash-and-stretch.
+- Giai đoạn 2 (0.4s): Nắp rương (#chest-lid-group) bật mở (\`translateY(-28px) rotate(-18deg)\`), chùm tia sáng hoàng kim (#chest-light-burst) xoay tròn tỏa sáng.
+- Giai đoạn 3 (4.8s - CS2 Horizontal Reel):
+  + Sinh động một mảng 65 thẻ vật phẩm (\`TOTAL_REEL_CARDS = 65\`) theo đúng trọng số 55/30/12/3%.
+  + Đặt vật phẩm trúng thưởng cố định tại vị trí \`WINNING_CARD_INDEX = 52\`.
+  + Mỗi thẻ rộng 116px, khoảng cách 10px (\`CARD_PITCH_PX = 126px\`).
+  + Dịch chuyển \`#cs2-reel-track\` tới tâm thẻ số 52 cộng thêm độ lệch ngẫu nhiên \`subCardJitter\` trong khoảng [-36px, +36px] bằng \`transition: transform 4800ms cubic-bezier(0.10, 0.82, 0.08, 1)\` dưới con trỏ cố định ở tâm màn hình.
+  + Dùng \`requestAnimationFrame\` đọc \`DOMMatrixReadOnly\` để phát âm thanh tick mỗi khi 1 thẻ đi qua vạch laser giữa.
+- Giai đoạn 4: Phóng to thẻ số 52 và hiển thị Modal phần thưởng cho phép người dùng bấm "Trang bị ngay" lên Thú cưng hoặc Căn phòng.
+
+3. Danh sách JSON 24 Vật phẩm Gacha:
+${JSON.stringify(poolSchema, null, 2)}`;
+            }
+        }
+
+        function copyCurrentCode() {
+            const text = document.getElementById('code-display-area').textContent;
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            showToast('📋 Đã sao chép mã nguồn Gacha CS2 vào bộ nhớ tạm!');
+        }
+
+        function setWorkspaceLayout(mode) {
+            const left = document.getElementById('left-preview-pane');
+            const right = document.getElementById('right-code-pane');
+            ['split', 'preview', 'code'].forEach(m => {
+                const btn = document.getElementById(`layout-${m}`);
+                btn.classList.toggle('active-btn', m === mode);
+                btn.classList.toggle('bg-pink-300', m === mode);
+                btn.classList.toggle('bg-white', m !== mode);
+            });
+
+            if (mode === 'split') {
+                left.className = 'lg:col-span-7 flex flex-col gap-4';
+                right.className = 'lg:col-span-5 flex flex-col';
+            } else if (mode === 'preview') {
+                left.className = 'lg:col-span-10 lg:col-start-2 flex flex-col gap-4';
+                right.className = 'hidden';
+            } else {
+                left.className = 'hidden';
+                right.className = 'lg:col-span-12 flex flex-col';
+            }
+        }
+
+        let toastTimeout = null;
+        function showToast(msg) {
+            const box = document.getElementById('toast-box');
+            document.getElementById('toast-text').textContent = msg;
+            box.classList.remove('opacity-0', 'translate-y-3');
+            box.classList.add('opacity-100', 'translate-y-0');
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                box.classList.remove('opacity-100', 'translate-y-0');
+                box.classList.add('opacity-0', 'translate-y-3');
+            }, 2600);
+        }
+
+        window.onload = () => {
+            buildReelCards(GACHA_ITEMS_POOL[18]); // Hiển thị mẫu thẻ Vương miện ban đầu
+            syncRoomAndPetItems();
+            renderInventory24Grid();
+            updateCodeViewer();
+        };
+    </script>
+</body>
+</html>

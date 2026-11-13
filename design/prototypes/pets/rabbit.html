@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawQuest Studio - Lop Bunny Edition (6 Trạng Thái Animation & Code)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style id="pawquest-bunny-animation-styles">
+        * {
+            font-family: 'Quicksand', sans-serif;
+            user-select: none;
+        }
+        code, pre, .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+            user-select: text;
+        }
+
+        body {
+            background-color: #fdf2f8;
+            color: #4B2412;
+        }
+
+        /* =========================================================
+           HỆ THỐNG RIGGING & KEYFRAME ANIMATIONS CHO CHÚ THỎ TAI CỤP
+           ========================================================= */
+        #bunny-whole {
+            transform-origin: 200px 282px;
+            transition: transform 0.3s ease;
+        }
+        #bunny-body-group {
+            transform-origin: 200px 282px;
+        }
+        #bunny-head-group {
+            transform-origin: 200px 195px;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        #ear-left {
+            transform-origin: 152px 108px;
+            transition: transform 0.3s ease;
+        }
+        #ear-right {
+            transform-origin: 230px 104px;
+            transition: transform 0.3s ease;
+        }
+        #bunny-tail {
+            transform-origin: 138px 258px;
+        }
+        #paws-front {
+            transform-origin: 200px 220px;
+        }
+        #nose-mouth-unit {
+            transform-origin: 211px 168px;
+        }
+
+        /* =========================================================
+           1. TRẠNG THÁI ĐỨNG YÊN (IDLE - .state-idle)
+           ========================================================= */
+        @keyframes bunnyIdleBreath {
+            0%, 100% { transform: scale(1, 1) translateY(0px); }
+            50% { transform: scale(1.018, 0.984) translateY(2px); }
+        }
+        @keyframes bunnyIdleHead {
+            0%, 100% { transform: rotate(-1deg) translateY(0px); }
+            50% { transform: rotate(1.5deg) translateY(2px); }
+        }
+        @keyframes earSwingL {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(3.2deg); }
+        }
+        @keyframes earSwingR {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(-3.2deg); }
+        }
+        @keyframes noseSniffTwitch {
+            0%, 70%, 100% { transform: translateY(0px) scale(1); }
+            78% { transform: translateY(-2px) scale(1.08, 0.92); }
+            86% { transform: translateY(0.5px) scale(0.96, 1.04); }
+            94% { transform: translateY(-1.5px) scale(1.05, 0.95); }
+        }
+        @keyframes tailFluffWiggle {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(-7deg) scale(1.05); }
+        }
+        @keyframes bunnyBlink {
+            0%, 92%, 100% { transform: scaleY(1); }
+            96% { transform: scaleY(0.1); }
+        }
+
+        .state-idle #bunny-body-group { animation: bunnyIdleBreath 3.2s ease-in-out infinite; }
+        .state-idle #bunny-head-group { animation: bunnyIdleHead 3.2s ease-in-out infinite; }
+        .state-idle #ear-left { animation: earSwingL 3.2s ease-in-out infinite; }
+        .state-idle #ear-right { animation: earSwingR 3.2s ease-in-out infinite; }
+        .state-idle #nose-mouth-unit { animation: noseSniffTwitch 2.6s ease-in-out infinite; }
+        .state-idle #bunny-tail { animation: tailFluffWiggle 2.4s ease-in-out infinite; }
+        .state-idle .bunny-eye-blink {
+            transform-origin: 205px 153px;
+            animation: bunnyBlink 4.2s infinite;
+        }
+
+        /* =========================================================
+           2. TRẠNG THÁI ĂN (EATING - .state-eating)
+           ========================================================= */
+        @keyframes bunnyEatDip {
+            0%, 100% { transform: rotate(2deg) translateY(3px); }
+            50% { transform: rotate(6deg) translateY(8px); }
+        }
+        @keyframes bunnyChewMunch {
+            0%, 100% { transform: scale(0.92, 0.72); }
+            50% { transform: scale(1.12, 1.22); }
+        }
+        @keyframes pawsEatMove {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-4px); }
+        }
+        @keyframes earEatBounceL {
+            0%, 100% { transform: rotate(2deg); }
+            50% { transform: rotate(7deg); }
+        }
+        @keyframes earEatBounceR {
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(-7deg); }
+        }
+        @keyframes crumbFlyR {
+            0% { opacity: 1; transform: translate(0, 0) scale(1); }
+            100% { opacity: 0; transform: translate(16px, -14px) scale(0.3); }
+        }
+        @keyframes crumbFlyL {
+            0% { opacity: 1; transform: translate(0, 0) scale(1); }
+            100% { opacity: 0; transform: translate(-16px, -12px) scale(0.3); }
+        }
+
+        .state-eating #bunny-head-group { animation: bunnyEatDip 0.58s ease-in-out infinite; }
+        .state-eating #bunny-chew-mouth {
+            transform-origin: 211px 173px;
+            animation: bunnyChewMunch 0.29s ease-in-out infinite;
+        }
+        .state-eating #paws-front { animation: pawsEatMove 0.29s ease-in-out infinite; }
+        .state-eating #ear-left { animation: earEatBounceL 0.58s ease-in-out infinite; }
+        .state-eating #ear-right { animation: earEatBounceR 0.58s ease-in-out infinite; }
+        .state-eating #bunny-tail { animation: tailFluffWiggle 0.45s ease-in-out infinite; }
+        .state-eating .crumb-1 { animation: crumbFlyR 0.5s ease-out infinite; }
+        .state-eating .crumb-2 { animation: crumbFlyL 0.5s ease-out 0.25s infinite; }
+
+        /* =========================================================
+           3. TRẠNG THÁI UỐNG (DRINKING - .state-drinking)
+           ========================================================= */
+        @keyframes bunnyDrinkHead {
+            0%, 100% { transform: rotate(3deg) translateY(5px); }
+            50% { transform: rotate(5.5deg) translateY(8px); }
+        }
+        @keyframes bunnySipPulse {
+            0%, 100% { transform: scale(1, 1); }
+            50% { transform: scale(0.84, 1.2); }
+        }
+        @keyframes milkRipple {
+            0%, 100% { transform: scaleX(1); opacity: 0.8; }
+            50% { transform: scaleX(0.82); opacity: 1; }
+        }
+        @keyframes pinkBubbleUp {
+            0% { opacity: 0; transform: translateY(4px) scale(0.5); }
+            50% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-16px) scale(1.15); }
+        }
+
+        .state-drinking #bunny-head-group { animation: bunnyDrinkHead 0.55s ease-in-out infinite; }
+        .state-drinking #bunny-sip-mouth {
+            transform-origin: 211px 174px;
+            animation: bunnySipPulse 0.28s ease-in-out infinite;
+        }
+        .state-drinking #milk-ripple {
+            transform-origin: 252px 268px;
+            animation: milkRipple 0.36s ease-in-out infinite;
+        }
+        .state-drinking .drink-bubble-1 { animation: pinkBubbleUp 0.88s ease-out infinite; }
+        .state-drinking .drink-bubble-2 { animation: pinkBubbleUp 0.88s ease-out 0.44s infinite; }
+
+        /* =========================================================
+           4. TRẠNG THÁI NGỦ (SLEEPING - .state-sleeping)
+           ========================================================= */
+        @keyframes bunnySleepBreath {
+            0%, 100% { transform: scale(1.01, 0.98) translateY(2px); }
+            50% { transform: scale(1.045, 0.945) translateY(6px); }
+        }
+        @keyframes bunnySleepHead {
+            0%, 100% { transform: rotate(2deg) translateY(4px); }
+            50% { transform: rotate(5deg) translateY(8px); }
+        }
+        @keyframes sleepBubblePulse {
+            0%, 100% { transform: scale(0.55); opacity: 0.75; }
+            50% { transform: scale(1.28); opacity: 0.96; }
+        }
+        @keyframes zzzFloatUp {
+            0% { opacity: 0; transform: translate(0, 10px) scale(0.55); }
+            40% { opacity: 1; }
+            100% { opacity: 0; transform: translate(20px, -36px) scale(1.18); }
+        }
+
+        .state-sleeping #bunny-body-group { animation: bunnySleepBreath 3.6s ease-in-out infinite; }
+        .state-sleeping #bunny-head-group { animation: bunnySleepHead 3.6s ease-in-out infinite; }
+        .state-sleeping #sleep-bubble {
+            transform-origin: 230px 162px;
+            animation: sleepBubblePulse 3.6s ease-in-out infinite;
+        }
+        .state-sleeping .zzz-1 { animation: zzzFloatUp 3s ease-out infinite; }
+        .state-sleeping .zzz-2 { animation: zzzFloatUp 3s ease-out 1s infinite; }
+        .state-sleeping .zzz-3 { animation: zzzFloatUp 3s ease-out 2s infinite; }
+
+        /* =========================================================
+           5. TRẠNG THÁI CƯỜI (LAUGHING - .state-laughing)
+           ========================================================= */
+        @keyframes bunnyJoyJump {
+            0%, 100% { transform: translateY(0px) scale(1, 1); }
+            40% { transform: translateY(-15px) scale(0.95, 1.05); }
+            75% { transform: translateY(0px) scale(1.05, 0.95); }
+        }
+        @keyframes earFlopUpL {
+            0%, 100% { transform: rotate(0deg); }
+            45% { transform: rotate(16deg) translateY(-4px); }
+        }
+        @keyframes earFlopUpR {
+            0%, 100% { transform: rotate(0deg); }
+            45% { transform: rotate(-16deg) translateY(-4px); }
+        }
+        @keyframes pawsCheerWave {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-7px); }
+        }
+        @keyframes heartFloat {
+            0% { opacity: 0; transform: translateY(8px) scale(0.4); }
+            45% { opacity: 1; transform: translateY(-10px) scale(1.15); }
+            100% { opacity: 0; transform: translateY(-34px) scale(0.85); }
+        }
+
+        .state-laughing #bunny-whole { animation: bunnyJoyJump 0.54s ease-in-out infinite; }
+        .state-laughing #ear-left { animation: earFlopUpL 0.54s ease-in-out infinite; }
+        .state-laughing #ear-right { animation: earFlopUpR 0.54s ease-in-out infinite; }
+        .state-laughing #paws-front { animation: pawsCheerWave 0.27s ease-in-out infinite; }
+        .state-laughing #bunny-tail { animation: tailFluffWiggle 0.3s ease-in-out infinite; }
+        .state-laughing .heart-1 { animation: heartFloat 1.1s ease-out infinite; }
+        .state-laughing .heart-2 { animation: heartFloat 1.1s ease-out 0.36s infinite; }
+        .state-laughing .heart-3 { animation: heartFloat 1.1s ease-out 0.72s infinite; }
+
+        /* =========================================================
+           6. TRẠNG THÁI BUỒN (SAD - .state-sad)
+           ========================================================= */
+        @keyframes bunnySadTremble {
+            0%, 100% { transform: translateX(0px) translateY(3px); }
+            25% { transform: translateX(-1.5px) translateY(4px); }
+            75% { transform: translateX(1.5px) translateY(4px); }
+        }
+        @keyframes bunnySadHead {
+            0%, 100% { transform: rotate(3deg) translateY(6px); }
+            50% { transform: rotate(5deg) translateY(9px); }
+        }
+        @keyframes tearFallDown {
+            0% { opacity: 0; transform: translateY(0px) scale(0.6); }
+            35% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(22px) scale(1); }
+        }
+        @keyframes rainDropFall {
+            0% { opacity: 0; transform: translateY(0px); }
+            40% { opacity: 0.85; }
+            100% { opacity: 0; transform: translateY(22px); }
+        }
+
+        .state-sad #bunny-body-group { animation: bunnySadTremble 0.42s ease-in-out infinite; }
+        .state-sad #bunny-head-group { animation: bunnySadHead 2.5s ease-in-out infinite; }
+        .state-sad #ear-left { transform: rotate(-5deg) translateY(4px); }
+        .state-sad #ear-right { transform: rotate(5deg) translateY(4px); }
+        .state-sad .tear-1 { animation: tearFallDown 1.05s ease-in infinite; }
+        .state-sad .tear-2 { animation: tearFallDown 1.05s ease-in 0.52s infinite; }
+        .state-sad .rain-1 { animation: rainDropFall 0.85s linear infinite; }
+        .state-sad .rain-2 { animation: rainDropFall 0.85s linear 0.3s infinite; }
+        .state-sad .rain-3 { animation: rainDropFall 0.85s linear 0.6s infinite; }
+
+        /* ẨN/HIỆN BIỂU CẢM & ĐẠO CỤ THEO STATE */
+        .face-expr, .prop-group, .fx-overlay { display: none; }
+        .state-idle .face-normal { display: block; }
+        .state-eating .face-eating, .state-eating .prop-food { display: block; }
+        .state-drinking .face-drinking, .state-drinking .prop-drink { display: block; }
+        .state-sleeping .face-sleeping, .state-sleeping .fx-sleeping { display: block; }
+        .state-laughing .face-laughing, .state-laughing .fx-laughing { display: block; }
+        .state-sad .face-sad, .state-sad .fx-sad { display: block; }
+
+        /* UI STYLING */
+        .kawaii-card {
+            border: 3px solid #4B2412;
+            box-shadow: 0 6px 0 rgba(75, 36, 18, 0.15);
+        }
+        .kawaii-btn {
+            border: 2.5px solid #4B2412;
+            box-shadow: 0 3px 0 #4B2412;
+            transition: all 0.12s ease;
+        }
+        .kawaii-btn:hover:not(:disabled) {
+            transform: translateY(-1.5px);
+            box-shadow: 0 4.5px 0 #4B2412;
+        }
+        .kawaii-btn:active:not(:disabled), .kawaii-btn.active-state {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #4B2412;
+        }
+
+        ::-webkit-scrollbar { width: 7px; height: 7px; }
+        ::-webkit-scrollbar-track { background: #27272a; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb { background: #f472b6; border-radius: 6px; }
+    </style>
+</head>
+<body class="min-h-screen p-3 md:p-5 flex flex-col items-center">
+
+    <!-- THANH CÔNG CỤ ĐẦU TRANG -->
+    <header class="w-full max-w-7xl mb-4 bg-white rounded-3xl px-4 py-3 kawaii-card flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-pink-100 border-2 border-[#4B2412] flex items-center justify-center text-2xl shadow-inner">
+                🐰
+            </div>
+            <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <h1 class="text-lg md:text-xl font-extrabold text-[#4B2412] tracking-tight">PawQuest Studio — Chú Thỏ Tai Cụp (Lop Bunny)</h1>
+                    <span class="bg-pink-200 border border-[#4B2412] text-[#4B2412] text-[11px] font-extrabold px-2.5 py-0.5 rounded-full">Đã sửa sạch nét thừa tai phải + 6 Animation</span>
+                </div>
+                <p class="text-xs text-[#8c5233] font-semibold">Thỏ trắng kem tai cụp, lòng tai phải hồng phấn sạch nét thừa, đuôi bông xù & xuất code trực tiếp cho Codex</p>
+            </div>
+        </div>
+
+        <!-- Bộ nút chuyển đổi chế độ hiển thị cửa sổ -->
+        <div class="flex items-center gap-2 bg-pink-50 p-1.5 rounded-2xl border-2 border-[#4B2412]">
+            <button id="view-btn-split" onclick="setLayoutMode('split')" class="kawaii-btn active-state bg-pink-300 text-[#4B2412] text-xs font-extrabold px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+                <span>🪟 Chia đôi (Preview + Code)</span>
+            </button>
+            <button id="view-btn-preview" onclick="setLayoutMode('preview')" class="kawaii-btn bg-white text-[#4B2412] text-xs font-extrabold px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+                <span>🎮 Chỉ xem Giao diện</span>
+            </button>
+            <button id="view-btn-code" onclick="setLayoutMode('code')" class="kawaii-btn bg-white text-[#4B2412] text-xs font-extrabold px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+                <span>💻 Chỉ xem Code</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- KHÔNG GIAN LÀM VIỆC CHÍNH -->
+    <main id="workspace-grid" class="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1">
+
+        <!-- =================================================================
+             CỬA SỔ 1: XEM TRƯỚC GIAO DIỆN & ANIMATION CHÚ THỎ (6 CỘT)
+             ================================================================= -->
+        <section id="pane-preview" class="lg:col-span-6 flex flex-col gap-4">
+            
+            <!-- Sân khấu nhân vật Chú Thỏ -->
+            <div class="bg-white rounded-3xl kawaii-card overflow-hidden flex flex-col relative">
+                
+                <!-- Thanh chỉ số & Tiền thưởng -->
+                <div class="bg-white/95 border-b-2 border-[#4B2412] px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-1 bg-amber-100 border-2 border-[#4B2412] px-2.5 py-1 rounded-xl text-xs font-extrabold">
+                            <span>🪙</span>
+                            <span id="coin-display">240</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 text-[11px] font-bold">
+                            <div class="flex items-center gap-1" title="No bụng">
+                                <span>🥕</span>
+                                <div class="w-12 h-2.5 bg-orange-100 rounded-full border border-[#4B2412] overflow-hidden">
+                                    <div id="bar-hunger" class="h-full bg-orange-400 transition-all" style="width: 90%"></div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1" title="Độ ẩm">
+                                <span>🍓</span>
+                                <div class="w-12 h-2.5 bg-pink-100 rounded-full border border-[#4B2412] overflow-hidden">
+                                    <div id="bar-thirst" class="h-full bg-pink-400 transition-all" style="width: 86%"></div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1" title="Hạnh phúc">
+                                <span>💖</span>
+                                <div class="w-12 h-2.5 bg-rose-100 rounded-full border border-[#4B2412] overflow-hidden">
+                                    <div id="bar-happy" class="h-full bg-rose-400 transition-all" style="width: 95%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <span id="state-badge" class="bg-[#4B2412] text-pink-100 text-[11px] font-extrabold px-3 py-1 rounded-full">
+                        🐰 Đang đứng yên (.state-idle)
+                    </span>
+                </div>
+
+                <!-- Bong bóng lời thoại -->
+                <div class="relative bg-[#ffd6ec] pt-3 px-4 flex justify-center">
+                    <div id="speech-bubble" class="bg-white border-2 border-[#4B2412] px-4 py-1.5 rounded-2xl text-xs font-bold text-[#4B2412] shadow-sm text-center">
+                        Khịt khịt~ Hoàn thành nhiệm vụ hằng ngày để thưởng cà rốt giòn ngọt cho Thỏ nha! 🥕✨
+                    </div>
+                </div>
+
+                <!-- KHUNG SVG CHÚ THỎ TAI CỤP ĐÃ SỬA SẠCH NÉT THỪA Ở TAI PHẢI -->
+                <div id="svg-container-source" class="w-full aspect-[400/330] relative cursor-pointer select-none" onclick="triggerBunnyState('laughing', 3200)" title="Nhấn để nựng Chú Thỏ!">
+                    <svg id="pawquest-bunny-svg" viewBox="0 0 400 330" class="w-full h-full block state-idle" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <!-- Họa tiết thảm tím kẻ caro đúng như ảnh mẫu -->
+                            <pattern id="purplePlaidPattern" width="52" height="36" patternUnits="userSpaceOnUse">
+                                <rect width="52" height="36" fill="#B59BF0"/>
+                                <path d="M 0 18 L 52 18" stroke="#9F82E4" stroke-width="5"/>
+                                <path d="M 26 0 L 26 36" stroke="#9F82E4" stroke-width="5"/>
+                                <circle cx="13" cy="9" r="3" fill="#C8B3F6" opacity="0.7"/>
+                                <circle cx="39" cy="27" r="2.5" fill="#C8B3F6" opacity="0.7"/>
+                            </pattern>
+                        </defs>
+
+                        <!-- ================= 1. NỀN PHÒNG HỒNG & THẢM TÍM VIỀN BÈO ================= -->
+                        <rect x="0" y="0" width="400" height="200" fill="#FFD9EC" />
+                        <path d="M 110 0 L 145 95 M 180 0 L 145 95" stroke="#FFC4E1" stroke-width="14" stroke-linecap="round" opacity="0.55" />
+                        <path d="M 270 0 L 305 95 M 340 0 L 305 95" stroke="#FFC4E1" stroke-width="14" stroke-linecap="round" opacity="0.55" />
+
+                        <!-- Viền ren trắng & bèo hồng đầu thảm -->
+                        <path d="M 0 148 Q 30 132 60 148 Q 90 132 120 148 Q 150 132 180 148 Q 210 132 240 148 Q 270 132 300 148 Q 330 132 360 148 Q 385 132 400 145 L 400 190 L 0 190 Z" fill="#FFF7FB" />
+                        <path d="M -10 162 Q 15 145 40 162 Q 65 145 90 162 Q 115 145 140 162 Q 165 145 190 162 Q 215 145 240 162 Q 265 145 290 162 Q 315 145 340 162 Q 365 145 390 162 L 410 162 L 410 200 L -10 200 Z" fill="#F2A7DA" stroke="#DF87C3" stroke-width="2.5" />
+
+                        <!-- Mặt thảm tím kẻ caro -->
+                        <rect x="-10" y="176" width="420" height="145" fill="url(#purplePlaidPattern)" stroke="#9575DE" stroke-width="3" />
+
+                        <!-- Bóng đổ hình elip tím đậm dưới chú thỏ -->
+                        <ellipse cx="198" cy="285" rx="84" ry="18" fill="#7D68AE" opacity="0.72" />
+
+                        <!-- ================= 2. NHÂN VẬT CHÚ THỎ TAI CỤP (image_7b0c98.png) ================= -->
+                        <g id="bunny-whole">
+                            <g id="bunny-body-group">
+
+                                <!-- A. ĐUÔI BÔNG XÙ BÊN TRÁI (#bunny-tail) -->
+                                <g id="bunny-tail">
+                                    <path d="M 136 242 C 126 232, 110 236, 112 248 C 102 250, 100 264, 110 269 C 104 277, 114 287, 125 282 C 130 288, 142 284, 142 274 Z" fill="#FFF5F2" stroke="#4B2412" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+                                </g>
+
+                                <!-- B. THÂN THỎ & BỤNG HỒNG PHẤN -->
+                                <!-- Nền thân trắng kem (#FFF5F2) -->
+                                <path d="M 155 186 C 140 210, 130 242, 134 268 C 136 280, 150 286, 168 286 L 236 286 C 254 286, 266 278, 266 264 C 266 238, 256 208, 244 186 Z" fill="#FFF5F2" />
+
+                                <!-- Mảng bụng bầu dục hồng phấn (#F9CDC8) -->
+                                <ellipse cx="206" cy="246" rx="32" ry="37" fill="#F9CDC8" />
+
+                                <!-- Vệt bóng hồng nhỏ hình lưỡi liềm dưới cổ (#F4C2BC) giống ảnh mẫu -->
+                                <path d="M 186 198 Q 204 202 222 198 Q 216 208 204 208 Q 192 208 186 198 Z" fill="#F4C2BC" />
+
+                                <!-- Đường viền hông trái, đáy bụng và hông phải -->
+                                <path d="M 154 188 C 138 212, 130 244, 135 270 C 138 278, 146 283, 156 284" fill="none" stroke="#4B2412" stroke-width="6" stroke-linecap="round" />
+                                <path d="M 245 190 C 258 214, 266 244, 263 268 C 261 276, 255 281, 248 283" fill="none" stroke="#4B2412" stroke-width="6" stroke-linecap="round" />
+                                <path d="M 192 287 Q 206 288 222 287" fill="none" stroke="#4B2412" stroke-width="6" stroke-linecap="round" />
+
+                                <!-- Hai bàn chân dưới có ngấn ngón chân -->
+                                <!-- Chân dưới bên trái -->
+                                <path d="M 164 275 C 180 275, 192 282, 190 290 C 188 296, 164 295, 154 287" fill="#FFF5F2" stroke="#4B2412" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M 173 293 L 169 285" stroke="#4B2412" stroke-width="4.5" stroke-linecap="round" />
+                                <path d="M 182 293 L 178 285" stroke="#4B2412" stroke-width="4.5" stroke-linecap="round" />
+
+                                <!-- Chân dưới bên phải -->
+                                <path d="M 232 275 C 248 275, 260 281, 258 289 C 256 295, 232 295, 222 287" fill="#FFF5F2" stroke="#4B2412" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M 240 292 L 236 284" stroke="#4B2412" stroke-width="4.5" stroke-linecap="round" />
+                                <path d="M 249 291 L 245 284" stroke="#4B2412" stroke-width="4.5" stroke-linecap="round" />
+
+                                <!-- Hai tay trước nhỏ nhắn đặt trước ngực (#paws-front) -->
+                                <g id="paws-front">
+                                    <!-- Tay trước trái -->
+                                    <path d="M 161 215 C 165 232, 174 242, 182 240 C 189 238, 187 222, 180 205" fill="#FFF5F2" stroke="#4B2412" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M 174 238 L 172 231" stroke="#4B2412" stroke-width="4.2" stroke-linecap="round" />
+                                    <path d="M 180 239 L 178 231" stroke="#4B2412" stroke-width="4.2" stroke-linecap="round" />
+
+                                    <!-- Tay trước phải -->
+                                    <path d="M 239 215 C 235 232, 226 242, 218 240 C 211 238, 213 222, 220 205" fill="#FFF5F2" stroke="#4B2412" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M 226 238 L 228 231" stroke="#4B2412" stroke-width="4.2" stroke-linecap="round" />
+                                    <path d="M 220 239 L 222 231" stroke="#4B2412" stroke-width="4.2" stroke-linecap="round" />
+                                </g>
+
+                                <!-- C. PHẦN ĐẦU & ĐÔI TAI CỤP (#bunny-head-group) -->
+                                <g id="bunny-head-group">
+
+                                    <!-- 1. TAI PHẢI (#ear-right): ĐÃ SỬA SẠCH NÉT THỪA Ở GIỮA TAI -->
+                                    <!-- Lòng tai phải chỉ có mảng màu hồng phấn (#F9CDC8, stroke="none") nằm gọn bên trong viền tai ngoài -->
+                                    <g id="ear-right">
+                                        <!-- Nền trắng kem của tai phải -->
+                                        <path d="M 224 102 C 248 96, 268 118, 278 158 C 288 198, 290 236, 272 242 C 256 246, 246 218, 244 184 C 242 154, 232 124, 224 102 Z" fill="#FFF5F2" stroke="none" />
+                                        <!-- Mảng lòng tai hồng phấn (#F9CDC8) hoàn toàn KHÔNG có viền đen cắt ngang -->
+                                        <path d="M 253 166 C 258 148, 269 156, 274 184 C 279 210, 277 232, 268 235 C 259 237, 250 212, 248 186 C 247 176, 250 172, 253 166 Z" fill="#F9CDC8" stroke="none" />
+                                        <!-- Viền ngoài duy nhất của tai phải nối mượt từ đỉnh đầu vòng qua chóp tai lên sát má phải -->
+                                        <path d="M 226 102 C 248 96, 268 118, 278 158 C 288 198, 290 236, 272 242 C 256 246, 247 220, 245 186" fill="none" stroke="#4B2412" stroke-width="6.2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </g>
+
+                                    <!-- 2. KHỐI NỀN ĐẦU & MÁ PHẢI PHÚNG PHÍNH ĐÈ LÊN GỐC TRONG CỦA TAI PHẢI -->
+                                    <path d="M 146 116 C 160 98, 182 92, 198 86 C 198 93, 196 96, 196 96 C 204 90, 212 91, 210 97 C 224 98, 242 110, 252 134 C 264 158, 262 182, 234 196 C 212 204, 178 202, 152 190 C 136 178, 136 140, 146 116 Z" fill="#FFF5F2" stroke="none" />
+
+                                    <!-- Đường viền đỉnh đầu (gồm 2 chỏm lông tơ nhọn đúng ảnh mẫu) -->
+                                    <path d="M 156 107 C 170 96, 184 91, 199 84 C 199 91, 196 96, 196 96 C 204 90, 212 90, 214 91 C 212 96, 209 99, 209 99 C 220 100, 232 106, 240 116" fill="none" stroke="#4B2412" stroke-width="6.2" stroke-linecap="round" stroke-linejoin="round" />
+
+                                    <!-- Đường viền bầu má phải dừng ngay tại mép trong tai phải (KHÔNG kéo dài cắt ngang lòng tai) -->
+                                    <path d="M 247 126 C 262 152, 263 180, 233 195" fill="none" stroke="#4B2412" stroke-width="6.2" stroke-linecap="round" stroke-linejoin="round" />
+
+                                    <!-- Đường viền má dưới bên trái -->
+                                    <path d="M 142 182 C 154 191, 166 195, 178 197" fill="none" stroke="#4B2412" stroke-width="6.2" stroke-linecap="round" />
+
+                                    <!-- 3. TAI TRÁI (#ear-left) DÀI CỤP BÊN MÁ TRÁI ĐÚNG ẢNH MẪU -->
+                                    <g id="ear-left">
+                                        <path d="M 164 106 C 140 102, 120 128, 110 174 C 102 212, 102 238, 119 242 C 134 245, 144 218, 148 180 C 151 154, 153 136, 155 126" fill="#FFF5F2" stroke="none" />
+                                        <path d="M 164 106 C 140 102, 120 128, 110 174 C 102 212, 102 238, 119 242 C 134 245, 144 218, 148 180 C 151 154, 153 136, 155 126" fill="none" stroke="#4B2412" stroke-width="6.2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </g>
+
+                                    <!-- 4. ĐÔI MÁ HỒNG PHẤN CÓ 3 GẠCH CHÉO (///) -->
+                                    <g id="bunny-blush">
+                                        <!-- Má hồng trái -->
+                                        <ellipse cx="163" cy="168" rx="16" ry="8.5" fill="#F69B95" opacity="0.9" />
+                                        <line x1="156" y1="165" x2="152" y2="171" stroke="#C83E37" stroke-width="2.3" stroke-linecap="round" />
+                                        <line x1="163" y1="165" x2="159" y2="171" stroke="#C83E37" stroke-width="2.3" stroke-linecap="round" />
+                                        <line x1="170" y1="165" x2="166" y2="171" stroke="#C83E37" stroke-width="2.3" stroke-linecap="round" />
+
+                                        <!-- Má hồng phải -->
+                                        <ellipse cx="244" cy="166" rx="14.5" ry="8" fill="#F69B95" opacity="0.9" />
+                                        <line x1="238" y1="163" x2="234" y2="169" stroke="#C83E37" stroke-width="2.3" stroke-linecap="round" />
+                                        <line x1="244" y1="163" x2="240" y2="169" stroke="#C83E37" stroke-width="2.3" stroke-linecap="round" />
+                                        <line x1="250" y1="163" x2="246" y2="169" stroke="#C83E37" stroke-width="2.3" stroke-linecap="round" />
+                                    </g>
+
+                                    <!-- ========================================================
+                                         5. BIỂU CẢM MẮT & MŨI/MIỆNG CHỮ Y THEO 6 TRẠNG THÁI
+                                         ======================================================== -->
+
+                                    <!-- TRẠNG THÁI 1: ĐỨNG YÊN (.face-normal) -->
+                                    <g class="face-expr face-normal">
+                                        <g class="bunny-eye-blink">
+                                            <ellipse cx="177" cy="154" rx="7.2" ry="7.8" fill="#4B2412" />
+                                            <ellipse cx="235" cy="152" rx="6.8" ry="7.5" fill="#4B2412" />
+                                        </g>
+                                        <g id="nose-mouth-unit">
+                                            <path d="M 204 160 Q 211 165 218 160" fill="none" stroke="#4B2412" stroke-width="4.6" stroke-linecap="round" />
+                                            <line x1="211" y1="163" x2="211" y2="171" stroke="#4B2412" stroke-width="4.6" stroke-linecap="round" />
+                                            <path d="M 204 176 Q 211 170 218 176" fill="none" stroke="#4B2412" stroke-width="4.6" stroke-linecap="round" />
+                                        </g>
+                                    </g>
+
+                                    <!-- TRẠNG THÁI 2: ĂN (.face-eating) -->
+                                    <g class="face-expr face-eating">
+                                        <ellipse cx="177" cy="154" rx="7.2" ry="7.8" fill="#4B2412" />
+                                        <ellipse cx="235" cy="152" rx="6.8" ry="7.5" fill="#4B2412" />
+                                        <path d="M 204 159 Q 211 164 218 159" fill="none" stroke="#4B2412" stroke-width="4.5" stroke-linecap="round" />
+                                        <g id="bunny-chew-mouth">
+                                            <path d="M 201 167 Q 211 164 221 167 Q 222 181 211 181 Q 200 181 201 167 Z" fill="#B91C1C" stroke="#4B2412" stroke-width="3.8" stroke-linejoin="round" />
+                                            <!-- Răng cửa thỏ trắng nhỏ -->
+                                            <rect x="208" y="166" width="6" height="4.5" rx="1.5" fill="#FFFFFF" stroke="#4B2412" stroke-width="2" />
+                                            <path d="M 204 175 Q 211 171 218 175 Q 211 180 204 175 Z" fill="#F48FB1" />
+                                        </g>
+                                        <circle class="crumb-1" cx="226" cy="175" r="2.6" fill="#F97316" />
+                                        <circle class="crumb-2" cx="195" cy="175" r="2.4" fill="#F97316" />
+                                    </g>
+
+                                    <!-- TRẠNG THÁI 3: UỐNG (.face-drinking) -->
+                                    <g class="face-expr face-drinking">
+                                        <path d="M 169 155 Q 177 145 185 155" fill="none" stroke="#4B2412" stroke-width="4.8" stroke-linecap="round" />
+                                        <path d="M 227 153 Q 235 143 243 153" fill="none" stroke="#4B2412" stroke-width="4.8" stroke-linecap="round" />
+                                        <path d="M 205 160 Q 211 164 217 160" fill="none" stroke="#4B2412" stroke-width="4.4" stroke-linecap="round" />
+                                        <ellipse id="bunny-sip-mouth" cx="211" cy="173" rx="6" ry="5" fill="#F48FB1" stroke="#4B2412" stroke-width="3.8" />
+                                    </g>
+
+                                    <!-- TRẠNG THÁI 4: NGỦ (.face-sleeping) -->
+                                    <g class="face-expr face-sleeping">
+                                        <path d="M 169 153 Q 177 161 185 153" fill="none" stroke="#4B2412" stroke-width="4.8" stroke-linecap="round" />
+                                        <path d="M 227 151 Q 235 159 243 151" fill="none" stroke="#4B2412" stroke-width="4.8" stroke-linecap="round" />
+                                        <path d="M 204 161 Q 211 165 218 161" fill="none" stroke="#4B2412" stroke-width="4.4" stroke-linecap="round" />
+                                        <line x1="211" y1="164" x2="211" y2="171" stroke="#4B2412" stroke-width="4.4" stroke-linecap="round" />
+                                        <path d="M 205 175 Q 211 170 217 175" fill="none" stroke="#4B2412" stroke-width="4.4" stroke-linecap="round" />
+                                        <g id="sleep-bubble">
+                                            <circle cx="228" cy="160" r="10.5" fill="#BAE6FD" fill-opacity="0.82" stroke="#0284C7" stroke-width="2.4" />
+                                            <circle cx="225" cy="156" r="2.8" fill="#FFFFFF" />
+                                        </g>
+                                    </g>
+
+                                    <!-- TRẠNG THÁI 5: CƯỜI (.face-laughing) -->
+                                    <g class="face-expr face-laughing">
+                                        <path d="M 168 156 Q 177 142 186 156" fill="none" stroke="#4B2412" stroke-width="5.2" stroke-linecap="round" />
+                                        <path d="M 226 154 Q 235 140 244 154" fill="none" stroke="#4B2412" stroke-width="5.2" stroke-linecap="round" />
+                                        <path d="M 204 159 Q 211 164 218 159" fill="none" stroke="#4B2412" stroke-width="4.4" stroke-linecap="round" />
+                                        <path d="M 199 166 Q 211 169 223 166 Q 222 183 211 183 Q 200 183 199 166 Z" fill="#B91C1C" stroke="#4B2412" stroke-width="3.8" stroke-linejoin="round" />
+                                        <path d="M 203 175 Q 211 170 219 175 Q 211 182 203 175 Z" fill="#F48FB1" />
+                                    </g>
+
+                                    <!-- TRẠNG THÁI 6: BUỒN (.face-sad) -->
+                                    <g class="face-expr face-sad">
+                                        <path d="M 167 144 L 185 148" stroke="#4B2412" stroke-width="4" stroke-linecap="round" />
+                                        <path d="M 244 142 L 226 146" stroke="#4B2412" stroke-width="4" stroke-linecap="round" />
+                                        <circle cx="177" cy="155" r="8" fill="#4B2412" />
+                                        <circle cx="174" cy="152" r="2.8" fill="#FFFFFF" />
+                                        <circle cx="235" cy="153" r="7.8" fill="#4B2412" />
+                                        <circle cx="232" cy="150" r="2.8" fill="#FFFFFF" />
+                                        <path d="M 204 161 Q 211 165 218 161" fill="none" stroke="#4B2412" stroke-width="4.4" stroke-linecap="round" />
+                                        <line x1="211" y1="164" x2="211" y2="171" stroke="#4B2412" stroke-width="4.4" stroke-linecap="round" />
+                                        <path d="M 201 178 Q 211 168 221 178" fill="none" stroke="#4B2412" stroke-width="4.5" stroke-linecap="round" />
+                                        <!-- Nước mắt chảy dài -->
+                                        <path class="tear-1" d="M 173 163 C 170 171, 170 176, 174 176 C 178 176, 178 171, 173 163 Z" fill="#38BDF8" stroke="#0284C7" stroke-width="1.5" />
+                                        <path class="tear-2" d="M 238 161 C 235 169, 235 174, 239 174 C 243 174, 243 169, 238 161 Z" fill="#38BDF8" stroke="#0284C7" stroke-width="1.5" />
+                                    </g>
+
+                                </g> <!-- End #bunny-head-group -->
+                            </g> <!-- End #bunny-body-group -->
+                        </g> <!-- End #bunny-whole -->
+
+                        <!-- ================= 3. ĐẠO CỤ & HIỆU ỨNG THEO TRẠNG THÁI ================= -->
+
+                        <!-- ĐẠO CỤ 1: Bát sứ hồng đựng cà rốt & dâu tây khi ĂN (#prop-food) -->
+                        <g id="prop-food" class="prop-group prop-food" transform="translate(226, 252)">
+                            <ellipse cx="42" cy="32" rx="36" ry="9" fill="#F472B6" stroke="#4B2412" stroke-width="3.6" />
+                            <path d="M 12 20 L 72 20 L 64 34 C 56 38, 28 38, 20 34 Z" fill="#F9A8D4" stroke="#4B2412" stroke-width="3.6" stroke-linejoin="round" />
+                            <!-- Củ cà rốt cam tươi -->
+                            <path d="M 22 20 C 26 6, 48 6, 56 20 Z" fill="#F97316" stroke="#4B2412" stroke-width="3.2" stroke-linejoin="round" />
+                            <path d="M 20 12 C 14 6, 18 2, 24 8" fill="none" stroke="#22C55E" stroke-width="3.5" stroke-linecap="round" />
+                            <!-- Quả dâu tây đỏ -->
+                            <circle cx="54" cy="16" r="8" fill="#EF4444" stroke="#4B2412" stroke-width="3" />
+                        </g>
+
+                        <!-- ĐẠO CỤ 2: Bát sữa dâu & ống hút khi UỐNG (#prop-drink) -->
+                        <g id="prop-drink" class="prop-group prop-drink">
+                            <path d="M 213 175 L 234 222 L 250 266" fill="none" stroke="#F43F5E" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" />
+                            <ellipse cx="252" cy="282" rx="33" ry="8.5" fill="#F472B6" stroke="#4B2412" stroke-width="3.4" />
+                            <path d="M 222 266 L 282 266 L 274 283 C 266 288, 238 288, 230 283 Z" fill="#FBCFE8" stroke="#4B2412" stroke-width="3.6" stroke-linejoin="round" />
+                            <ellipse cx="252" cy="266" rx="27" ry="6" fill="#FDA4AF" stroke="#4B2412" stroke-width="2.8" />
+                            <ellipse id="milk-ripple" cx="252" cy="266" rx="17" ry="3" fill="#FFF1F2" />
+                            <circle class="drink-bubble-1" cx="242" cy="256" r="4" fill="#FFE4E6" stroke="#F43F5E" stroke-width="1.6" />
+                            <circle class="drink-bubble-2" cx="262" cy="252" r="4.8" fill="#FFE4E6" stroke="#F43F5E" stroke-width="1.6" />
+                        </g>
+
+                        <!-- HIỆU ỨNG KHI NGỦ: Chữ Zzz bay lên (#prop-zzz) -->
+                        <g id="prop-zzz" class="fx-overlay fx-sleeping" font-weight="800" fill="#7C3AED" stroke="#FFFFFF" stroke-width="1.5">
+                            <text class="zzz-1" x="256" y="102" font-size="18">Z</text>
+                            <text class="zzz-2" x="274" y="82" font-size="23">z</text>
+                            <text class="zzz-3" x="292" y="62" font-size="28">Z</text>
+                        </g>
+
+                        <!-- HIỆU ỨNG KHI CƯỜI: Tim hồng bay lên (#prop-hearts) -->
+                        <g id="prop-hearts" class="fx-overlay fx-laughing">
+                            <g class="heart-1" transform="translate(88, 108)">
+                                <path d="M 12 6 C 12 1, 5 -1, 2 4 C -1 -1, -8 1, -8 6 C -8 13, 2 17, 2 22 C 2 17, 12 13, 12 6 Z" fill="#FB7185" stroke="#4B2412" stroke-width="2.5"/>
+                            </g>
+                            <g class="heart-2" transform="translate(292, 98)">
+                                <path d="M 12 6 C 12 1, 5 -1, 2 4 C -1 -1, -8 1, -8 6 C -8 13, 2 17, 2 22 C 2 17, 12 13, 12 6 Z" fill="#F43F5E" stroke="#4B2412" stroke-width="2.5"/>
+                            </g>
+                            <g class="heart-3" transform="translate(254, 48)">
+                                <path d="M 0 -10 L 3 -3 L 10 0 L 3 3 L 0 10 L -3 3 L -10 0 L -3 -3 Z" fill="#FACC15" stroke="#4B2412" stroke-width="2"/>
+                            </g>
+                        </g>
+
+                        <!-- HIỆU ỨNG KHI BUỒN: Đám mây mưa u ám (#prop-sad-cloud) -->
+                        <g id="prop-sad-cloud" class="fx-overlay fx-sad">
+                            <g transform="translate(152, 12)">
+                                <path d="M 22 32 C 10 32, 6 20, 16 14 C 20 4, 38 4, 44 12 C 54 6, 70 12, 68 23 C 78 25, 76 36, 64 36 L 22 36 Z" fill="#94A3B8" stroke="#4B2412" stroke-width="3.2" stroke-linejoin="round" />
+                                <line class="rain-1" x1="26" y1="40" x2="23" y2="50" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
+                                <line class="rain-2" x1="44" y1="40" x2="41" y2="50" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
+                                <line class="rain-3" x1="60" y1="40" x2="57" y2="50" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
+                            </g>
+                        </g>
+                    </svg>
+                </div>
+
+                <!-- BẢNG NÚT BẤM KIỂM THỬ 6 ANIMATION CỦA CHÚ THỎ -->
+                <div class="bg-pink-50/90 border-t-3 border-[#4B2412] p-3.5">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-extrabold text-[#4B2412] uppercase tracking-wider">🎬 Bảng điều khiển 6 Trạng thái Animation Chú Thỏ:</span>
+                        <span id="active-state-label" class="text-[11px] font-bold text-pink-700">Đang chọn: 1. Đứng yên 🐰</span>
+                    </div>
+                    <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                        <button id="btn-state-idle" onclick="triggerBunnyState('idle')" class="state-btn kawaii-btn active-state bg-pink-300 text-[#4B2412] py-2 px-2 rounded-2xl text-xs font-extrabold flex flex-col items-center gap-0.5">
+                            <span class="text-base">🐰</span>
+                            <span>1. Đứng yên</span>
+                        </button>
+                        <button id="btn-state-eating" onclick="triggerBunnyState('eating')" class="state-btn kawaii-btn bg-white hover:bg-orange-100 text-[#4B2412] py-2 px-2 rounded-2xl text-xs font-extrabold flex flex-col items-center gap-0.5">
+                            <span class="text-base">🥕</span>
+                            <span>2. Ăn</span>
+                        </button>
+                        <button id="btn-state-drinking" onclick="triggerBunnyState('drinking')" class="state-btn kawaii-btn bg-white hover:bg-pink-100 text-[#4B2412] py-2 px-2 rounded-2xl text-xs font-extrabold flex flex-col items-center gap-0.5">
+                            <span class="text-base">🍓</span>
+                            <span>3. Uống</span>
+                        </button>
+                        <button id="btn-state-sleeping" onclick="triggerBunnyState('sleeping')" class="state-btn kawaii-btn bg-white hover:bg-indigo-100 text-[#4B2412] py-2 px-2 rounded-2xl text-xs font-extrabold flex flex-col items-center gap-0.5">
+                            <span class="text-base">😴</span>
+                            <span>4. Ngủ</span>
+                        </button>
+                        <button id="btn-state-laughing" onclick="triggerBunnyState('laughing')" class="state-btn kawaii-btn bg-white hover:bg-rose-100 text-[#4B2412] py-2 px-2 rounded-2xl text-xs font-extrabold flex flex-col items-center gap-0.5">
+                            <span class="text-base">😆</span>
+                            <span>5. Cười</span>
+                        </button>
+                        <button id="btn-state-sad" onclick="triggerBunnyState('sad')" class="state-btn kawaii-btn bg-white hover:bg-slate-200 text-[#4B2412] py-2 px-2 rounded-2xl text-xs font-extrabold flex flex-col items-center gap-0.5">
+                            <span class="text-base">😢</span>
+                            <span>6. Buồn</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bảng Mô phỏng Nhiệm vụ Hằng ngày -->
+            <div class="bg-white rounded-3xl p-4 kawaii-card">
+                <div class="flex items-center justify-between mb-2.5">
+                    <div>
+                        <h2 class="text-sm md:text-base font-extrabold text-[#4B2412]">📋 Nhiệm Vụ Hằng Ngày (Test luồng Thưởng / Phạt)</h2>
+                        <p class="text-xs text-[#8c5233]">Tick hoàn thành ➔ Thỏ bật nhảy Cười 🐰 | Bấm "Bỏ lỡ" ➔ Thỏ khóc Buồn cụp tai 😢</p>
+                    </div>
+                </div>
+                <div id="quest-list-container" class="space-y-2"></div>
+            </div>
+        </section>
+
+        <!-- =================================================================
+             CỬA SỔ 2: TRÌNH XEM MÃ NGUỒN & SAO CHÉP CHO CODEX (6 CỘT)
+             ================================================================= -->
+        <section id="pane-code" class="lg:col-span-6 flex flex-col">
+            <div class="bg-[#1e1e2e] text-slate-100 rounded-3xl kawaii-card overflow-hidden flex flex-col h-full min-h-[560px]">
+                
+                <!-- Thanh Tab chọn loại Code -->
+                <div class="bg-[#181825] border-b border-slate-700 px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <button id="code-tab-svg" onclick="switchCodeTab('svg')" class="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-pink-500 text-white transition">
+                            🎨 1. Mã SVG Chú Thỏ
+                        </button>
+                        <button id="code-tab-css" onclick="switchCodeTab('css')" class="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+                            🎬 2. Mã CSS Keyframes
+                        </button>
+                        <button id="code-tab-codex" onclick="switchCodeTab('codex')" class="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+                            🤖 3. Prompt & Code cho Codex
+                        </button>
+                    </div>
+
+                    <button onclick="copyActiveCode()" class="kawaii-btn bg-emerald-400 hover:bg-emerald-300 text-[#4B2412] text-xs font-extrabold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
+                        <span>📋 Sao chép mã này</span>
+                    </button>
+                </div>
+
+                <!-- Chú thích hướng dẫn nhanh trên khung Code -->
+                <div id="code-helper-banner" class="bg-slate-800/90 border-b border-slate-700 px-4 py-2 text-xs text-pink-200 flex items-center justify-between">
+                    <span>💡 Mã SVG Chú Thỏ Tai Cụp đã xóa sạch nét đen thừa ở giữa tai phải (`#ear-right`).</span>
+                    <span class="font-mono text-[11px] text-pink-300">Lop Bunny SVG Fixed</span>
+                </div>
+
+                <!-- Vùng hiển thị Code có thanh cuộn -->
+                <div class="relative flex-1 overflow-auto p-4 bg-[#1e1e2e]">
+                    <pre class="text-xs leading-relaxed font-mono text-emerald-300 whitespace-pre-wrap break-words"><code id="code-viewer-content"></code></pre>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Thông báo nổi (Toast) -->
+    <div id="toast-msg" class="fixed bottom-5 right-5 z-50 pointer-events-none opacity-0 translate-y-3 transition-all duration-300 bg-[#4B2412] text-pink-100 border-2 border-pink-200 px-4 py-2.5 rounded-2xl shadow-xl text-xs md:text-sm font-extrabold flex items-center gap-2">
+        <span>🐰</span>
+        <span id="toast-text">Đã sao chép!</span>
+    </div>
+
+    <script>
+        let coins = 240;
+        let currentBunnyState = 'idle';
+        let activeCodeTab = 'svg';
+        let autoResetTimer = null;
+
+        const stats = { hunger: 90, thirst: 86, happy: 95 };
+
+        const quests = [
+            { id: 1, title: 'Đọc 15 trang sách hoặc ôn bài mới hôm nay', reward: 35, done: false },
+            { id: 2, title: 'Uống đủ 2 lít nước và ăn trái cây tươi', reward: 30, done: false },
+            { id: 3, title: 'Đi ngủ đúng giờ trước 23:00', reward: 40, done: false }
+        ];
+
+        const stateDescriptions = {
+            idle: {
+                badge: '🐰 Đang đứng yên (.state-idle)',
+                label: 'Đang chọn: 1. Đứng yên 🐰',
+                speech: 'Khịt khịt~ Hoàn thành nhiệm vụ hằng ngày để thưởng cà rốt giòn ngọt cho Thỏ nha! 🥕✨'
+            },
+            eating: {
+                badge: '🥕 Đang gặm cà rốt (.state-eating)',
+                label: 'Đang chọn: 2. Ăn 🥕',
+                speech: 'Rộp rộp~ Cà rốt tươi với dâu tây ngọt lịm ngon tuyệt vời luôn! 🥕🍓'
+            },
+            drinking: {
+                badge: '🍓 Đang uống sữa dâu (.state-drinking)',
+                label: 'Đang chọn: 3. Uống 🍓',
+                speech: 'Chụt chụt~ Sữa dâu mát lành thơm phức giúp Thỏ tràn đầy năng lượng! 🥛💖'
+            },
+            sleeping: {
+                badge: '💤 Đang ngủ ngon (.state-sleeping)',
+                label: 'Đang chọn: 4. Ngủ 😴',
+                speech: 'Khò khò... Thỏ đang mơ thấy cánh đồng cà rốt khổng lồ... 😴🌙'
+            },
+            laughing: {
+                badge: '😆 Đang nhảy vui sướng (.state-laughing)',
+                label: 'Đang chọn: 5. Cười 😆',
+                speech: 'Yayyy!! Bạn giỏi quá đi, Thỏ vui đến mức nhảy tung cả hai tai lên nè! 💖🐰'
+            },
+            sad: {
+                badge: '🌧️ Đang buồn tủi thân (.state-sad)',
+                label: 'Đang chọn: 6. Buồn 😢',
+                speech: 'Hức hức... Bạn quên làm nhiệm vụ rồi, Thỏ buồn rớt nước mắt luôn... 😢🌧️'
+            }
+        };
+
+        function triggerBunnyState(stateKey, durationMs = 0) {
+            const svgEl = document.getElementById('pawquest-bunny-svg');
+            const badgeEl = document.getElementById('state-badge');
+            const labelEl = document.getElementById('active-state-label');
+            const speechEl = document.getElementById('speech-bubble');
+
+            if (autoResetTimer) {
+                clearTimeout(autoResetTimer);
+                autoResetTimer = null;
+            }
+
+            currentBunnyState = stateKey;
+            svgEl.setAttribute('class', `w-full h-full block state-${stateKey}`);
+
+            const info = stateDescriptions[stateKey] || stateDescriptions.idle;
+            badgeEl.textContent = info.badge;
+            labelEl.textContent = info.label;
+            speechEl.textContent = info.speech;
+
+            if (stateKey === 'eating') stats.hunger = Math.min(100, stats.hunger + 10);
+            if (stateKey === 'drinking') stats.thirst = Math.min(100, stats.thirst + 10);
+            if (stateKey === 'laughing') stats.happy = Math.min(100, stats.happy + 8);
+            if (stateKey === 'sad') stats.happy = Math.max(15, stats.happy - 15);
+            updateStatsBars();
+
+            document.querySelectorAll('.state-btn').forEach(btn => {
+                btn.classList.remove('active-state', 'bg-pink-300');
+                btn.classList.add('bg-white');
+            });
+            const activeBtn = document.getElementById(`btn-state-${stateKey}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-white');
+                activeBtn.classList.add('active-state', 'bg-pink-300');
+            }
+
+            if (durationMs > 0) {
+                autoResetTimer = setTimeout(() => {
+                    triggerBunnyState('idle');
+                }, durationMs);
+            }
+        }
+
+        function updateStatsBars() {
+            document.getElementById('coin-display').textContent = coins;
+            document.getElementById('bar-hunger').style.width = `${stats.hunger}%`;
+            document.getElementById('bar-thirst').style.width = `${stats.thirst}%`;
+            document.getElementById('bar-happy').style.width = `${stats.happy}%`;
+        }
+
+        function renderQuests() {
+            const container = document.getElementById('quest-list-container');
+            container.innerHTML = quests.map(q => `
+                <div class="flex items-center justify-between gap-2 p-2.5 rounded-2xl border-2 border-[#4B2412] ${q.done ? 'bg-emerald-50' : 'bg-pink-50/40'}">
+                    <label class="flex items-center gap-2.5 cursor-pointer flex-1">
+                        <input type="checkbox" ${q.done ? 'checked' : ''} onchange="completeQuest(${q.id})" class="w-4 h-4 accent-pink-500 rounded cursor-pointer"/>
+                        <span class="text-xs font-bold ${q.done ? 'line-through text-slate-400' : 'text-[#4B2412]'}">${q.title}</span>
+                    </label>
+                    <div class="flex items-center gap-1.5">
+                        <span class="bg-amber-200 border border-[#4B2412] text-[11px] font-extrabold px-2 py-0.5 rounded-lg">+${q.reward} 🪙</span>
+                        <button onclick="missQuest(${q.id})" class="kawaii-btn bg-rose-100 hover:bg-rose-200 text-rose-900 text-[11px] font-extrabold px-2 py-0.5 rounded-lg">
+                            Bỏ lỡ 😢
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function completeQuest(id) {
+            const q = quests.find(item => item.id === id);
+            if (!q) return;
+            q.done = !q.done;
+            if (q.done) {
+                coins += q.reward;
+                triggerBunnyState('laughing', 3800);
+                showToast(`🎉 Hoàn thành "${q.title}"! +${q.reward} Xu!`);
+            }
+            updateStatsBars();
+            renderQuests();
+        }
+
+        function missQuest(id) {
+            const q = quests.find(item => item.id === id);
+            if (q) q.done = false;
+            triggerBunnyState('sad', 4500);
+            showToast('😢 Bỏ lỡ nhiệm vụ! Chú Thỏ đang buồn bã...');
+            renderQuests();
+        }
+
+        function setLayoutMode(mode) {
+            const previewPane = document.getElementById('pane-preview');
+            const codePane = document.getElementById('pane-code');
+
+            ['split', 'preview', 'code'].forEach(m => {
+                const btn = document.getElementById(`view-btn-${m}`);
+                btn.classList.remove('active-state', 'bg-pink-300');
+                btn.classList.add('bg-white');
+            });
+            const currentBtn = document.getElementById(`view-btn-${mode}`);
+            currentBtn.classList.remove('bg-white');
+            currentBtn.classList.add('active-state', 'bg-pink-300');
+
+            if (mode === 'split') {
+                previewPane.className = 'lg:col-span-6 flex flex-col gap-4';
+                codePane.className = 'lg:col-span-6 flex flex-col';
+            } else if (mode === 'preview') {
+                previewPane.className = 'lg:col-span-8 lg:col-start-3 flex flex-col gap-4';
+                codePane.className = 'hidden';
+            } else if (mode === 'code') {
+                previewPane.className = 'hidden';
+                codePane.className = 'lg:col-span-12 flex flex-col';
+            }
+        }
+
+        function getCleanSvgCode() {
+            return document.getElementById('svg-container-source').innerHTML.trim();
+        }
+
+        function getCleanCssCode() {
+            return document.getElementById('pawquest-bunny-animation-styles').textContent.trim();
+        }
+
+        function getCodexPromptBundle() {
+            return `Hãy tích hợp nhân vật Chú Thỏ Tai Cụp (Lop Bunny) cho ứng dụng PawQuest của tôi dựa trên bộ mã SVG và CSS Animation chuẩn dưới đây.
+
+1. Cấu trúc Rigging SVG Nhân vật Chú Thỏ:
+- Thẻ gốc <svg id="pawquest-bunny-svg"> điều khiển trạng thái thông qua 6 class: 'state-idle' | 'state-eating' | 'state-drinking' | 'state-sleeping' | 'state-laughing' | 'state-sad'.
+- Các bộ phận tách rời có tâm xoay riêng:
+  + #bunny-whole (toàn thân)
+  + #bunny-body-group (thân trắng kem #FFF5F2, bụng hồng phấn #F9CDC8, hai chân dưới)
+  + #bunny-tail (đuôi bông xù bên trái)
+  + #paws-front (hai tay nhỏ đặt trước ngực)
+  + #bunny-head-group (đầu thỏ với 2 chỏm lông tơ trên đỉnh, má hồng 3 gạch chéo #bunny-blush)
+  + #ear-left, #ear-right (đôi tai cụp dài hai bên; lòng tai phải #F9CDC8 sạch nét thừa, chỉ có duy nhất đường viền bao ngoài)
+  + #nose-mouth-unit (chiếc mũi/miệng chữ Y nhúc nhích khịt khịt)
+  + Các nhóm biểu cảm & đạo cụ ẩn/hiện tự động: .face-normal, .face-eating (#prop-food), .face-drinking (#prop-drink), .face-sleeping (#sleep-bubble, #prop-zzz), .face-laughing (#prop-hearts), .face-sad (#prop-sad-cloud).
+
+2. Mã CSS Animation đầy đủ:
+\`\`\`css
+${getCleanCssCode()}
+\`\`\`
+
+3. Mã SVG Nhân Vật Chú Thỏ:
+\`\`\`html
+${getCleanSvgCode()}
+\`\`\``;
+        }
+
+        function switchCodeTab(tabName) {
+            activeCodeTab = tabName;
+            const viewer = document.getElementById('code-viewer-content');
+            const banner = document.getElementById('code-helper-banner');
+
+            ['svg', 'css', 'codex'].forEach(t => {
+                document.getElementById(`code-tab-${t}`).className = 'px-3 py-1.5 rounded-xl text-xs font-extrabold bg-slate-800 text-slate-300 hover:bg-slate-700 transition';
+            });
+            document.getElementById(`code-tab-${tabName}`).className = 'px-3 py-1.5 rounded-xl text-xs font-extrabold bg-pink-500 text-white transition';
+
+            if (tabName === 'svg') {
+                viewer.textContent = getCleanSvgCode();
+                banner.innerHTML = '<span>💡 Mã SVG Chú Thỏ Tai Cụp đã xóa sạch nét đen thừa ở giữa tai phải (`#ear-right`).</span><span class="font-mono text-[11px] text-pink-300">SVG Vector</span>';
+            } else if (tabName === 'css') {
+                viewer.textContent = getCleanCssCode();
+                banner.innerHTML = '<span>🎬 Toàn bộ @keyframes CSS cho 6 hành động: Đứng yên, Ăn, Uống, Ngủ, Cười, Buồn.</span><span class="font-mono text-[11px] text-pink-300">CSS3 Animations</span>';
+            } else {
+                viewer.textContent = getCodexPromptBundle();
+                banner.innerHTML = '<span>🤖 Bản đóng gói hoàn chỉnh gồm Prompt hướng dẫn + CSS + SVG để bạn dán thẳng vào Codex!</span><span class="font-mono text-[11px] text-pink-300">Codex Ready</span>';
+            }
+        }
+
+        function copyActiveCode() {
+            const content = document.getElementById('code-viewer-content').textContent;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = content;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            showToast('📋 Đã sao chép mã nguồn Chú Thỏ vào bộ nhớ tạm!');
+        }
+
+        let toastTimer = null;
+        function showToast(text) {
+            const box = document.getElementById('toast-msg');
+            document.getElementById('toast-text').textContent = text;
+            box.classList.remove('opacity-0', 'translate-y-3');
+            box.classList.add('opacity-100', 'translate-y-0');
+
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                box.classList.remove('opacity-100', 'translate-y-0');
+                box.classList.add('opacity-0', 'translate-y-3');
+            }, 2800);
+        }
+
+        window.onload = () => {
+            renderQuests();
+            updateStatsBars();
+            switchCodeTab('svg');
+        };
+    </script>
+</body>
+</html>

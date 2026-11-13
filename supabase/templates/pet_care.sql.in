@@ -1,0 +1,108 @@
+-- Generated from config/pet-care-balance.json; do not reapply an installed migration.
+begin;
+create function pawquest_private.pet_care_balance() returns jsonb language sql immutable set search_path='' as $$
+    select '@@BALANCE_JSON@@'::jsonb;
+$$;
+revoke all on function pawquest_private.pet_care_balance() from public,anon,authenticated,service_role;
+create table public.pet_food_inventory (
+    user_id uuid primary key references public.profiles(id),
+    quantity integer not null check(quantity between 0 and 1000000)
+);
+alter table public.pet_food_inventory enable row level security;
+revoke all on public.pet_food_inventory from public,anon,authenticated,service_role;
+grant select on public.pet_food_inventory to authenticated;
+create policy food_read_own on public.pet_food_inventory for select to authenticated using(user_id=(select auth.uid()));
+create function pawquest_private.starter_food() returns trigger language plpgsql security definer set search_path='' as $$
+begin
+    insert into public.pet_food_inventory values(new.id,(pawquest_private.pet_care_balance()->>'starterFood')::integer) on conflict do nothing;
+    return new;
+end $$;
+revoke all on function pawquest_private.starter_food() from public,anon,authenticated,service_role;
+create trigger profile_starter_food after insert on public.profiles for each row execute function pawquest_private.starter_food();
+insert into public.pet_food_inventory select id,(pawquest_private.pet_care_balance()->>'starterFood')::integer from public.profiles on conflict do nothing;
+alter table public.pets add column energy_updated_at timestamptz;
+update public.pets set energy_updated_at=stats_updated_at;
+alter table public.pets alter column energy_updated_at set default clock_timestamp(),alter column energy_updated_at set not null,
+    add column sleep_started_at timestamptz,add column sleep_until timestamptz,add column sleep_start_energy smallint,
+    add constraint finite_energy_time check(isfinite(energy_updated_at)),
+    add constraint valid_sleep check(
+        (sleep_started_at is null and sleep_until is null and sleep_start_energy is null) or
+        (sleep_started_at is not null and sleep_until is not null and sleep_start_energy is not null and
+         isfinite(sleep_started_at) and isfinite(sleep_until) and sleep_until>sleep_started_at and sleep_start_energy between 0 and 99));
+alter table pawquest_private.pet_care_requests add column outcome text not null default 'legacy_applied',
+    add column food_used integer not null default 0 check(food_used between 0 and 1);
+
+create or replace function public.pet_state(p_action text default null,p_request_id uuid default null) returns jsonb
+language plpgsql security definer set search_path='' as $$
+declare actor uuid:=auth.uid(); p public.pets%rowtype; stamp timestamptz; hours bigint;
+    food integer; balance bigint; previous pawquest_private.pet_care_requests%rowtype;
+    code text; used integer:=0; result jsonb:=null; minutes integer;
+    b jsonb:=pawquest_private.pet_care_balance(); maxstat integer:=(b->>'statMax')::integer;
+begin
+    if actor is null then raise exception 'Authentication required' using errcode='42501'; end if;
+    if p_action is not null and (p_action not in ('feed','play','sleep','touch') or p_request_id is null) then
+        raise exception 'Valid care action and request UUID required' using errcode='23514';
+    end if;
+    select coins into balance from public.wallets where user_id=actor for update;
+    if not found then raise exception 'Account not initialized' using errcode='23503'; end if;
+    select * into p from public.pets where user_id=actor for update;
+    if not found then raise exception 'Pet not initialized' using errcode='23503'; end if;
+    select quantity into food from public.pet_food_inventory where user_id=actor for update;
+    if not found then raise exception 'Food inventory missing' using errcode='23503'; end if;
+    stamp:=clock_timestamp();
+    hours:=greatest(0,floor(extract(epoch from(stamp-p.stats_updated_at))/3600))::bigint;
+    p.hunger:=greatest(0,p.hunger-least(hours,100)*(b->>'hungerDecayPerHour')::integer);
+    p.happiness:=greatest(0,p.happiness-least(hours,100)*(b->>'happinessDecayPerHour')::integer);
+    p.stats_updated_at:=p.stats_updated_at+hours*interval '1 hour';
+    if p.sleep_until is not null then
+        minutes:=greatest(0,floor(extract(epoch from(least(stamp,p.sleep_until)-p.sleep_started_at))/60))::integer;
+        p.energy:=least(maxstat,p.sleep_start_energy+minutes*(b->>'sleepEnergyPerMinute')::integer);
+        if stamp>=p.sleep_until then
+            p.energy:=maxstat; p.energy_updated_at:=p.sleep_until;
+            p.sleep_started_at:=null; p.sleep_until:=null; p.sleep_start_energy:=null;
+        end if;
+    end if;
+    if p.sleep_until is null then
+        hours:=greatest(0,floor(extract(epoch from(stamp-p.energy_updated_at))/3600))::bigint;
+        p.energy:=greatest(0,p.energy-least(hours,100)*(b->>'energyDecayPerHour')::integer);
+        p.energy_updated_at:=p.energy_updated_at+hours*interval '1 hour';
+    end if;
+    if p_action is not null then
+        select * into previous from pawquest_private.pet_care_requests where user_id=actor and request_id=p_request_id;
+        if found then
+            if previous.action<>p_action then raise exception 'Request UUID already used' using errcode='23514'; end if;
+            code:=previous.outcome; used:=previous.food_used;
+        else
+            code:=case
+                when p.sleep_until is not null then case when p_action='sleep' then 'already_sleeping' else 'pet_sleeping' end
+                when p_action='feed' and p.hunger>=maxstat then 'already_full'
+                when p_action='feed' and food<=0 then 'no_food'
+                when p_action='play' and p.energy<(b->>'playEnergyCost')::integer then 'not_enough_energy'
+                when p_action='play' and p.happiness>=maxstat then 'already_happy'
+                when p_action='sleep' and p.energy>=maxstat then 'fully_rested'
+                when p_action='feed' then 'fed' when p_action='play' then 'played'
+                when p_action='sleep' then 'sleep_started' else 'touched' end;
+            if code='fed' then
+                update public.pet_food_inventory set quantity=quantity-1 where user_id=actor and quantity>0 returning quantity into food;
+                if not found then raise exception 'Food inventory conflict' using errcode='23514'; end if;
+                p.hunger:=least(maxstat,p.hunger+(b->>'feedGain')::integer); used:=1;
+            elsif code='played' then
+                p.happiness:=least(maxstat,p.happiness+(b->>'playHappinessGain')::integer);
+                p.energy:=p.energy-(b->>'playEnergyCost')::integer;
+            elsif code='sleep_started' then
+                minutes:=ceil((maxstat-p.energy)::numeric/(b->>'sleepEnergyPerMinute')::integer)::integer;
+                p.sleep_started_at:=stamp; p.sleep_until:=stamp+minutes*interval '1 minute'; p.sleep_start_energy:=p.energy;
+            end if;
+            insert into pawquest_private.pet_care_requests(user_id,request_id,action,outcome,food_used) values(actor,p_request_id,p_action,code,used);
+        end if;
+        result:=jsonb_build_object('request_id',p_request_id,'action',p_action,'code',code,
+            'applied',code in ('fed','played','sleep_started','touched','legacy_applied'),'food_consumed',used);
+    end if;
+    update public.pets set hunger=p.hunger,happiness=p.happiness,energy=p.energy,stats_updated_at=p.stats_updated_at,
+        energy_updated_at=p.energy_updated_at,sleep_started_at=p.sleep_started_at,sleep_until=p.sleep_until,sleep_start_energy=p.sleep_start_energy
+        where id=p.id returning * into p;
+    return jsonb_build_object('pet',to_jsonb(p),'coins',balance,'server_now',stamp,'food_quantity',food,'care_result',result);
+end $$;
+revoke all on function public.pet_state(text,uuid) from public,anon,authenticated,service_role;
+grant execute on function public.pet_state(text,uuid) to authenticated;
+commit;

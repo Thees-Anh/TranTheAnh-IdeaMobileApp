@@ -1,0 +1,1154 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'">
+<style>* {
+            font-family: 'Quicksand', sans-serif;
+            user-select: none;
+        }
+        code, pre, .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+            user-select: text;
+        }
+
+        body {
+            background-color: #fdf2f8;
+            color: #4A2511;
+        }
+
+        /* =========================================================
+           HỆ THỐNG RIGGING & KEYFRAME ANIMATIONS CHO CHÚ CÚN MẪU
+           ========================================================= */
+        #dog-whole {
+            transform-origin: 200px 280px;
+            transition: transform 0.3s ease;
+        }
+        #dog-body-group {
+            transform-origin: 200px 265px;
+        }
+        #dog-head-group {
+            transform-origin: 200px 185px;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        #ear-left {
+            transform-origin: 138px 110px;
+            transition: transform 0.35s ease;
+        }
+        #ear-right {
+            transform-origin: 256px 110px;
+            transition: transform 0.35s ease;
+        }
+        #dog-tail {
+            transform-origin: 138px 258px;
+        }
+        #paws-front {
+            transform-origin: 200px 215px;
+        }
+
+        /* 1. TRẠNG THÁI ĐỨNG YÊN (IDLE) */
+        @keyframes dogIdleHead {
+            0%, 100% { transform: rotate(-1.5deg) translateY(0px); }
+            50% { transform: rotate(2deg) translateY(3px); }
+        }
+        @keyframes dogIdleBody {
+            0%, 100% { transform: scale(1, 1); }
+            50% { transform: scale(1.02, 0.985) translateY(1px); }
+        }
+        @keyframes dogEarLeftIdle {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(4deg); }
+        }
+        @keyframes dogEarRightIdle {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(-4deg); }
+        }
+        @keyframes dogTailIdle {
+            0%, 100% { transform: rotate(-6deg); }
+            50% { transform: rotate(14deg); }
+        }
+        @keyframes dogBlink {
+            0%, 94%, 100% { transform: scaleY(1); }
+            97% { transform: scaleY(0.08); }
+        }
+
+        .state-idle #dog-head-group { animation: dogIdleHead 3s ease-in-out infinite; }
+        .state-idle #dog-body-group { animation: dogIdleBody 3s ease-in-out infinite; }
+        .state-idle #ear-left { animation: dogEarLeftIdle 3s ease-in-out infinite; }
+        .state-idle #ear-right { animation: dogEarRightIdle 3s ease-in-out infinite; }
+        .state-idle #dog-tail { animation: dogTailIdle 1.8s ease-in-out infinite; }
+        .eye-blink-group {
+            transform-origin: 205px 150px;
+            animation: dogBlink 4s infinite;
+        }
+
+        /* 2. TRẠNG THÁI ĂN (EATING) */
+        @keyframes dogEatHead {
+            0%, 100% { transform: translateY(4px) rotate(0deg); }
+            35%, 75% { transform: translateY(18px) rotate(5deg); }
+            55% { transform: translateY(10px) rotate(2deg); }
+        }
+        @keyframes dogEatEars {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(8deg); }
+        }
+        @keyframes dogEatEarsRight {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(-8deg); }
+        }
+        @keyframes dogChewMouth {
+            0%, 100% { transform: scale(0.9, 0.65); }
+            50% { transform: scale(1.12, 1.25); }
+        }
+        @keyframes dogTailFast {
+            0%, 100% { transform: rotate(-14deg); }
+            50% { transform: rotate(24deg); }
+        }
+        @keyframes dogPawsEat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(5px); }
+        }
+        @keyframes crumbFlyLeft {
+            0% { opacity: 1; transform: translate(0, 0) scale(1); }
+            100% { opacity: 0; transform: translate(-18px, -22px) scale(0.3); }
+        }
+        @keyframes crumbFlyRight {
+            0% { opacity: 1; transform: translate(0, 0) scale(1); }
+            100% { opacity: 0; transform: translate(18px, -20px) scale(0.3); }
+        }
+
+        .state-eating #dog-head-group { animation: dogEatHead 0.75s ease-in-out infinite; }
+        .state-eating #ear-left { animation: dogEatEars 0.38s ease-in-out infinite; }
+        .state-eating #ear-right { animation: dogEatEarsRight 0.38s ease-in-out infinite; }
+        .state-eating #dog-tail { animation: dogTailFast 0.35s ease-in-out infinite; }
+        .state-eating #paws-front { animation: dogPawsEat 0.38s ease-in-out infinite; }
+        .state-eating #mouth-eating {
+            transform-origin: 205px 175px;
+            animation: dogChewMouth 0.25s ease-in-out infinite;
+        }
+        .state-eating .crumb-l { animation: crumbFlyLeft 0.55s ease-out infinite; }
+        .state-eating .crumb-r { animation: crumbFlyRight 0.55s ease-out 0.25s infinite; }
+
+        /* 3. TRẠNG THÁI UỐNG (DRINKING) */
+        @keyframes dogDrinkHead {
+            0%, 100% { transform: translateY(12px) rotate(4deg); }
+            50% { transform: translateY(16px) rotate(7deg); }
+        }
+        @keyframes dogTongueLap {
+            0%, 100% { transform: translateY(0px) scaleY(0.7); }
+            50% { transform: translateY(8px) scaleY(1.35); }
+        }
+        @keyframes waterRippleAnim {
+            0%, 100% { transform: scaleX(1); opacity: 0.75; }
+            50% { transform: scaleX(0.86); opacity: 1; }
+        }
+        @keyframes splashDrop {
+            0% { opacity: 0; transform: translateY(0) scale(0.5); }
+            40% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-16px) scale(1.1); }
+        }
+
+        .state-drinking #dog-head-group { animation: dogDrinkHead 0.55s ease-in-out infinite; }
+        .state-drinking #dog-tail { animation: dogTailIdle 0.9s ease-in-out infinite; }
+        .state-drinking #drink-tongue {
+            transform-origin: 205px 174px;
+            animation: dogTongueLap 0.28s ease-in-out infinite;
+        }
+        .state-drinking #water-ripple {
+            transform-origin: 215px 282px;
+            animation: waterRippleAnim 0.35s ease-in-out infinite;
+        }
+        .state-drinking .drop-1 { animation: splashDrop 0.65s ease-out infinite; }
+        .state-drinking .drop-2 { animation: splashDrop 0.65s ease-out 0.3s infinite; }
+
+        /* 4. TRẠNG THÁI NGỦ (SLEEPING) */
+        @keyframes dogSleepBody {
+            0%, 100% { transform: scale(1.02, 0.96) translateY(4px); }
+            50% { transform: scale(1.06, 0.92) translateY(8px); }
+        }
+        @keyframes dogSleepHead {
+            0%, 100% { transform: translateY(12px) rotate(-8deg); }
+            50% { transform: translateY(16px) rotate(-11deg); }
+        }
+        @keyframes snotBubblePulse {
+            0%, 100% { transform: scale(0.55); opacity: 0.75; }
+            50% { transform: scale(1.25); opacity: 0.95; }
+        }
+        @keyframes zzzRise {
+            0% { opacity: 0; transform: translate(0, 8px) scale(0.5); }
+            40% { opacity: 1; }
+            100% { opacity: 0; transform: translate(26px, -42px) scale(1.2); }
+        }
+
+        .state-sleeping #dog-body-group { animation: dogSleepBody 3.6s ease-in-out infinite; }
+        .state-sleeping #dog-head-group { animation: dogSleepHead 3.6s ease-in-out infinite; }
+        .state-sleeping #ear-left { transform: rotate(6deg); }
+        .state-sleeping #ear-right { transform: rotate(-6deg); }
+        .state-sleeping #dog-tail { transform: rotate(-18deg); transition: transform 0.5s ease; }
+        .state-sleeping #sleep-bubble {
+            transform-origin: 222px 160px;
+            animation: snotBubblePulse 3.6s ease-in-out infinite;
+        }
+        .state-sleeping .zzz-1 { animation: zzzRise 3s ease-out infinite; }
+        .state-sleeping .zzz-2 { animation: zzzRise 3s ease-out 1s infinite; }
+        .state-sleeping .zzz-3 { animation: zzzRise 3s ease-out 2s infinite; }
+
+        /* 5. TRẠNG THÁI CƯỜI / HẠNH PHÚC (LAUGHING) */
+        @keyframes dogHappyBounce {
+            0%, 100% { transform: translateY(0px) scale(1, 1); }
+            35% { transform: translateY(-15px) scale(0.96, 1.05); }
+            70% { transform: translateY(0px) scale(1.05, 0.95); }
+        }
+        @keyframes dogHappyHead {
+            0%, 100% { transform: rotate(-6deg); }
+            50% { transform: rotate(6deg); }
+        }
+        @keyframes dogHappyEarL {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(15deg); }
+        }
+        @keyframes dogHappyEarR {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(-15deg); }
+        }
+        @keyframes dogPawsClap {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-7px) scale(1.06); }
+        }
+        @keyframes heartFloatUp {
+            0% { opacity: 0; transform: translateY(8px) scale(0.4); }
+            40% { opacity: 1; transform: translateY(-8px) scale(1.1); }
+            100% { opacity: 0; transform: translateY(-34px) scale(0.85); }
+        }
+
+        .state-laughing #dog-whole { animation: dogHappyBounce 0.6s ease-in-out infinite; }
+        .state-laughing #dog-head-group { animation: dogHappyHead 0.42s ease-in-out infinite; }
+        .state-laughing #ear-left { animation: dogHappyEarL 0.3s ease-in-out infinite; }
+        .state-laughing #ear-right { animation: dogHappyEarR 0.3s ease-in-out infinite; }
+        .state-laughing #paws-front { animation: dogPawsClap 0.3s ease-in-out infinite; }
+        .state-laughing #dog-tail { animation: dogTailFast 0.25s ease-in-out infinite; }
+        .state-laughing .heart-1 { animation: heartFloatUp 1.2s ease-out infinite; }
+        .state-laughing .heart-2 { animation: heartFloatUp 1.2s ease-out 0.4s infinite; }
+        .state-laughing .heart-3 { animation: heartFloatUp 1.2s ease-out 0.8s infinite; }
+
+        /* 6. TRẠNG THÁI BUỒN / ĐÓI (SAD) */
+        @keyframes dogSadTremble {
+            0%, 100% { transform: translateX(0px) scale(0.99, 0.97); }
+            25% { transform: translateX(-1.5px) scale(0.99, 0.97); }
+            75% { transform: translateX(1.5px) scale(0.99, 0.97); }
+        }
+        @keyframes dogSadHead {
+            0%, 100% { transform: translateY(10px) rotate(-4deg); }
+            50% { transform: translateY(13px) rotate(-6deg); }
+        }
+        @keyframes tearFall {
+            0% { opacity: 0; transform: translateY(0px) scale(0.6); }
+            30% { opacity: 1; transform: translateY(6px) scale(1); }
+            100% { opacity: 0; transform: translateY(24px) scale(0.8); }
+        }
+        @keyframes gloomCloudBob {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(5px); }
+        }
+
+        .state-sad #dog-body-group { animation: dogSadTremble 0.4s ease-in-out infinite; }
+        .state-sad #dog-head-group { animation: dogSadHead 2.4s ease-in-out infinite; }
+        .state-sad #ear-left { transform: rotate(8deg) translateY(5px); }
+        .state-sad #ear-right { transform: rotate(-10deg) translateY(5px); }
+        .state-sad #dog-tail { transform: rotate(-28deg); transition: transform 0.4s ease; }
+        .state-sad .tear-drop-l { animation: tearFall 1.1s ease-in infinite; }
+        .state-sad .tear-drop-r { animation: tearFall 1.1s ease-in 0.55s infinite; }
+        .state-sad #gloom-cloud { animation: gloomCloudBob 2s ease-in-out infinite; }
+
+        /* ẨN/HIỆN BIỂU CẢM & ĐẠO CỤ THEO STATE */
+        .face-expr, .prop-group, .fx-overlay { display: none; }
+        .state-idle .face-idle { display: block; }
+        .state-eating .face-eating, .state-eating .prop-food { display: block; }
+        .state-drinking .face-drinking, .state-drinking .prop-drink { display: block; }
+        .state-sleeping .face-sleeping, .state-sleeping .fx-sleeping { display: block; }
+        .state-laughing .face-laughing, .state-laughing .fx-laughing { display: block; }
+        .state-sad .face-sad, .state-sad .fx-sad { display: block; }
+
+        /* UI STYLING */
+        .kawaii-card {
+            border: 3px solid #4A2511;
+            box-shadow: 0 6px 0 rgba(74, 37, 17, 0.14);
+        }
+        .kawaii-btn {
+            border: 2.5px solid #4A2511;
+            box-shadow: 0 3px 0 #4A2511;
+            transition: all 0.12s ease;
+        }
+        .kawaii-btn:hover:not(:disabled) {
+            transform: translateY(-1.5px);
+            box-shadow: 0 4.5px 0 #4A2511;
+        }
+        .kawaii-btn:active:not(:disabled), .kawaii-btn.active-state {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #4A2511;
+        }
+
+        ::-webkit-scrollbar { width: 7px; height: 7px; }
+        ::-webkit-scrollbar-track { background: #27272a; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb { background: #f472b6; border-radius: 6px; }
+
+html,body{margin:0;width:100%;height:auto;overflow:hidden;background:#FFD9EC;touch-action:manipulation}
+svg{display:block;width:100%;height:auto;aspect-ratio:400/330;object-fit:contain}.hidden{display:none!important}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+* {
+            font-family: 'Quicksand', sans-serif;
+            user-select: none;
+        }
+        code, pre, .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+            user-select: text;
+        }
+        body {
+            background-color: #fdf2f8;
+            color: #4B2412;
+        }
+
+        /* =========================================================
+           1. HỆ THỐNG RIGGING CHUYỂN ĐỘNG THÚ CƯNG & PHỤ KIỆN
+           (Phụ kiện gắn trong #pet-head-rig & #pet-body-rig sẽ tự động
+            nghiêng và nhún nhảy đồng bộ 100% với thú cưng)
+           ========================================================= */
+        #pet-root-stage {
+            transform-origin: 300px 330px;
+        }
+        #pet-body-rig {
+            transform-origin: 300px 330px;
+        }
+        #pet-head-rig {
+            transform-origin: 300px 235px;
+        }
+
+        /* Chế độ 1: Đứng yên thở nhẹ (Idle) */
+        @keyframes petIdleBreath {
+            0%, 100% { transform: scale(1, 1) translateY(0px); }
+            50% { transform: scale(1.018, 0.985) translateY(2px); }
+        }
+        @keyframes petIdleHeadTilt {
+            0%, 100% { transform: rotate(-1.6deg) translateY(0px); }
+            50% { transform: rotate(1.8deg) translateY(2.5px); }
+        }
+
+        /* Chế độ 2: Nhún nhảy vui vẻ (Happy Bounce) */
+        @keyframes petHappyBounce {
+            0%, 100% { transform: translateY(0px) scale(1, 1); }
+            40% { transform: translateY(-14px) scale(0.96, 1.04); }
+            75% { transform: translateY(2px) scale(1.04, 0.96); }
+        }
+        @keyframes petHappyHeadWag {
+            0%, 100% { transform: rotate(-4deg) translateY(0px); }
+            50% { transform: rotate(4deg) translateY(-4px); }
+        }
+
+        .anim-idle #pet-body-rig {
+            animation: petIdleBreath 3.2s ease-in-out infinite;
+        }
+        .anim-idle #pet-head-rig {
+            animation: petIdleHeadTilt 3.2s ease-in-out infinite;
+        }
+
+        .anim-bounce #pet-body-rig {
+            animation: petHappyBounce 0.65s ease-in-out infinite;
+        }
+        .anim-bounce #pet-head-rig {
+            animation: petHappyHeadWag 0.65s ease-in-out infinite;
+        }
+
+        /* =========================================================
+           2. ANIMATION RIÊNG CHO TỪNG PHỤ KIỆN THÚ CƯNG (#acc-1 -> #acc-10)
+           ========================================================= */
+        /* Cánh thiên thần vẫy (#acc-wings) */
+        @keyframes wingFlapLeft {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(-12deg) translateY(-3px); }
+        }
+        @keyframes wingFlapRight {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(12deg) translateY(-3px); }
+        }
+        #wing-left { transform-origin: 255px 255px; animation: wingFlapLeft 1.4s ease-in-out infinite; }
+        #wing-right { transform-origin: 345px 255px; animation: wingFlapRight 1.4s ease-in-out infinite; }
+
+        /* Bóng bay trái tim của Balo (#acc-backpack) */
+        @keyframes balloonBob {
+            0%, 100% { transform: translateY(0px) rotate(-3deg); }
+            50% { transform: translateY(-9px) rotate(4deg); }
+        }
+        #acc-balloon-float {
+            transform-origin: 375px 150px;
+            animation: balloonBob 2.6s ease-in-out infinite;
+        }
+
+        /* Mầm cây đung đưa (#acc-sprout) */
+        @keyframes sproutSway {
+            0%, 100% { transform: rotate(-4deg); }
+            50% { transform: rotate(6deg); }
+        }
+        #sprout-stem {
+            transform-origin: 300px 134px;
+            animation: sproutSway 2.2s ease-in-out infinite;
+        }
+
+        /* Chuông vàng lắc nhẹ (#acc-bowtie) */
+        @keyframes bellRing {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+        #golden-bell {
+            transform-origin: 300px 254px;
+            animation: bellRing 1.8s ease-in-out infinite;
+        }
+
+        /* =========================================================
+           3. ANIMATION CHO 10 NỘI THẤT CĂN PHÒNG (#furn-1 -> #furn-10)
+           ========================================================= */
+        /* 1. Mây trôi ngoài cửa sổ (#furn-window) */
+        @keyframes cloudDrift {
+            0%, 100% { transform: translateX(-6px); }
+            50% { transform: translateX(8px); }
+        }
+        .window-cloud { animation: cloudDrift 5s ease-in-out infinite; }
+
+        /* 2. Quả lắc đồng hồ mèo (#furn-clock) */
+        @keyframes pendulumSwing {
+            0%, 100% { transform: rotate(-14deg); }
+            50% { transform: rotate(14deg); }
+        }
+        #clock-pendulum {
+            transform-origin: 430px 128px;
+            animation: pendulumSwing 1.6s ease-in-out infinite;
+        }
+
+        /* 3. Dây đèn LED nhấp nháy (#furn-lights) */
+        @keyframes bulbTwinkle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.55; transform: scale(0.88); }
+        }
+        .led-bulb-odd { transform-box: fill-box; transform-origin: center; animation: bulbTwinkle 1.8s ease-in-out infinite; }
+        .led-bulb-even { transform-box: fill-box; transform-origin: center; animation: bulbTwinkle 1.8s ease-in-out 0.9s infinite; }
+
+        /* 5. Bóng bông trên trụ mèo (#furn-cat-tree) */
+        @keyframes pomPomSwing {
+            0%, 100% { transform: rotate(-10deg); }
+            50% { transform: rotate(10deg); }
+        }
+        #cat-tree-toy {
+            transform-origin: 118px 180px;
+            animation: pomPomSwing 2s ease-in-out infinite;
+        }
+
+        /* 8. Khói ấm trà bay lên (#furn-tea-table) */
+        @keyframes steamRise {
+            0% { opacity: 0; transform: translateY(4px) scale(0.8); }
+            50% { opacity: 0.75; }
+            100% { opacity: 0; transform: translateY(-16px) scale(1.2); }
+        }
+        .tea-steam-1 { animation: steamRise 2.4s ease-out infinite; }
+        .tea-steam-2 { animation: steamRise 2.4s ease-out 1.2s infinite; }
+
+        /* 9. Nốt nhạc bay lên từ máy đĩa than (#furn-gramophone) */
+        @keyframes noteFloat {
+            0% { opacity: 0; transform: translate(0, 6px) scale(0.6); }
+            45% { opacity: 1; }
+            100% { opacity: 0; transform: translate(-14px, -26px) scale(1.15); }
+        }
+        .music-note-1 { animation: noteFloat 2.6s ease-out infinite; }
+        .music-note-2 { animation: noteFloat 2.6s ease-out 1.3s infinite; }
+
+        /* 10. Ánh sáng đèn Hoa Linh Lan (#furn-lamp) */
+        @keyframes lampGlowPulse {
+            0%, 100% { opacity: 0.45; transform: scale(1); }
+            50% { opacity: 0.75; transform: scale(1.08); }
+        }
+        .lamp-glow {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: lampGlowPulse 2.8s ease-in-out infinite;
+        }
+
+        /* Ẩn các vật phẩm mặc định khi chưa bật class .item-visible */
+        .room-item, .pet-acc, .pet-model {
+            display: none;
+        }
+        .room-item.item-visible, .pet-acc.item-visible, .pet-model.pet-active {
+            display: block;
+        }
+
+        /* UI Kawaii Card & Button */
+        .kawaii-card {
+            border: 3px solid #4B2412;
+            box-shadow: 0 6px 0 rgba(75, 36, 18, 0.14);
+        }
+        .kawaii-btn {
+            border: 2.5px solid #4B2412;
+            box-shadow: 0 3px 0 #4B2412;
+            transition: all 0.12s ease;
+        }
+        .kawaii-btn:hover:not(:disabled) {
+            transform: translateY(-1.5px);
+            box-shadow: 0 4.5px 0 #4B2412;
+        }
+        .kawaii-btn:active:not(:disabled), .kawaii-btn.active-btn {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #4B2412;
+        }
+
+        ::-webkit-scrollbar { width: 7px; height: 7px; }
+        ::-webkit-scrollbar-track { background: #181825; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb { background: #f472b6; border-radius: 6px; }
+
+.pq-decor{display:block}.pq-decor.hidden{display:none!important}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body><svg xmlns="http://www.w3.org/2000/svg" id="pawquest-dog-svg" viewBox="0 0 400 330" class="state-idle">
+                        <defs>
+                            
+                            <pattern id="purplePlaidPattern" width="52" height="36" patternUnits="userSpaceOnUse">
+                                <rect width="52" height="36" fill="#B59BF0" />
+                                <path d="M 0 18 L 52 18" stroke="#9F82E4" stroke-width="5" />
+                                <path d="M 26 0 L 26 36" stroke="#9F82E4" stroke-width="5" />
+                                <circle cx="13" cy="9" r="3" fill="#C8B3F6" opacity="0.7" />
+                                <circle cx="39" cy="27" r="2.5" fill="#C8B3F6" opacity="0.7" />
+                            </pattern>
+
+                            
+                            <clipPath id="dogBodyClip">
+                                <path d="M 152 186 C 136 212, 128 246, 138 268 C 148 286, 174 289, 200 289 C 226 289, 250 285, 258 268 C 266 246, 258 212, 244 186 Z" />
+                            </clipPath>
+
+                            
+                            <clipPath id="dogHeadClip">
+                                <path d="M 134 108 C 154 74, 246 74, 264 108 C 282 140, 278 182, 250 194 C 224 203, 176 203, 148 194 C 120 182, 116 140, 134 108 Z" />
+                            </clipPath>
+                        <pattern id="rugPlaid" width="46" height="32" patternUnits="userSpaceOnUse">
+                                <rect width="46" height="32" fill="#b79ced" />
+                                <line x1="0" y1="16" x2="46" y2="16" stroke="#a685e2" stroke-width="3.5" />
+                                <line x1="23" y1="0" x2="23" y2="32" stroke="#a685e2" stroke-width="3.5" />
+                                <circle cx="11" cy="8" r="2.2" fill="#cbb2f7" />
+                                <circle cx="35" cy="24" r="1.8" fill="#cbb2f7" />
+                            </pattern>
+
+                            
+                            </defs><rect id="room-wall-extension" width="400" height="330" fill="#FFD9EC" />
+<rect id="room-floor-extension" width="400" y="176" height="154" fill="#efb6df" /><g id="room-art">
+
+                        
+                        
+                        <rect x="0" y="0" width="400" height="200" fill="#FFD9EC" />
+                        <path d="M 0 148 Q 30 132 60 148 Q 90 132 120 148 Q 150 132 180 148 Q 210 132 240 148 Q 270 132 300 148 Q 330 132 360 148 Q 385 132 400 145 L 400 190 L 0 190 Z" fill="#FFF7FB" />
+                        <path d="M -10 162 Q 15 145 40 162 Q 65 145 90 162 Q 115 145 140 162 Q 165 145 190 162 Q 215 145 240 162 Q 265 145 290 162 Q 315 145 340 162 Q 365 145 390 162 L 410 162 L 410 200 L -10 200 Z" fill="#F2A7DA" stroke="#DF87C3" stroke-width="2.5" />
+
+                        
+                        <rect x="-10" y="176" width="420" height="154" fill="url(#purplePlaidPattern)" stroke="#9575DE" stroke-width="3" />
+
+                        
+                        <ellipse cx="198" cy="286" rx="68" ry="16" fill="#7D68AE" opacity="0.65" />
+
+                        
+                        <g id="pq-bed" class="hidden" transform="translate(25,232)">
+      <rect x="0" y="-15" width="83" height="36" rx="10" fill="#bfe4df" stroke="#592512" stroke-width="3" />
+      <rect x="3" y="-10" width="77" height="25" rx="10" fill="#fffbeb" stroke="#592512" stroke-width="2" />
+      <rect x="11" y="-7" width="24" height="12" rx="6" fill="#fce7f3" stroke="#592512" stroke-width="2" />
+    </g>
+    <g id="pq-lamp" class="hidden" stroke="#592512" stroke-width="2.5" stroke-linejoin="round">
+      <ellipse cx="348" cy="265" rx="17" ry="5" fill="#fef3c7" />
+      <path d="M348 261V196" fill="none" /><path d="M330 167H366L375 200H321Z" fill="#fde68a" />
+      <path d="M348 163V167" />
+    </g>
+    <g id="pq-carpet" class="hidden">
+      <ellipse cx="208" cy="269" rx="84" ry="20" fill="#e9d5ff" stroke="#592512" stroke-width="2.5" />
+      <ellipse cx="208" cy="269" rx="74" ry="14" fill="url(#rugPlaid)" stroke="#ffffff" stroke-width="2" stroke-dasharray="4 4" />
+    </g>
+                        <g id="room-furniture-back-layer" transform="scale(0.666666667)"><g id="furn-window" class="pq-decor hidden">
+                                
+                                <path d="M 235 55 C 235 12, 365 12, 365 55 L 365 155 L 235 155 Z" fill="#BAE6FD" stroke="#4B2412" stroke-width="5" stroke-linejoin="round" />
+                                
+                                <path d="M 248 135 C 260 75, 340 75, 352 135" fill="none" stroke="#FDA4AF" stroke-width="7" opacity="0.85" />
+                                <path d="M 255 135 C 265 85, 335 85, 345 135" fill="none" stroke="#FDE047" stroke-width="7" opacity="0.85" />
+                                <path d="M 262 135 C 270 95, 330 95, 338 135" fill="none" stroke="#A7F3D0" stroke-width="7" opacity="0.85" />
+                                
+                                <circle cx="272" cy="58" r="13" fill="#FDE047" stroke="#4B2412" stroke-width="3.5" />
+                                <g class="window-cloud">
+                                    <path d="M 295 96 C 287 96, 285 86, 293 83 C 296 75, 310 75, 314 82 C 322 79, 330 85, 327 93 C 333 95, 331 102, 323 102 L 295 102 Z" fill="#FFFFFF" stroke="#4B2412" stroke-width="3" stroke-linejoin="round" />
+                                </g>
+                                
+                                <line x1="300" y1="23" x2="300" y2="155" stroke="#FFF7FB" stroke-width="6" />
+                                <line x1="300" y1="23" x2="300" y2="155" stroke="#4B2412" stroke-width="3.5" />
+                                <line x1="235" y1="95" x2="365" y2="95" stroke="#FFF7FB" stroke-width="6" />
+                                <line x1="235" y1="95" x2="365" y2="95" stroke="#4B2412" stroke-width="3.5" />
+                                
+                                <path d="M 235 45 C 260 55, 265 95, 248 148 L 232 148 Z" fill="#F472B6" stroke="#4B2412" stroke-width="4" stroke-linejoin="round" />
+                                <path d="M 365 45 C 340 55, 335 95, 352 148 L 368 148 Z" fill="#F472B6" stroke="#4B2412" stroke-width="4" stroke-linejoin="round" />
+                                
+                                <rect x="226" y="150" width="148" height="14" rx="6" fill="#FFF7FB" stroke="#4B2412" stroke-width="4.5" />
+                            </g>
+
+
+<g id="furn-clock" class="pq-decor hidden">
+                                
+                                <g id="clock-pendulum">
+                                    <line x1="430" y1="125" x2="430" y2="164" stroke="#4B2412" stroke-width="4" stroke-linecap="round" />
+                                    <circle cx="430" cy="166" r="10" fill="#FACC15" stroke="#4B2412" stroke-width="3.8" />
+                                </g>
+                                
+                                <path d="M 404 82 L 400 58 L 418 70 Q 430 66 442 70 L 460 58 L 456 82 C 464 94, 462 118, 448 126 C 436 132, 424 132, 412 126 C 398 118, 396 94, 404 82 Z" fill="#FDBA74" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round" />
+                                <circle cx="430" cy="100" r="21" fill="#FFFBEB" stroke="#4B2412" stroke-width="3.8" />
+                                
+                                <line x1="430" y1="100" x2="430" y2="87" stroke="#4B2412" stroke-width="3.5" stroke-linecap="round" />
+                                <line x1="430" y1="100" x2="441" y2="104" stroke="#F43F5E" stroke-width="3.2" stroke-linecap="round" />
+                                <circle cx="430" cy="100" r="3" fill="#4B2412" />
+                            </g>
+
+
+<g id="furn-lights" class="pq-decor hidden">
+                                
+                                <path d="M 15 18 Q 160 65 300 22 Q 440 65 585 18" fill="none" stroke="#4B2412" stroke-width="3.5" stroke-linecap="round" />
+                                
+                                <g class="led-bulb-odd">
+                                    <circle cx="85" cy="40" r="9" fill="#FEF08A" stroke="#4B2412" stroke-width="3" />
+                                    <circle cx="225" cy="40" r="9" fill="#FBCFE8" stroke="#4B2412" stroke-width="3" />
+                                    <circle cx="375" cy="40" r="9" fill="#BAE6FD" stroke="#4B2412" stroke-width="3" />
+                                    <circle cx="515" cy="40" r="9" fill="#FEF08A" stroke="#4B2412" stroke-width="3" />
+                                </g>
+                                <g class="led-bulb-even">
+                                    <polygon points="155,36 159,44 168,45 161,51 163,60 155,55 147,60 149,51 142,45 151,44" fill="#FDE047" stroke="#4B2412" stroke-width="2.8" stroke-linejoin="round" />
+                                    <polygon points="300,18 304,26 313,27 306,33 308,42 300,37 292,42 294,33 287,27 296,26" fill="#FDE047" stroke="#4B2412" stroke-width="2.8" stroke-linejoin="round" />
+                                    <polygon points="445,36 449,44 458,45 451,51 453,60 445,55 437,60 439,51 432,45 441,44" fill="#FDE047" stroke="#4B2412" stroke-width="2.8" stroke-linejoin="round" />
+                                </g>
+                            </g>
+
+
+<g id="furn-bookshelf" class="pq-decor hidden">
+                                
+                                <rect x="34" y="112" width="136" height="12" rx="5" fill="#FBBF24" stroke="#4B2412" stroke-width="4" />
+                                <path d="M 48 124 L 48 138 L 60 124 Z" fill="#D97706" stroke="#4B2412" stroke-width="3.5" stroke-linejoin="round" />
+                                <path d="M 156 124 L 156 138 L 144 124 Z" fill="#D97706" stroke="#4B2412" stroke-width="3.5" stroke-linejoin="round" />
+                                
+                                <rect x="44" y="76" width="15" height="36" rx="3" fill="#F472B6" stroke="#4B2412" stroke-width="3.5" />
+                                <rect x="59" y="82" width="15" height="30" rx="3" fill="#60A5FA" stroke="#4B2412" stroke-width="3.5" />
+                                <rect x="78" y="78" width="15" height="34" rx="3" fill="#34D399" stroke="#4B2412" stroke-width="3.5" transform="rotate(10 85 95)" />
+                                
+                                <polygon points="124,96 152,96 147,112 129,112" fill="#FB7185" stroke="#4B2412" stroke-width="3.5" stroke-linejoin="round" />
+                                <path d="M 131 96 C 131 74, 145 74, 145 96 Z" fill="#4ADE80" stroke="#4B2412" stroke-width="3.5" />
+                                <circle cx="138" cy="76" r="4.5" fill="#F43F5E" stroke="#4B2412" stroke-width="2.5" />
+                            </g>
+
+
+<g id="furn-cat-tree" class="pq-decor hidden">
+                                
+                                <ellipse cx="92" cy="312" rx="52" ry="15" fill="#F9A8D4" stroke="#4B2412" stroke-width="4.5" />
+                                
+                                <rect x="78" y="182" width="28" height="126" rx="6" fill="#FDE68A" stroke="#4B2412" stroke-width="4.2" />
+                                <line x1="78" y1="205" x2="106" y2="215" stroke="#D97706" stroke-width="3" />
+                                <line x1="78" y1="230" x2="106" y2="240" stroke="#D97706" stroke-width="3" />
+                                <line x1="78" y1="255" x2="106" y2="265" stroke="#D97706" stroke-width="3" />
+                                
+                                <rect x="52" y="232" width="68" height="50" rx="16" fill="#DDD6FE" stroke="#4B2412" stroke-width="4.2" />
+                                <circle cx="86" cy="258" r="15" fill="#4B2412" />
+                                
+                                <path d="M 55 182 C 42 182, 42 162, 58 160 C 66 148, 114 148, 122 160 C 138 162, 138 182, 125 182 Z" fill="#FFF7FB" stroke="#4B2412" stroke-width="4.2" stroke-linejoin="round" />
+                                
+                                <g id="cat-tree-toy">
+                                    <line x1="122" y1="180" x2="122" y2="212" stroke="#4B2412" stroke-width="3" />
+                                    <circle cx="122" cy="216" r="9.5" fill="#F43F5E" stroke="#4B2412" stroke-width="3.5" />
+                                </g>
+                            </g>
+
+
+<g id="furn-bed" class="pq-decor hidden">
+                                <ellipse cx="495" cy="340" rx="64" ry="24" fill="#F472B6" stroke="#4B2412" stroke-width="4.5" />
+                                <path d="M 436 332 L 446 296 L 472 316 L 495 290 L 518 316 L 544 296 L 554 332 Z" fill="#FBCFE8" stroke="#4B2412" stroke-width="4.2" stroke-linejoin="round" />
+                                <ellipse cx="495" cy="342" rx="46" ry="15" fill="#FFF1F2" stroke="#4B2412" stroke-width="3.5" />
+                                <circle cx="446" cy="294" r="5" fill="#FACC15" stroke="#4B2412" stroke-width="2.5" />
+                                <circle cx="495" cy="288" r="6" fill="#FACC15" stroke="#4B2412" stroke-width="2.5" />
+                                <circle cx="544" cy="294" r="5" fill="#FACC15" stroke="#4B2412" stroke-width="2.5" />
+                            </g>
+
+
+<g id="furn-plant" class="pq-decor hidden">
+                                
+                                <path d="M 526 248 C 495 225, 495 190, 522 188 C 538 188, 542 220, 526 248 Z" fill="#22C55E" stroke="#4B2412" stroke-width="4" />
+                                <path d="M 538 248 C 555 215, 585 218, 578 244 C 572 260, 548 258, 538 248 Z" fill="#4ADE80" stroke="#4B2412" stroke-width="4" />
+                                <path d="M 532 246 C 520 205, 552 175, 566 202 C 575 220, 550 242, 532 246 Z" fill="#16A34A" stroke="#4B2412" stroke-width="4" />
+                                
+                                <polygon points="508,244 562,244 554,288 516,288" fill="#FFFBEB" stroke="#4B2412" stroke-width="4.2" stroke-linejoin="round" />
+                                <rect x="503" y="236" width="64" height="12" rx="5" fill="#FDE68A" stroke="#4B2412" stroke-width="4" />
+                                <circle cx="525" cy="264" r="3" fill="#4B2412" />
+                                <circle cx="545" cy="264" r="3" fill="#4B2412" />
+                                <path d="M 531 268 Q 535 273 539 268" fill="none" stroke="#4B2412" stroke-width="2.8" stroke-linecap="round" />
+                            </g>
+
+
+<g id="furn-lamp" class="pq-decor hidden">
+                                
+                                <circle class="lamp-glow" cx="452" cy="186" r="32" fill="#FEF08A" />
+                                
+                                <ellipse cx="475" cy="292" rx="24" ry="8" fill="#A7F3D0" stroke="#4B2412" stroke-width="4" />
+                                <path d="M 475 290 L 475 185 C 475 152, 445 152, 448 175" fill="none" stroke="#10B981" stroke-width="6" stroke-linecap="round" />
+                                <path d="M 475 290 L 475 185 C 475 152, 445 152, 448 175" fill="none" stroke="#4B2412" stroke-width="4.2" stroke-linecap="round" />
+                                
+                                <path d="M 448 170 C 432 172, 430 194, 438 198 C 445 194, 448 198, 456 198 C 464 194, 462 172, 448 170 Z" fill="#FEF9C3" stroke="#4B2412" stroke-width="4" stroke-linejoin="round" />
+                            </g></g><g id="dog-whole">
+
+                            
+                            <g id="dog-tail">
+                                <path d="M 140 264 C 118 258, 98 242, 95 224 C 93 215, 103 214, 111 224 C 120 235, 132 244, 144 248 Z" fill="#FFF6E0" />
+                                
+                                <path d="M 112 246 C 101 238, 96 229, 95 224 C 93 215, 103 214, 111 224 C 115 229, 118 233, 121 236 Z" fill="#C59361" />
+                                <path d="M 140 264 C 118 258, 98 242, 95 224 C 93 215, 103 214, 111 224 C 120 235, 132 244, 144 248" fill="none" stroke="#4A2511" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </g>
+
+                            
+                            <g id="dog-body-group">
+                                
+                                <g transform="translate(-25.0,35.0) scale(0.75)"><g id="acc-wings" class="pq-decor hidden">
+                                    <g id="wing-left">
+                                        <path d="M 255 256 C 210 218, 178 232, 192 262 C 178 268, 188 286, 208 284 C 198 296, 215 306, 248 286 Z" fill="#FFFFFF" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round" />
+                                        <path d="M 238 262 C 216 248, 204 256, 212 268" fill="none" stroke="#BAE6FD" stroke-width="3" stroke-linecap="round" />
+                                    </g>
+                                    <g id="wing-right">
+                                        <path d="M 345 256 C 390 218, 422 232, 408 262 C 422 268, 412 286, 392 284 C 402 296, 385 306, 352 286 Z" fill="#FFFFFF" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round" />
+                                        <path d="M 362 262 C 384 248, 396 256, 388 268" fill="none" stroke="#BAE6FD" stroke-width="3" stroke-linecap="round" />
+                                    </g>
+                                </g>
+
+
+</g><path d="M 152 186 C 136 212, 128 246, 138 268 C 148 286, 174 289, 200 289 C 226 289, 250 285, 258 268 C 266 246, 258 212, 244 186 Z" fill="#FFF6E0" />
+
+                                
+                                <g clip-path="url(#dogBodyClip)">
+                                    
+                                    <ellipse cx="140" cy="226" rx="22" ry="24" fill="#C59361" transform="rotate(-18 140 226)" />
+                                    
+                                    <ellipse cx="203" cy="252" rx="26" ry="32" fill="#F5D0C5" />
+                                    
+                                    <path d="M 178 198 Q 204 210 226 198 Q 214 214 178 198 Z" fill="#E6D3B3" />
+                                </g>
+
+                                
+                                <path d="M 152 186 C 136 212, 128 246, 138 268 C 146 282, 162 287, 178 288" fill="none" stroke="#4A2511" stroke-width="5.5" stroke-linecap="round" />
+                                <path d="M 184 288 C 196 289, 212 288, 226 284" fill="none" stroke="#4A2511" stroke-width="5.5" stroke-linecap="round" />
+                                <path d="M 244 186 C 258 212, 266 246, 258 268" fill="none" stroke="#4A2511" stroke-width="5.5" stroke-linecap="round" />
+
+                                
+                                <g id="paws-back">
+                                    
+                                    <g transform="translate(173, 276)">
+                                        <ellipse cx="0" cy="0" rx="14" ry="16" fill="#FFF6E0" stroke="#4A2511" stroke-width="5.5" transform="rotate(-8)" />
+                                        
+                                        <ellipse cx="0" cy="5" rx="4.8" ry="3.8" fill="#D6A982" />
+                                        <circle cx="-6" cy="-3" r="2.3" fill="#D6A982" />
+                                        <circle cx="0" cy="-5" r="2.3" fill="#D6A982" />
+                                        <circle cx="6" cy="-3" r="2.3" fill="#D6A982" />
+                                    </g>
+
+                                    
+                                    <g transform="translate(245, 272)">
+                                        <ellipse cx="0" cy="0" rx="13.5" ry="15.5" fill="#FFF6E0" stroke="#4A2511" stroke-width="5.5" transform="rotate(10)" />
+                                        
+                                        <ellipse cx="0" cy="5" rx="4.5" ry="3.6" fill="#D6A982" />
+                                        <circle cx="-5.5" cy="-3" r="2.2" fill="#D6A982" />
+                                        <circle cx="0" cy="-5" r="2.2" fill="#D6A982" />
+                                        <circle cx="5.5" cy="-3" r="2.2" fill="#D6A982" />
+                                    </g>
+                                </g>
+
+                                
+                                <g id="paws-front">
+                                    
+                                    <path d="M 162 222 C 166 238, 174 246, 182 244 C 190 242, 190 228, 180 212" fill="#FFF6E0" stroke="#4A2511" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round" />
+                                    <line x1="178" y1="242" x2="176" y2="237" stroke="#4A2511" stroke-width="3.2" stroke-linecap="round" />
+                                    <line x1="183" y1="240" x2="180" y2="235" stroke="#4A2511" stroke-width="3.2" stroke-linecap="round" />
+
+                                    
+                                    <path d="M 222 212 C 216 228, 216 240, 224 243 C 232 245, 238 236, 240 220" fill="#FFF6E0" stroke="#4A2511" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round" />
+                                    <line x1="221" y1="240" x2="223" y2="235" stroke="#4A2511" stroke-width="3.2" stroke-linecap="round" />
+                                    <line x1="226" y1="242" x2="227" y2="237" stroke="#4A2511" stroke-width="3.2" stroke-linecap="round" />
+                                </g>
+                            <g transform="translate(12.0,36.5) scale(0.65)"><g id="acc-bowtie" class="pq-decor hidden">
+                                    
+                                    <path d="M 255 244 Q 300 262 345 244" fill="none" stroke="#EF4444" stroke-width="9" stroke-linecap="round" />
+                                    <path d="M 255 244 Q 300 262 345 244" fill="none" stroke="#4B2412" stroke-width="4.2" stroke-linecap="round" />
+                                    
+                                    <polygon points="300,252 274,238 274,264" fill="#F43F5E" stroke="#4B2412" stroke-width="4" stroke-linejoin="round" />
+                                    <polygon points="300,252 326,238 326,264" fill="#F43F5E" stroke="#4B2412" stroke-width="4" stroke-linejoin="round" />
+                                    
+                                    <g id="golden-bell">
+                                        <circle cx="300" cy="254" r="10.5" fill="#FACC15" stroke="#4B2412" stroke-width="4" />
+                                        <line x1="293" y1="252" x2="307" y2="252" stroke="#4B2412" stroke-width="3" />
+                                        <circle cx="300" cy="257" r="2.8" fill="#4B2412" />
+                                    </g>
+                                </g>
+
+
+</g><g transform="translate(12.0,36.5) scale(0.65)"><g id="acc-scarf" class="pq-decor hidden">
+                                    <path d="M 248 238 Q 300 260 352 238 C 358 248, 354 260, 342 262 Q 300 276 256 262 C 246 258, 242 248, 248 238 Z" fill="#FB7185" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round" />
+                                    
+                                    <path d="M 316 254 L 312 298 L 338 296 L 340 250 Z" fill="#F43F5E" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round" />
+                                    <line x1="314" y1="276" x2="338" y2="275" stroke="#FEF08A" stroke-width="5" />
+                                    <line x1="316" y1="298" x2="315" y2="306" stroke="#4B2412" stroke-width="3.5" stroke-linecap="round" />
+                                    <line x1="325" y1="298" x2="325" y2="306" stroke="#4B2412" stroke-width="3.5" stroke-linecap="round" />
+                                    <line x1="334" y1="297" x2="335" y2="305" stroke="#4B2412" stroke-width="3.5" stroke-linecap="round" />
+                                </g>
+
+
+</g><g transform="translate(5.0,61.0) scale(0.65)"><g id="acc-backpack" class="pq-decor hidden">
+                                    
+                                    <path d="M 262 248 Q 300 282 346 308" fill="none" stroke="#EA580C" stroke-width="7" stroke-linecap="round" />
+                                    <path d="M 262 248 Q 300 282 346 308" fill="none" stroke="#4B2412" stroke-width="4" stroke-linecap="round" />
+                                    
+                                    <ellipse cx="348" cy="298" rx="16" ry="20" transform="rotate(-18 348 298)" fill="#FB923C" stroke="#4B2412" stroke-width="4.2" />
+                                    <path d="M 342 276 C 338 264, 352 264, 350 276" fill="#4ADE80" stroke="#4B2412" stroke-width="3.5" stroke-linejoin="round" />
+                                    
+                                    <g id="acc-balloon-float">
+                                        <path d="M 352 284 Q 378 225 372 162" fill="none" stroke="#4B2412" stroke-width="2.8" stroke-dasharray="4 3" />
+                                        <path d="M 372 142 C 372 126, 350 122, 350 140 C 350 156, 372 166, 372 174 C 372 166, 394 156, 394 140 C 394 122, 372 126, 372 142 Z" fill="#FB7185" stroke="#4B2412" stroke-width="4" stroke-linejoin="round" />
+                                        <ellipse cx="362" cy="138" rx="4" ry="6" transform="rotate(-20 362 138)" fill="#FFFFFF" opacity="0.7" />
+                                    </g>
+                                </g></g></g>
+
+                            
+                            <g id="dog-head-group">
+
+                                
+                                <g id="ear-right">
+                                    <path d="M 244 96 C 266 90, 286 116, 296 144 C 304 166, 290 180, 274 176 C 262 172, 258 152, 254 134 Z" fill="#C59361" stroke="#4A2511" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" />
+                                </g>
+
+                                
+                                <path d="M 134 108 C 154 74, 246 74, 264 108 C 282 140, 278 182, 250 194 C 224 203, 176 203, 148 194 C 120 182, 116 140, 134 108 Z" fill="#FFF6E0" />
+
+                                
+                                <g clip-path="url(#dogHeadClip)">
+                                    <path d="M 115 75 L 184 82 C 204 108, 212 146, 194 166 C 178 182, 142 182, 115 170 Z" fill="#C59361" />
+                                </g>
+
+                                
+                                <path d="M 142 100 C 166 76, 236 76, 258 102" fill="none" stroke="#4A2511" stroke-width="5.5" stroke-linecap="round" />
+                                <path d="M 262 112 C 278 142, 275 182, 246 194 C 238 197, 230 199, 222 200" fill="none" stroke="#4A2511" stroke-width="5.5" stroke-linecap="round" />
+                                <path d="M 132 168 C 136 184, 148 194, 166 198" fill="none" stroke="#4A2511" stroke-width="5.5" stroke-linecap="round" />
+
+                                
+                                <g id="ear-left">
+                                    <path d="M 152 96 C 126 90, 100 120, 96 154 C 93 178, 114 190, 132 180 C 146 172, 148 146, 150 124" fill="#C59361" stroke="#4A2511" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" />
+                                </g>
+
+                                
+                                <g id="dog-blush">
+                                    
+                                    <ellipse cx="163" cy="166" rx="14" ry="7.5" fill="#F28B82" />
+                                    <line x1="157" y1="163" x2="154" y2="169" stroke="#8C2D2D" stroke-width="2.2" stroke-linecap="round" />
+                                    <line x1="163" y1="163" x2="160" y2="169" stroke="#8C2D2D" stroke-width="2.2" stroke-linecap="round" />
+                                    <line x1="169" y1="163" x2="166" y2="169" stroke="#8C2D2D" stroke-width="2.2" stroke-linecap="round" />
+
+                                    
+                                    <ellipse cx="249" cy="163" rx="13.5" ry="7.2" fill="#F28B82" />
+                                    <line x1="244" y1="160" x2="241" y2="166" stroke="#8C2D2D" stroke-width="2.2" stroke-linecap="round" />
+                                    <line x1="250" y1="160" x2="247" y2="166" stroke="#8C2D2D" stroke-width="2.2" stroke-linecap="round" />
+                                    <line x1="256" y1="160" x2="253" y2="166" stroke="#8C2D2D" stroke-width="2.2" stroke-linecap="round" />
+                                </g>
+
+                                
+                                <path d="M 201 153 C 201 150, 213 150, 213 153 C 213 157, 209 160, 207 160 C 205 160, 201 157, 201 153 Z" fill="#4A2511" />
+
+                                
+
+                                
+                                <g class="face-expr face-idle">
+                                    <g class="eye-blink-group">
+                                        <ellipse cx="180" cy="147" rx="7.5" ry="8.2" fill="#4A2511" />
+                                        <ellipse cx="235" cy="145" rx="7.2" ry="8" fill="#4A2511" />
+                                    </g>
+                                    
+                                    <path d="M 199 166 C 199 181, 215 181, 215 166 Z" fill="#C95B5B" stroke="#4A2511" stroke-width="4" stroke-linejoin="round" />
+                                    <path d="M 201 171 C 204 169, 210 169, 213 171 C 212 178, 202 178, 201 171 Z" fill="#F28B82" />
+                                    <path d="M 193 164 Q 200 171 207 160 Q 214 171 220 163" fill="none" stroke="#4A2511" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" />
+                                </g>
+
+                                
+                                <g class="face-expr face-eating">
+                                    <path d="M 171 148 Q 180 138 189 148" fill="none" stroke="#4A2511" stroke-width="4.8" stroke-linecap="round" />
+                                    <path d="M 226 146 Q 235 136 244 146" fill="none" stroke="#4A2511" stroke-width="4.8" stroke-linecap="round" />
+                                    <g id="mouth-eating">
+                                        <path d="M 196 164 Q 207 161 218 164 Q 220 182 207 182 Q 194 182 196 164 Z" fill="#C95B5B" stroke="#4A2511" stroke-width="4" stroke-linejoin="round" />
+                                        <path d="M 200 173 Q 207 169 214 173 Q 207 181 200 173 Z" fill="#F28B82" />
+                                    </g>
+                                    <circle class="crumb-l" cx="188" cy="175" r="3" fill="#D97706" />
+                                    <circle class="crumb-r" cx="225" cy="173" r="2.5" fill="#D97706" />
+                                </g>
+
+                                
+                                <g class="face-expr face-drinking">
+                                    <g class="eye-blink-group">
+                                        <ellipse cx="180" cy="148" rx="7.5" ry="8" fill="#4A2511" />
+                                        <ellipse cx="235" cy="146" rx="7.2" ry="7.8" fill="#4A2511" />
+                                    </g>
+                                    <path id="drink-tongue" d="M 201 166 C 201 184, 213 184, 213 166 Z" fill="#FF758F" stroke="#4A2511" stroke-width="3.8" stroke-linejoin="round" />
+                                    <path d="M 193 164 Q 200 171 207 160 Q 214 171 220 163" fill="none" stroke="#4A2511" stroke-width="4.2" stroke-linecap="round" />
+                                </g>
+
+                                
+                                <g class="face-expr face-sleeping">
+                                    <path d="M 171 146 Q 180 155 189 146" fill="none" stroke="#4A2511" stroke-width="4.5" stroke-linecap="round" />
+                                    <path d="M 226 144 Q 235 153 244 144" fill="none" stroke="#4A2511" stroke-width="4.5" stroke-linecap="round" />
+                                    <path d="M 198 166 Q 203 170 207 164 Q 211 170 216 166" fill="none" stroke="#4A2511" stroke-width="3.8" stroke-linecap="round" />
+                                    <g id="sleep-bubble">
+                                        <circle cx="224" cy="158" r="10" fill="#BAE6FD" fill-opacity="0.8" stroke="#0284C7" stroke-width="2.5" />
+                                        <circle cx="220" cy="154" r="2.8" fill="#FFFFFF" />
+                                    </g>
+                                </g>
+
+                                
+                                <g class="face-expr face-laughing">
+                                    <path d="M 170 149 Q 180 135 190 148" fill="none" stroke="#4A2511" stroke-width="5" stroke-linecap="round" />
+                                    <path d="M 225 147 Q 235 133 245 146" fill="none" stroke="#4A2511" stroke-width="5" stroke-linecap="round" />
+                                    <path d="M 195 163 Q 207 167 219 162 Q 218 184 207 184 Q 196 184 195 163 Z" fill="#C95B5B" stroke="#4A2511" stroke-width="4" stroke-linejoin="round" />
+                                    <path d="M 199 174 Q 207 168 215 174 Q 207 183 199 174 Z" fill="#F28B82" />
+                                </g>
+
+                                
+                                <g class="face-expr face-sad">
+                                    
+                                    <line x1="170" y1="136" x2="186" y2="132" stroke="#4A2511" stroke-width="3.8" stroke-linecap="round" />
+                                    <line x1="244" y1="134" x2="228" y2="130" stroke="#4A2511" stroke-width="3.8" stroke-linecap="round" />
+                                    
+                                    <ellipse cx="180" cy="148" rx="8" ry="8.8" fill="#4A2511" />
+                                    <circle cx="177" cy="144" r="3" fill="#FFFFFF" />
+                                    <circle cx="183" cy="151" r="1.8" fill="#BAE6FD" />
+                                    <ellipse cx="235" cy="146" rx="7.8" ry="8.5" fill="#4A2511" />
+                                    <circle cx="232" cy="142" r="3" fill="#FFFFFF" />
+                                    <circle cx="238" cy="149" r="1.8" fill="#BAE6FD" />
+                                    
+                                    <path class="tear-drop-l" d="M 174 156 C 170 163, 178 163, 174 156 Z" fill="#38BDF8" stroke="#0284C7" stroke-width="2" />
+                                    <path class="tear-drop-r" d="M 241 154 C 237 161, 245 161, 241 154 Z" fill="#38BDF8" stroke="#0284C7" stroke-width="2" />
+                                    
+                                    <path d="M 197 172 Q 207 163 217 172" fill="none" stroke="#4A2511" stroke-width="4.2" stroke-linecap="round" />
+                                </g>
+
+                            <g id="pq-equipment">
+    <g id="pq-head" class="hidden" transform="translate(177,93)">
+      <path d="M3 10 Q4 -10 24 -10 Q43 -10 45 10Z" fill="#c4b5fd" stroke="#592512" stroke-width="3" />
+      <rect x="-2" y="8" width="52" height="8" rx="4" fill="#e9d5ff" stroke="#592512" stroke-width="3" />
+    </g>
+    <g id="pq-face" class="hidden" fill="none" stroke="#592512" stroke-width="2.5">
+      <ellipse cx="180" cy="147" rx="13" ry="12" />
+      <ellipse cx="235" cy="145" rx="13" ry="12" />
+      <path d="M193 147 Q207.5 141 222 145 M167 147 l-10 -4 M248 145 l10 -4" />
+    </g>
+    <g id="pq-neck" class="hidden">
+      <path d="M172 199 Q207.0 212 242 199 l0 7 Q207.0 219 172 206Z" fill="#f9a8d4" stroke="#592512" stroke-width="2" />
+      <circle cx="207.0" cy="215" r="4" fill="#facc15" stroke="#592512" stroke-width="1.6" />
+    </g></g><g transform="translate(7.0,14.0) scale(0.65)"><g id="acc-crown" class="pq-decor hidden">
+                                        <path d="M 272 142 L 266 108 L 286 124 L 300 100 L 314 124 L 334 108 L 328 142 Z" fill="#FACC15" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round" />
+                                        <rect x="270" y="136" width="60" height="9" rx="4" fill="#F59E0B" stroke="#4B2412" stroke-width="4" />
+                                        <circle cx="266" cy="105" r="4.5" fill="#FFFBEB" stroke="#4B2412" stroke-width="3" />
+                                        <circle cx="300" cy="97" r="5.5" fill="#FFFBEB" stroke="#4B2412" stroke-width="3" />
+                                        <circle cx="334" cy="105" r="4.5" fill="#FFFBEB" stroke="#4B2412" stroke-width="3" />
+                                        <polygon points="300,117 305,124 300,131 295,124" fill="#38BDF8" stroke="#4B2412" stroke-width="2.5" />
+                                    </g>
+
+
+</g><g transform="translate(7.0,14.0) scale(0.65)"><g id="acc-wizard-hat" class="pq-decor hidden">
+                                        <ellipse cx="300" cy="140" rx="54" ry="13" fill="#7C3AED" stroke="#4B2412" stroke-width="4.5" />
+                                        <path d="M 262 138 C 272 95, 292 68, 326 56 C 314 82, 322 108, 338 138 Z" fill="#8B5CF6" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round" />
+                                        <path d="M 264 128 Q 300 138 336 128 L 338 138 Q 300 148 262 138 Z" fill="#F59E0B" stroke="#4B2412" stroke-width="3.8" />
+                                        <rect x="293" y="126" width="14" height="14" rx="2" fill="#FDE047" stroke="#4B2412" stroke-width="3.2" />
+                                        <polygon points="302,88 305,95 312,96 307,101 308,108 302,104 296,108 297,101 292,96 299,95" fill="#FDE047" stroke="#4B2412" stroke-width="2.2" />
+                                    </g>
+
+
+</g><g transform="translate(7.0,14.0) scale(0.65)"><g id="acc-sprout" class="pq-decor hidden">
+                                        <g id="sprout-stem">
+                                            <path d="M 300 138 Q 302 114 298 102" fill="none" stroke="#4B2412" stroke-width="4.5" stroke-linecap="round" />
+                                            <path d="M 298 106 C 278 96, 274 114, 298 114 Z" fill="#4ADE80" stroke="#4B2412" stroke-width="3.8" stroke-linejoin="round" />
+                                            <path d="M 298 104 C 318 92, 324 110, 298 112 Z" fill="#22C55E" stroke="#4B2412" stroke-width="3.8" stroke-linejoin="round" />
+                                        </g>
+                                        
+                                        <circle cx="268" cy="148" r="10" fill="#F9A8D4" stroke="#4B2412" stroke-width="3.5" />
+                                        <circle cx="268" cy="148" r="3.5" fill="#FACC15" />
+                                    </g>
+
+
+</g><g transform="translate(12.5,19.89999999999999) scale(0.65)"><g id="acc-headphones" class="pq-decor hidden">
+                                        <path d="M 228 194 C 224 122, 376 122, 372 194" fill="none" stroke="#F472B6" stroke-width="10" stroke-linecap="round" />
+                                        <path d="M 228 194 C 224 122, 376 122, 372 194" fill="none" stroke="#4B2412" stroke-width="4.5" stroke-linecap="round" />
+                                        
+                                        <ellipse cx="230" cy="194" rx="12" ry="20" fill="#38BDF8" stroke="#4B2412" stroke-width="4.2" />
+                                        <ellipse cx="230" cy="194" rx="6" ry="11" fill="#FEF08A" />
+                                        <ellipse cx="370" cy="194" rx="12" ry="20" fill="#38BDF8" stroke="#4B2412" stroke-width="4.2" />
+                                        <ellipse cx="370" cy="194" rx="6" ry="11" fill="#FEF08A" />
+                                    </g>
+
+
+</g><g transform="translate(-99.07407407407408,-49.55555555555557) scale(1.0185185185185186)"><g id="acc-glasses" class="pq-decor hidden">
+                                        <line x1="242" y1="192" x2="358" y2="192" stroke="#4B2412" stroke-width="4.5" />
+                                        
+                                        <polygon points="274,172 280,185 294,187 284,197 286,211 274,204 262,211 264,197 254,187 268,185" fill="#FB7185" stroke="#4B2412" stroke-width="4" stroke-linejoin="round" />
+                                        
+                                        <polygon points="328,172 334,185 348,187 338,197 340,211 328,204 316,211 318,197 308,187 322,185" fill="#38BDF8" stroke="#4B2412" stroke-width="4" stroke-linejoin="round" />
+                                        <line x1="268" y1="186" x2="274" y2="196" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" />
+                                        <line x1="322" y1="186" x2="328" y2="196" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" />
+                                    </g>
+
+
+</g><g transform="translate(-99.07407407407408,-49.55555555555557) scale(1.0185185185185186)"><g id="acc-monocle" class="pq-decor hidden">
+                                        
+                                        <path d="M 344 202 Q 354 228 338 244" fill="none" stroke="#F59E0B" stroke-width="3.5" stroke-dasharray="4 3" />
+                                        
+                                        <circle cx="328" cy="195" r="16" fill="#E0F2FE" fill-opacity="0.55" stroke="#FACC15" stroke-width="5" />
+                                        <circle cx="328" cy="195" r="16" fill="none" stroke="#4B2412" stroke-width="3.5" />
+                                        
+                                        <path d="M 302 212 C 288 204, 276 218, 268 210 C 276 224, 292 222, 302 214 Z" fill="#5C3A21" stroke="#4B2412" stroke-width="3" stroke-linejoin="round" />
+                                        <path d="M 302 212 C 316 204, 328 218, 336 210 C 328 224, 312 222, 302 214 Z" fill="#5C3A21" stroke="#4B2412" stroke-width="3" stroke-linejoin="round" />
+                                    </g>
+
+
+</g></g> 
+                        </g> 
+
+                        
+
+                        
+                        <g class="prop-group prop-food" transform="translate(160, 268)">
+                            <ellipse cx="45" cy="26" rx="36" ry="9" fill="#FBCFE8" stroke="#4A2511" stroke-width="3.5" />
+                            
+                            <circle cx="30" cy="12" r="6" fill="#D97706" stroke="#4A2511" stroke-width="2.5" />
+                            <circle cx="58" cy="12" r="6" fill="#B45309" stroke="#4A2511" stroke-width="2.5" />
+                            <path d="M 33 8 C 30 4, 36 0, 39 5 L 51 5 C 54 0, 60 4, 57 8 C 60 12, 54 16, 51 11 L 39 11 C 36 16, 30 12, 33 8 Z" fill="#FDE68A" stroke="#4A2511" stroke-width="2.5" />
+                            
+                            <path d="M 16 13 L 74 13 L 67 28 C 60 32, 30 32, 23 28 Z" fill="#F472B6" stroke="#4A2511" stroke-width="3.8" stroke-linejoin="round" />
+                        </g>
+
+                        
+                        <g class="prop-group prop-drink">
+                            <ellipse cx="208" cy="285" rx="34" ry="9" fill="#BAE6FD" stroke="#4A2511" stroke-width="3.5" />
+                            <path d="M 180 272 L 236 272 L 229 286 C 222 290, 194 290, 187 286 Z" fill="#38BDF8" stroke="#4A2511" stroke-width="3.8" stroke-linejoin="round" />
+                            <ellipse cx="208" cy="272" rx="28" ry="6.5" fill="#E0F2FE" stroke="#4A2511" stroke-width="3" />
+                            <ellipse id="water-ripple" cx="208" cy="273" rx="20" ry="3.8" fill="#7DD3FC" />
+                            <circle class="drop-1" cx="195" cy="260" r="3" fill="#38BDF8" />
+                            <circle class="drop-2" cx="222" cy="258" r="2.5" fill="#38BDF8" />
+                        </g>
+
+                        
+                        <g class="fx-overlay fx-sleeping" font-weight="800" fill="#6D28D9" stroke="#FFFFFF" stroke-width="1.5">
+                            <text class="zzz-1" x="255" y="115" font-size="18">Z</text>
+                            <text class="zzz-2" x="272" y="96" font-size="23">z</text>
+                            <text class="zzz-3" x="290" y="78" font-size="28">Z</text>
+                        </g>
+
+                        
+                        <g class="fx-overlay fx-laughing">
+                            <g transform="translate(105, 115)"><g class="heart-1">
+                                <path d="M 12 6 C 12 1, 5 -1, 2 4 C -1 -1, -8 1, -8 6 C -8 13, 2 17, 2 22 C 2 17, 12 13, 12 6 Z" fill="#FB7185" stroke="#4A2511" stroke-width="2.5" />
+                            </g></g>
+                            <g transform="translate(285, 108)"><g class="heart-2">
+                                <path d="M 12 6 C 12 1, 5 -1, 2 4 C -1 -1, -8 1, -8 6 C -8 13, 2 17, 2 22 C 2 17, 12 13, 12 6 Z" fill="#F43F5E" stroke="#4A2511" stroke-width="2.5" />
+                            </g></g>
+                            <g transform="translate(200, 62)"><g class="heart-3">
+                                <path d="M 0 -10 L 3 -3 L 10 0 L 3 3 L 0 10 L -3 3 L -10 0 L -3 -3 Z" fill="#FACC15" stroke="#4A2511" stroke-width="2" />
+                            </g></g>
+                        </g>
+
+                        
+                        <g class="fx-overlay fx-sad" id="gloom-cloud">
+                            <path d="M 175 58 C 165 58, 160 46, 170 42 C 173 32, 190 30, 196 38 C 204 32, 218 36, 218 46 C 226 48, 224 58, 214 58 Z" fill="#94A3B8" stroke="#4A2511" stroke-width="3" stroke-linejoin="round" />
+                            <line x1="182" y1="63" x2="179" y2="72" stroke="#38BDF8" stroke-width="2.5" stroke-linecap="round" />
+                            <line x1="196" y1="64" x2="193" y2="73" stroke="#38BDF8" stroke-width="2.5" stroke-linecap="round" />
+                            <line x1="210" y1="63" x2="207" y2="72" stroke="#38BDF8" stroke-width="2.5" stroke-linecap="round" />
+                        </g>
+                    <g id="room-furniture-front-layer" transform="scale(0.666666667)"><g id="furn-tea-table" class="pq-decor hidden" transform="translate(226.4,114.6) scale(.7)">
+                                
+                                <rect x="392" y="388" width="12" height="24" rx="4" fill="#B45309" stroke="#4B2412" stroke-width="4" />
+                                <rect x="492" y="388" width="12" height="24" rx="4" fill="#B45309" stroke="#4B2412" stroke-width="4" />
+                                
+                                <ellipse cx="448" cy="382" rx="68" ry="20" fill="#FBBF24" stroke="#4B2412" stroke-width="4.5" />
+                                
+                                <ellipse cx="448" cy="380" rx="46" ry="12" fill="#FFF1F2" stroke="#4B2412" stroke-width="3" />
+                                
+                                <path d="M 412 368 C 402 364, 402 352, 412 352" fill="none" stroke="#4B2412" stroke-width="4" stroke-linecap="round" />
+                                <ellipse cx="426" cy="364" rx="16" ry="13" fill="#F472B6" stroke="#4B2412" stroke-width="3.8" />
+                                <path d="M 440 362 L 450 354" stroke="#F472B6" stroke-width="6" stroke-linecap="round" />
+                                <path d="M 440 362 L 450 354" stroke="#4B2412" stroke-width="3.8" stroke-linecap="round" />
+                                <circle cx="426" cy="350" r="4" fill="#FDE047" stroke="#4B2412" stroke-width="3" />
+                                
+                                <path class="tea-steam-1" d="M 424 342 Q 418 332 426 324" fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" />
+                                <path class="tea-steam-2" d="M 436 344 Q 442 334 434 326" fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" />
+                                
+                                <ellipse cx="472" cy="376" rx="18" ry="6" fill="#FFFFFF" stroke="#4B2412" stroke-width="3.2" />
+                                <ellipse cx="466" cy="372" rx="7" ry="4.5" fill="#A7F3D0" stroke="#4B2412" stroke-width="2.8" />
+                                <ellipse cx="478" cy="372" rx="7" ry="4.5" fill="#DDD6FE" stroke="#4B2412" stroke-width="2.8" />
+                            </g>
+
+
+<g id="furn-gramophone" class="pq-decor hidden" transform="translate(-29.6,51) scale(.85)">
+                                
+                                <rect x="64" y="346" width="68" height="44" rx="8" fill="#D97706" stroke="#4B2412" stroke-width="4.2" />
+                                <rect x="74" y="356" width="48" height="24" rx="4" fill="#FDE68A" stroke="#4B2412" stroke-width="3.2" />
+                                
+                                <ellipse cx="98" cy="344" rx="26" ry="7" fill="#1E293B" stroke="#4B2412" stroke-width="3.5" />
+                                <ellipse cx="98" cy="344" rx="9" ry="3" fill="#F43F5E" />
+                                
+                                <path d="M 112 342 Q 134 326 124 304 L 154 286 C 166 296, 166 322, 152 330 L 122 336 Z" fill="#FACC15" stroke="#4B2412" stroke-width="4" stroke-linejoin="round" />
+                                <ellipse cx="153" cy="308" rx="8" ry="20" transform="rotate(-10 153 308)" fill="#F59E0B" stroke="#4B2412" stroke-width="3.8" />
+                                
+                                <text class="music-note-1" x="148" y="274" font-size="22" font-weight="900" fill="#F43F5E" stroke="#4B2412" stroke-width="1">♪</text>
+                                <text class="music-note-2" x="172" y="262" font-size="24" font-weight="900" fill="#8B5CF6" stroke="#4B2412" stroke-width="1">♫</text>
+                            </g>
+
+
+</g></g></svg><script>(()=>{
+const stage=document.getElementById('pawquest-dog-svg');let current='';
+const states=new Set(['idle','eating','drinking','sleeping','laughing','sad']);
+window.pawquestResize=(w,h,top,bottom)=>{
+ if(w>0&&h>0){
+  stage.dataset.ratio=String(h/w);
+  stage.dataset.safeTop=String(top>0?400*top/w:50);
+  stage.dataset.safeBottom=String(bottom>0?400*bottom/w:110);
+ }
+ const height=Math.max(240,400*Number(stage.dataset.ratio||.825));
+ const safeTop=Number(stage.dataset.safeTop||50),safeBottom=Number(stage.dataset.safeBottom||110);
+ const available=Math.max(1,height-safeTop-safeBottom-8);
+ const scale=Math.min(1,available/290);
+ const offset=safeTop+4-20*scale+Math.max(0,available-290*scale)/2;
+ stage.setAttribute('viewBox','0 0 400 '+height);stage.style.aspectRatio='400 / '+height;
+ document.getElementById('room-art').setAttribute('transform','translate('+(200*(1-scale))+','+offset+') scale('+scale+')');
+ document.getElementById('room-wall-extension').setAttribute('height',height);
+ const floor=document.getElementById('room-floor-extension');
+ floor.setAttribute('y',176*scale+offset);floor.setAttribute('height',Math.max(0,height-176*scale-offset));
+};
+window.PawQuestDog=({state})=>{
+ const next=states.has(state)?state:'idle';
+ if(next!==current){stage.setAttribute('class','state-'+next);current=next;}
+};
+window.pawquestRender=(value)=>{
+ window.pawquestResize();window.PawQuestDog({state:value.state});
+ for(const [slot,id] of [['HEAD','pq-head'],['FACE','pq-face'],['NECK','pq-neck']])
+  document.getElementById(id).classList.toggle('hidden',!(value.equipment||[]).includes(slot));
+ for(const [slot,id] of [['BED','pq-bed'],['LAMP','pq-lamp'],['CARPET','pq-carpet']])
+  document.getElementById(id).classList.toggle('hidden',!(value.room||[]).includes(slot));
+};
+document.getElementById('dog-whole').addEventListener('click',()=>{location.href='pawquest-pet://touch';});
+window.pawquestRender({state:'idle'});
+})();</script><script>(()=>{
+const items=[{"id": "acc-crown", "slot": "HEAD", "category": "ACCESSORY"}, {"id": "acc-wizard-hat", "slot": "HEAD", "category": "ACCESSORY"}, {"id": "acc-sprout", "slot": "HEAD", "category": "ACCESSORY"}, {"id": "acc-headphones", "slot": "HEAD", "category": "ACCESSORY"}, {"id": "acc-glasses", "slot": "FACE", "category": "ACCESSORY"}, {"id": "acc-monocle", "slot": "FACE", "category": "ACCESSORY"}, {"id": "acc-bowtie", "slot": "NECK", "category": "ACCESSORY"}, {"id": "acc-scarf", "slot": "NECK", "category": "ACCESSORY"}, {"id": "acc-wings", "slot": "BACK", "category": "ACCESSORY"}, {"id": "acc-backpack", "slot": "BACK", "category": "ACCESSORY"}, {"id": "furn-window", "slot": "WINDOW", "category": "FURNITURE"}, {"id": "furn-clock", "slot": "CLOCK", "category": "FURNITURE"}, {"id": "furn-lights", "slot": "LIGHTS", "category": "FURNITURE"}, {"id": "furn-bookshelf", "slot": "BOOKSHELF", "category": "FURNITURE"}, {"id": "furn-cat-tree", "slot": "CAT_TREE", "category": "FURNITURE"}, {"id": "furn-bed", "slot": "BED", "category": "FURNITURE"}, {"id": "furn-plant", "slot": "PLANT", "category": "FURNITURE"}, {"id": "furn-tea-table", "slot": "TEA_TABLE", "category": "FURNITURE"}, {"id": "furn-gramophone", "slot": "GRAMOPHONE", "category": "FURNITURE"}, {"id": "furn-lamp", "slot": "LAMP", "category": "FURNITURE"}],stage=document.querySelector('svg');
+const legacyEquipment={'item.accessory.hat':'HEAD','item.accessory.glasses':'FACE','item.accessory.collar':'NECK'};
+const legacyRoom={'item.furniture.bed':'BED','item.furniture.lamp':'LAMP','item.furniture.carpet':'CARPET'};
+const original=window.pawquestRender;
+window.pawquestResize=(w,h,top,bottom)=>{
+ if(w>0&&h>0){stage.dataset.ratio=h/w;stage.dataset.safeTop=400*(top||0)/w;stage.dataset.safeBottom=400*(bottom||0)/w;}
+ const height=Math.max(330,400*Number(stage.dataset.ratio||.825));
+ const t=Number(stage.dataset.safeTop||50),b=Number(stage.dataset.safeBottom||110),available=Math.max(1,height-t-b-16);
+ const scale=Math.min(1,available/350),y=t+8+Math.max(0,available-350*scale)/2;
+ stage.setAttribute('viewBox','0 0 400 '+height);stage.style.aspectRatio='400 / '+height;stage.style.height='auto';
+ document.getElementById('room-art').setAttribute('transform','translate('+(200*(1-scale))+','+y+') scale('+scale+')');
+ document.getElementById('room-wall-extension').setAttribute('height',height);
+ const floor=document.getElementById('room-floor-extension');floor.setAttribute('y',176*scale+y);floor.setAttribute('height',Math.max(0,height-176*scale-y));floor.setAttribute('fill','#E8C4A3');
+};
+window.pawquestRender=(value)=>{
+ const equipment=value.equipment||[],room=value.room||[];
+ original({...value,equipment:equipment.map(v=>legacyEquipment[v]||v).filter(v=>['HEAD','FACE','NECK'].includes(v)),room:room.map(v=>legacyRoom[v]||v).filter(v=>['BED','LAMP','CARPET'].includes(v))});
+ for(const i of items)document.getElementById(i.id).classList.toggle('hidden',!(i.category==='ACCESSORY'?equipment:room).includes(i.id));
+ const orange=document.getElementById('head-orange');if(orange)orange.classList.toggle('hidden',equipment.some(v=>v==='HEAD'||legacyEquipment[v]==='HEAD'||items.some(i=>i.id===v&&i.slot==='HEAD')));
+};
+window.pawquestRender({state:'IDLE'});
+})();</script></body></html>

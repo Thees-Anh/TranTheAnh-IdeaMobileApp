@@ -1,0 +1,13 @@
+{
+  "statMax": 100,
+  "feedGain": 15,
+  "playHappinessGain": 15,
+  "playEnergyCost": 5,
+  "sleepEnergyPerMinute": 2,
+  "reactionMilliseconds": 2500,
+  "starterFood": 3,
+  "hungerDecayPerHour": 2,
+  "happinessDecayPerHour": 1,
+  "energyDecayPerHour": 1,
+  "xpPerLevel": 100
+}

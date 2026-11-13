@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="widget_surface_top">#2C2026</color>
+    <color name="widget_surface_bottom">#231A1F</color>
+    <color name="widget_outline">#4A3640</color>
+    <color name="widget_text">#F6E7DF</color>
+    <color name="widget_muted">#C9AB9C</color>
+    <color name="widget_tile">#33252C</color>
+    <color name="widget_tile_outline">#46343D</color>
+    <color name="widget_track">#3E2F36</color>
+    <color name="widget_food">#F2A65A</color>
+    <color name="widget_water">#5DB8F0</color>
+    <color name="widget_streak">#FF8A4C</color>
+    <color name="widget_done">#5CCB97</color>
+    <color name="widget_left">#F9A8D4</color>
+</resources>

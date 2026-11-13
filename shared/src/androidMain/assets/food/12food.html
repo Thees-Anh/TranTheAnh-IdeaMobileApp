@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawQuest Bistro Studio — 12 Món Ăn & Đồ Uống Thú Cưng (Từ Rẻ Tới Đắt)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style id="pawquest-bistro-styles">
+        * {
+            font-family: 'Quicksand', sans-serif;
+            user-select: none;
+        }
+        code, pre, .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+            user-select: text;
+        }
+        body {
+            background-color: #FFF5F8;
+            color: #4B2412;
+        }
+
+        /* =========================================================
+           1. PHONG CÁCH KAWAII PASTEL & VIỀN NÂU ĐẬM (#4B2412)
+           ========================================================= */
+        .kawaii-card {
+            border: 3px solid #4B2412;
+            box-shadow: 0 6px 0 rgba(75, 36, 18, 0.14);
+        }
+        .kawaii-btn {
+            border: 2.5px solid #4B2412;
+            box-shadow: 0 3.5px 0 #4B2412;
+            transition: all 0.12s ease;
+        }
+        .kawaii-btn:hover:not(:disabled) {
+            transform: translateY(-1.5px);
+            box-shadow: 0 5px 0 #4B2412;
+        }
+        .kawaii-btn:active:not(:disabled), .kawaii-btn.active-btn {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #4B2412;
+        }
+
+        /* =========================================================
+           2. KEYFRAMES CHUYỂN ĐỘNG CỦA THÚ CƯNG KHI ĐỨNG YÊN / ĂN / UỐNG / VUI
+           ========================================================= */
+        #pet-actor-root, #pet-head-rig, #pet-body-rig, #pet-tail-rig, #pet-ear-l, #pet-ear-r {
+            transform-box: fill-box;
+        }
+        #pet-body-rig { transform-origin: 50% 95%; }
+        #pet-head-rig { transform-origin: 50% 82%; }
+        #pet-tail-rig { transform-origin: 85% 85%; }
+        #pet-ear-l { transform-origin: 80% 20%; }
+        #pet-ear-r { transform-origin: 20% 20%; }
+
+        /* Trạng thái 1: Đứng yên (Idle) */
+        @keyframes petIdleBreath {
+            0%, 100% { transform: scale(1, 1); }
+            50% { transform: scale(1.02, 0.98); }
+        }
+        @keyframes petIdleHeadTilt {
+            0%, 100% { transform: rotate(-1.5deg) translateY(0px); }
+            50% { transform: rotate(2deg) translateY(2px); }
+        }
+        @keyframes petTailWagSlow {
+            0%, 100% { transform: rotate(-6deg); }
+            50% { transform: rotate(10deg); }
+        }
+        .state-idle #pet-body-rig { animation: petIdleBreath 2.8s ease-in-out infinite; }
+        .state-idle #pet-head-rig { animation: petIdleHeadTilt 3.2s ease-in-out infinite; }
+        .state-idle #pet-tail-rig { animation: petTailWagSlow 2.2s ease-in-out infinite; }
+
+        /* Trạng thái 2: Đang Ăn (Eating) */
+        @keyframes petEatHeadBob {
+            0%, 100% { transform: translateY(10px) rotate(5deg) scale(1, 1); }
+            50% { transform: translateY(18px) rotate(-3deg) scale(1.04, 0.96); }
+        }
+        @keyframes petEatBodySquish {
+            0%, 100% { transform: scale(1.02, 0.98); }
+            50% { transform: scale(1.06, 0.94); }
+        }
+        @keyframes petChewMouth {
+            0%, 100% { transform: scaleY(1) scaleX(1); }
+            50% { transform: scaleY(0.35) scaleX(1.25); }
+        }
+        @keyframes crumbFlyLeft {
+            0% { opacity: 1; transform: translate(0, 0) scale(0.8); }
+            100% { opacity: 0; transform: translate(-22px, -16px) scale(1.2); }
+        }
+        @keyframes crumbFlyRight {
+            0% { opacity: 1; transform: translate(0, 0) scale(0.8); }
+            100% { opacity: 0; transform: translate(22px, -18px) scale(1.2); }
+        }
+        .state-eating #pet-head-rig { animation: petEatHeadBob 0.42s ease-in-out infinite; }
+        .state-eating #pet-body-rig { animation: petEatBodySquish 0.42s ease-in-out infinite; }
+        .state-eating #pet-tail-rig { animation: petTailWagSlow 0.4s ease-in-out infinite; }
+        .state-eating .chew-mouth-anim {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: petChewMouth 0.24s ease-in-out infinite;
+        }
+        .state-eating .crumb-l { animation: crumbFlyLeft 0.45s ease-out infinite; }
+        .state-eating .crumb-r { animation: crumbFlyRight 0.45s 0.18s ease-out infinite; }
+
+        /* Trạng thái 3: Đang Uống (Drinking) */
+        @keyframes petDrinkHeadDip {
+            0%, 100% { transform: translateY(12px) rotate(3deg); }
+            50% { transform: translateY(15px) rotate(5deg); }
+        }
+        @keyframes petSipTongue {
+            0%, 100% { transform: translateY(0px) scaleY(1); }
+            50% { transform: translateY(4px) scaleY(1.3); }
+        }
+        @keyframes bubbleFloatUp {
+            0% { opacity: 0.9; transform: translateY(0) scale(0.8); }
+            100% { opacity: 0; transform: translateY(-24px) scale(1.3); }
+        }
+        .state-drinking #pet-head-rig { animation: petDrinkHeadDip 0.65s ease-in-out infinite; }
+        .state-drinking #pet-body-rig { animation: petIdleBreath 1.2s ease-in-out infinite; }
+        .state-drinking .sip-tongue-anim {
+            transform-box: fill-box;
+            transform-origin: top center;
+            animation: petSipTongue 0.3s ease-in-out infinite;
+        }
+        .state-drinking .drink-bubble-1 { animation: bubbleFloatUp 0.8s ease-out infinite; }
+        .state-drinking .drink-bubble-2 { animation: bubbleFloatUp 0.8s 0.35s ease-out infinite; }
+
+        /* Trạng thái 4: No Bụng Hạnh Phúc (Happy Full) */
+        @keyframes petHappyJump {
+            0%, 100% { transform: translateY(0px) scale(1.03, 0.97); }
+            50% { transform: translateY(-12px) scale(0.97, 1.04); }
+        }
+        .state-happy #pet-actor-root { animation: petHappyJump 0.45s ease-in-out infinite; }
+
+        /* =========================================================
+           3. KEYFRAMES ĐẠO CỤ MÓN ĂN (KHÓI BỐC LÊN, PUDDING NÚNG NÍNH, LẨU SÔI)
+           ========================================================= */
+        @keyframes foodSteamRise {
+            0% { opacity: 0; transform: translateY(4px) scaleX(0.9); }
+            50% { opacity: 0.85; transform: translateY(-6px) scaleX(1.1); }
+            100% { opacity: 0; transform: translateY(-16px) scaleX(0.95); }
+        }
+        @keyframes foodJiggleBounce {
+            0%, 100% { transform: scale(1, 1); }
+            40% { transform: scale(1.06, 0.94); }
+            75% { transform: scale(0.96, 1.04); }
+        }
+        @keyframes stageFoodPlop {
+            0% { transform: translateY(-25px) scale(0.5); opacity: 0; }
+            65% { transform: translateY(4px) scale(1.08, 0.92); opacity: 1; }
+            100% { transform: translateY(0px) scale(1, 1); opacity: 1; }
+        }
+        @keyframes floatBuffText {
+            0% { opacity: 0; transform: translateY(10px) scale(0.8); }
+            20% { opacity: 1; transform: translateY(0px) scale(1.05); }
+            80% { opacity: 1; transform: translateY(-26px) scale(1); }
+            100% { opacity: 0; transform: translateY(-38px) scale(0.95); }
+        }
+        .steam-line-1 { animation: foodSteamRise 1.8s ease-in-out infinite; }
+        .steam-line-2 { animation: foodSteamRise 1.8s 0.6s ease-in-out infinite; }
+        .steam-line-3 { animation: foodSteamRise 1.8s 1.2s ease-in-out infinite; }
+        .food-jiggle {
+            transform-box: fill-box;
+            transform-origin: bottom center;
+            animation: foodJiggleBounce 1.4s ease-in-out infinite;
+        }
+        .stage-dish-enter {
+            transform-box: fill-box;
+            transform-origin: bottom center;
+            animation: stageFoodPlop 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        .state-eating #stage-food-slot, .state-drinking #stage-food-slot {
+            animation: foodJiggleBounce 0.42s ease-in-out infinite;
+        }
+        .floating-buff-badge {
+            animation: floatBuffText 1.7s ease-out forwards;
+        }
+
+        /* Ẩn/hiện biểu cảm khuôn mặt thú cưng theo trạng thái */
+        .face-idle, .face-eating, .face-drinking, .face-happy, #fx-eating-crumbs, #fx-drinking-bubbles, #fx-happy-hearts {
+            display: none;
+        }
+        .state-idle .face-idle { display: inline; }
+        .state-eating .face-eating, .state-eating #fx-eating-crumbs { display: inline; }
+        .state-drinking .face-drinking, .state-drinking #fx-drinking-bubbles { display: inline; }
+        .state-happy .face-happy, .state-happy #fx-happy-hearts { display: inline; }
+
+        ::-webkit-scrollbar { width: 7px; height: 7px; }
+        ::-webkit-scrollbar-track { background: #181825; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb { background: #f472b6; border-radius: 6px; }
+    </style>
+</head>
+<body class="min-h-screen p-3 md:p-5 flex flex-col items-center">
+
+    <!-- =====================================================================
+         THƯ VIỆN SVG 12 MÓN ĂN & ĐỒ UỐNG (TỪ RẺ TỚI ĐẮT: 10 XU -> 500 XU)
+         ===================================================================== -->
+    <svg id="pawquest-food-svg-defs" class="hidden" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <!-- 1. Bánh Quy Khúc Xương (10 Xu - Bình Dân - Food) -->
+            <g id="food-bone-biscuit">
+                <ellipse cx="60" cy="96" rx="42" ry="10" fill="#4B2412" opacity="0.16"/>
+                <!-- Bát sứ hồng -->
+                <path d="M 22 72 L 98 72 L 90 94 C 86 100, 34 100, 30 94 Z" fill="#F9A8D4" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round"/>
+                <ellipse cx="60" cy="72" rx="38" ry="10" fill="#FCE7F3" stroke="#4B2412" stroke-width="4.5"/>
+                <!-- Hạt thức ăn nâu giòn -->
+                <circle cx="44" cy="69" r="6" fill="#B45309" stroke="#4B2412" stroke-width="3.5"/>
+                <circle cx="75" cy="70" r="6" fill="#92400E" stroke="#4B2412" stroke-width="3.5"/>
+                <circle cx="58" cy="73" r="6.5" fill="#B45309" stroke="#4B2412" stroke-width="3.5"/>
+                <!-- Bánh quy khúc xương vàng giòn ở trên -->
+                <g transform="translate(60, 58) rotate(-12)">
+                    <path d="M -18 -6 C -24 -12, -30 -4, -24 2 C -30 8, -22 14, -16 8 L 16 8 C 22 14, 30 8, 24 2 C 30 -4, 24 -12, 18 -6 Z" fill="#FDE047" stroke="#4B2412" stroke-width="4" stroke-linejoin="round"/>
+                    <circle cx="-8" cy="1" r="1.8" fill="#B45309"/>
+                    <circle cx="0" cy="1" r="1.8" fill="#B45309"/>
+                    <circle cx="8" cy="1" r="1.8" fill="#B45309"/>
+                </g>
+                <!-- Hình trái tim trên thân bát -->
+                <path d="M 60 88 C 55 83, 51 85, 55 90 L 60 94 L 65 90 C 69 85, 65 83, 60 88 Z" fill="#F43F5E"/>
+            </g>
+
+            <!-- 2. Cà Rốt & Lá Non (15 Xu - Bình Dân - Food) -->
+            <g id="food-fresh-carrot">
+                <ellipse cx="60" cy="96" rx="42" ry="9" fill="#4B2412" opacity="0.16"/>
+                <!-- Đĩa gỗ tròn -->
+                <ellipse cx="60" cy="84" rx="42" ry="13" fill="#FDE68A" stroke="#4B2412" stroke-width="4.5"/>
+                <ellipse cx="60" cy="84" rx="31" ry="8" fill="#FEF3C7" stroke="#D97706" stroke-width="2"/>
+                <!-- Lá xà lách xanh -->
+                <path d="M 30 80 C 26 70, 42 64, 52 72 C 62 64, 78 68, 76 80 Z" fill="#4ADE80" stroke="#4B2412" stroke-width="4"/>
+                <!-- Củ cà rốt tươi -->
+                <g transform="translate(58, 68) rotate(-18)">
+                    <!-- Chùm lá xanh -->
+                    <path d="M 18 -4 C 28 -16, 38 -8, 24 2 C 36 4, 32 14, 18 4 Z" fill="#22C55E" stroke="#4B2412" stroke-width="4" stroke-linejoin="round"/>
+                    <!-- Thân củ cà rốt -->
+                    <path d="M -28 4 C -10 -8, 14 -10, 20 0 C 22 8, -6 14, -28 6 Z" fill="#FB923C" stroke="#4B2412" stroke-width="4.2" stroke-linejoin="round"/>
+                    <line x1="-8" y1="-2" x2="-6" y2="4" stroke="#4B2412" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="4" y1="-4" x2="5" y2="3" stroke="#4B2412" stroke-width="3" stroke-linecap="round"/>
+                </g>
+                <!-- Cà chua bi đỏ mọng -->
+                <circle cx="76" cy="80" r="9.5" fill="#F43F5E" stroke="#4B2412" stroke-width="4"/>
+                <circle cx="73" cy="77" r="2.5" fill="#FFF"/>
+            </g>
+
+            <!-- 3. Sữa Tươi Ấm (20 Xu - Bình Dân - Drink) -->
+            <g id="food-warm-milk">
+                <ellipse cx="60" cy="96" rx="40" ry="9" fill="#4B2412" opacity="0.16"/>
+                <!-- Ống hút kẻ sọc hồng -->
+                <path d="M 74 68 L 88 32 L 96 35 L 82 70 Z" fill="#F472B6" stroke="#4B2412" stroke-width="4" stroke-linejoin="round"/>
+                <!-- Bát sứ xanh pastel -->
+                <path d="M 22 68 C 22 96, 98 96, 98 68 Z" fill="#7DD3FC" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round"/>
+                <ellipse cx="60" cy="68" rx="38" ry="11" fill="#E0F2FE" stroke="#4B2412" stroke-width="4.5"/>
+                <!-- Mặt sữa trắng kem ấm -->
+                <ellipse cx="60" cy="69" rx="32" ry="7.5" fill="#FFFFFF"/>
+                <!-- Hơi ấm bốc lên -->
+                <path class="steam-line-1" d="M 46 52 Q 42 44 48 36" fill="none" stroke="#94A3B8" stroke-width="3.5" stroke-linecap="round"/>
+                <path class="steam-line-2" d="M 62 50 Q 66 42 60 34" fill="none" stroke="#94A3B8" stroke-width="3.5" stroke-linecap="round"/>
+                <!-- Dấu chân mèo in trên bát -->
+                <circle cx="60" cy="84" r="4.5" fill="#FFF"/>
+                <circle cx="53" cy="79" r="2.2" fill="#FFF"/>
+                <circle cx="60" cy="77" r="2.2" fill="#FFF"/>
+                <circle cx="67" cy="79" r="2.2" fill="#FFF"/>
+            </g>
+
+            <!-- 4. Cá Nướng Taiyaki (35 Xu - Ngon Miệng - Food) -->
+            <g id="food-taiyaki">
+                <ellipse cx="60" cy="96" rx="43" ry="9" fill="#4B2412" opacity="0.16"/>
+                <!-- Đĩa sứ trắng viền xanh -->
+                <ellipse cx="60" cy="84" rx="44" ry="13" fill="#FFF" stroke="#4B2412" stroke-width="4.5"/>
+                <ellipse cx="60" cy="84" rx="35" ry="9" fill="#E0F2FE" stroke="#38BDF8" stroke-width="2.5"/>
+                <!-- Bánh cá Taiyaki vàng ươm -->
+                <g class="food-jiggle" transform="translate(58, 66) rotate(-8)">
+                    <!-- Đuôi bánh cá -->
+                    <path d="M 22 -2 L 38 -14 L 36 0 L 40 12 L 22 6 Z" fill="#F59E0B" stroke="#4B2412" stroke-width="4.2" stroke-linejoin="round"/>
+                    <!-- Thân cá phúng phính -->
+                    <path d="M -32 2 C -26 -18, 12 -20, 25 -2 C 26 14, -12 22, -32 2 Z" fill="#FBBF24" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round"/>
+                    <!-- Nhân đậu đỏ tràn nhẹ -->
+                    <ellipse cx="-8" cy="-10" rx="10" ry="4.5" fill="#881337" stroke="#4B2412" stroke-width="3.5"/>
+                    <!-- Mắt cá & vảy bánh -->
+                    <circle cx="-18" cy="0" r="3.5" fill="#4B2412"/>
+                    <path d="M -4 -1 Q 0 4 -4 8 M 6 -2 Q 10 3 6 7" fill="none" stroke="#B45309" stroke-width="3" stroke-linecap="round"/>
+                </g>
+                <path class="steam-line-1" d="M 45 44 Q 41 35 47 27" fill="none" stroke="#F59E0B" stroke-width="3.5" stroke-linecap="round"/>
+            </g>
+
+            <!-- 5. Cơm Nắm Onigiri Cá Hồi (50 Xu - Ngon Miệng - Food) -->
+            <g id="food-onigiri">
+                <ellipse cx="60" cy="96" rx="42" ry="9" fill="#4B2412" opacity="0.16"/>
+                <!-- Khay gỗ Nhật -->
+                <rect x="20" y="76" width="80" height="16" rx="7" fill="#D97706" stroke="#4B2412" stroke-width="4.5"/>
+                <!-- Khối cơm tam giác bầu bĩnh -->
+                <g class="food-jiggle">
+                    <path d="M 60 32 C 74 32, 92 66, 86 80 C 80 86, 40 86, 34 80 C 28 66, 46 32, 60 32 Z" fill="#FFFFFF" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round"/>
+                    <!-- Topping cá hồi cam trên đỉnh -->
+                    <path d="M 49 38 C 54 28, 66 28, 71 38 C 66 44, 54 44, 49 38 Z" fill="#FB7185" stroke="#4B2412" stroke-width="4"/>
+                    <!-- Lá rong biển Nori quấn bụng -->
+                    <rect x="46" y="62" width="28" height="22" rx="4" fill="#1E293B" stroke="#4B2412" stroke-width="4"/>
+                    <!-- Khuôn mặt đáng yêu trên cơm nắm -->
+                    <circle cx="51" cy="52" r="3" fill="#4B2412"/>
+                    <circle cx="69" cy="52" r="3" fill="#4B2412"/>
+                    <ellipse cx="45" cy="55" rx="4" ry="2.2" fill="#FDA4AF"/>
+                    <ellipse cx="75" cy="55" rx="4" ry="2.2" fill="#FDA4AF"/>
+                    <path d="M 57 54 Q 60 57 63 54" fill="none" stroke="#4B2412" stroke-width="3" stroke-linecap="round"/>
+                </g>
+            </g>
+
+            <!-- 6. Trà Sữa Trân Châu Đường Đen (65 Xu - Ngon Miệng - Drink) -->
+            <g id="food-boba-tea">
+                <ellipse cx="60" cy="98" rx="34" ry="8" fill="#4B2412" opacity="0.16"/>
+                <!-- Ống hút to hút trân châu -->
+                <rect x="55" y="16" width="11" height="36" rx="4" fill="#F43F5E" stroke="#4B2412" stroke-width="4"/>
+                <!-- Nắp vòm hình tai gấu -->
+                <circle cx="38" cy="40" r="8" fill="#FDE68A" stroke="#4B2412" stroke-width="4"/>
+                <circle cx="82" cy="40" r="8" fill="#FDE68A" stroke="#4B2412" stroke-width="4"/>
+                <path d="M 34 48 C 34 30, 86 30, 86 48 Z" fill="#FEF3C7" stroke="#4B2412" stroke-width="4.2"/>
+                <!-- Thân cốc trà sữa -->
+                <path d="M 35 48 L 85 48 L 79 92 C 78 96, 42 96, 41 92 Z" fill="#FDE68A" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round"/>
+                <!-- Vân đường đen chảy -->
+                <path d="M 38 56 Q 48 66 42 74 Q 56 64 62 76 Q 72 62 80 72" fill="none" stroke="#92400E" stroke-width="4" stroke-linecap="round"/>
+                <!-- Hạt trân châu đen bóng dưới đáy -->
+                <circle cx="47" cy="87" r="4.5" fill="#4B2412"/>
+                <circle cx="57" cy="88" r="4.5" fill="#4B2412"/>
+                <circle cx="67" cy="87" r="4.5" fill="#4B2412"/>
+                <circle cx="52" cy="80" r="4.2" fill="#4B2412"/>
+                <circle cx="63" cy="80" r="4.2" fill="#4B2412"/>
+                <!-- Mắt cười trên ly -->
+                <path d="M 49 62 Q 52 59 55 62 M 65 62 Q 68 59 71 62" fill="none" stroke="#4B2412" stroke-width="3.2" stroke-linecap="round"/>
+            </g>
+
+            <!-- 7. Bánh Pudding Mèo Caramel (90 Xu - Cao Cấp - Food) -->
+            <g id="food-cat-pudding">
+                <ellipse cx="60" cy="96" rx="44" ry="9" fill="#4B2412" opacity="0.16"/>
+                <!-- Đĩa sứ ren hồng -->
+                <ellipse cx="60" cy="84" rx="44" ry="12" fill="#FCE7F3" stroke="#4B2412" stroke-width="4.5"/>
+                <!-- Khối bánh Pudding Mèo núng nính -->
+                <g class="food-jiggle">
+                    <path d="M 32 82 L 38 48 L 48 54 Q 60 50 72 54 L 82 48 L 88 82 C 88 88, 32 88, 32 82 Z" fill="#FDE047" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round"/>
+                    <!-- Lớp sốt Caramel nâu bóng chảy trên đầu -->
+                    <path d="M 37 54 L 38 48 L 48 54 Q 60 50 72 54 L 82 48 L 83 56 C 76 62, 70 56, 65 62 C 60 66, 54 58, 48 62 C 42 64, 38 58, 37 54 Z" fill="#92400E" stroke="#4B2412" stroke-width="4" stroke-linejoin="round"/>
+                    <!-- Quả Cherry đỏ trên đỉnh -->
+                    <circle cx="60" cy="44" r="7" fill="#E11D48" stroke="#4B2412" stroke-width="3.8"/>
+                    <path d="M 60 37 Q 66 26 74 28" fill="none" stroke="#4B2412" stroke-width="3.5" stroke-linecap="round"/>
+                    <!-- Mặt mèo Pudding -->
+                    <circle cx="49" cy="70" r="3" fill="#4B2412"/>
+                    <circle cx="71" cy="70" r="3" fill="#4B2412"/>
+                    <path d="M 56 72 Q 60 75 64 72" fill="none" stroke="#4B2412" stroke-width="3" stroke-linecap="round"/>
+                </g>
+            </g>
+
+            <!-- 8. Mì Ramen Trứng Lòng Đào (120 Xu - Cao Cấp - Food) -->
+            <g id="food-ramen-bowl">
+                <ellipse cx="60" cy="97" rx="44" ry="9" fill="#4B2412" opacity="0.16"/>
+                <!-- Lá rong biển Nori cắm phía sau -->
+                <rect x="68" y="36" width="22" height="28" rx="3" transform="rotate(14 78 50)" fill="#1E293B" stroke="#4B2412" stroke-width="4"/>
+                <!-- Tô Ramen đỏ truyền thống -->
+                <path d="M 18 64 C 18 98, 102 98, 102 64 Z" fill="#EF4444" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round"/>
+                <ellipse cx="60" cy="64" rx="42" ry="13" fill="#FEF3C7" stroke="#4B2412" stroke-width="4.5"/>
+                <!-- Nước dùng & sợi mì vàng -->
+                <ellipse cx="60" cy="65" rx="36" ry="9.5" fill="#F59E0B"/>
+                <path d="M 34 65 Q 45 58 56 65 T 78 64" fill="none" stroke="#FDE047" stroke-width="4" stroke-linecap="round"/>
+                <!-- Trứng lòng đào Ajitsuke Tamago -->
+                <ellipse cx="44" cy="61" rx="12" ry="9" fill="#FFFFFF" stroke="#4B2412" stroke-width="3.8"/>
+                <circle cx="44" cy="61" r="5.5" fill="#EA580C"/>
+                <!-- Chả cá xoắn Narutomaki -->
+                <circle cx="70" cy="63" r="10" fill="#FFFFFF" stroke="#4B2412" stroke-width="3.8"/>
+                <path d="M 70 63 m -4 0 a 4 4 0 1 0 8 0 a 2.5 2.5 0 1 0 -5 0" fill="none" stroke="#F43F5E" stroke-width="2.8" stroke-linecap="round"/>
+                <!-- Khói mì nóng hổi -->
+                <path class="steam-line-1" d="M 38 42 Q 34 32 40 22" fill="none" stroke="#94A3B8" stroke-width="3.5" stroke-linecap="round"/>
+                <path class="steam-line-2" d="M 56 38 Q 60 28 54 18" fill="none" stroke="#94A3B8" stroke-width="3.5" stroke-linecap="round"/>
+            </g>
+
+            <!-- 9. Sushi Cá Hồi Thượng Hạng (160 Xu - Cao Cấp - Food) -->
+            <g id="food-salmon-sushi">
+                <ellipse cx="60" cy="96" rx="46" ry="9" fill="#4B2412" opacity="0.16"/>
+                <!-- Khay gỗ Geta Nhật Bản -->
+                <rect x="24" y="84" width="10" height="10" fill="#B45309" stroke="#4B2412" stroke-width="4"/>
+                <rect x="86" y="84" width="10" height="10" fill="#B45309" stroke="#4B2412" stroke-width="4"/>
+                <rect x="14" y="72" width="92" height="14" rx="5" fill="#FBBF24" stroke="#4B2412" stroke-width="4.5"/>
+                <!-- Miếng Nigiri Cá Hồi Cam Vân Trắng -->
+                <g class="food-jiggle">
+                    <rect x="24" y="58" width="32" height="15" rx="7" fill="#FFFFFF" stroke="#4B2412" stroke-width="4"/>
+                    <path d="M 20 58 C 22 44, 58 44, 60 58 C 52 63, 28 63, 20 58 Z" fill="#FB7185" stroke="#4B2412" stroke-width="4"/>
+                    <line x1="30" y1="49" x2="36" y2="59" stroke="#FFE4E6" stroke-width="2.8" stroke-linecap="round"/>
+                    <line x1="42" y1="49" x2="48" y2="59" stroke="#FFE4E6" stroke-width="2.8" stroke-linecap="round"/>
+                    <!-- Miếng Sushi Trứng Cuộn Tamago -->
+                    <rect x="64" y="58" width="30" height="15" rx="7" fill="#FFFFFF" stroke="#4B2412" stroke-width="4"/>
+                    <rect x="62" y="47" width="34" height="13" rx="5" fill="#FDE047" stroke="#4B2412" stroke-width="4"/>
+                    <rect x="74" y="47" width="10" height="26" fill="#1E293B" stroke="#4B2412" stroke-width="3.5"/>
+                </g>
+            </g>
+
+            <!-- 10. Sinh Tố Dâu Tây Kem Tươi (200 Xu - Cao Cấp - Drink) -->
+            <g id="food-berry-parfait">
+                <ellipse cx="60" cy="98" rx="34" ry="8" fill="#4B2412" opacity="0.16"/>
+                <!-- Bánh quế cắm nghiêng -->
+                <rect x="68" y="18" width="9" height="32" rx="4" transform="rotate(20 72 34)" fill="#F59E0B" stroke="#4B2412" stroke-width="3.8"/>
+                <!-- Chân ly thủy tinh Parfait -->
+                <path d="M 42 94 L 78 94 L 66 84 L 54 84 Z" fill="#E0F2FE" stroke="#4B2412" stroke-width="4" stroke-linejoin="round"/>
+                <!-- Bầu ly sinh tố dâu tầng kem -->
+                <path d="M 34 46 L 86 46 L 74 84 C 70 88, 50 88, 46 84 Z" fill="#FDA4AF" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round"/>
+                <!-- Tầng sốt dâu đậm -->
+                <path d="M 38 62 Q 50 68 60 62 T 82 62 L 77 76 L 43 76 Z" fill="#F43F5E"/>
+                <!-- Chóp kem tươi Whipped Cream bồng bềnh -->
+                <path d="M 32 48 C 28 36, 44 30, 60 28 C 76 30, 92 36, 88 48 C 76 54, 44 54, 32 48 Z" fill="#FFFFFF" stroke="#4B2412" stroke-width="4.2"/>
+                <!-- Quả dâu tây đỏ mọng trên đỉnh kem -->
+                <path d="M 60 16 C 68 16, 72 28, 60 34 C 48 28, 52 16, 60 16 Z" fill="#E11D48" stroke="#4B2412" stroke-width="4"/>
+            </g>
+
+            <!-- 11. Bít Tết Wagyu Áp Chảo (300 Xu - Hoàng Gia - Food) -->
+            <g id="food-wagyu-steak">
+                <ellipse cx="60" cy="96" rx="48" ry="10" fill="#4B2412" opacity="0.18"/>
+                <!-- Chảo gang đen Sizzling -->
+                <ellipse cx="60" cy="80" rx="46" ry="16" fill="#334155" stroke="#4B2412" stroke-width="4.8"/>
+                <ellipse cx="60" cy="78" rx="39" ry="12" fill="#1E293B"/>
+                <!-- Miếng thịt bò Wagyu dày mọng nước -->
+                <g class="food-jiggle">
+                    <path d="M 28 74 C 24 58, 48 52, 70 56 C 86 60, 88 76, 72 82 C 52 86, 30 84, 28 74 Z" fill="#991B1B" stroke="#4B2412" stroke-width="4.5"/>
+                    <path d="M 30 68 C 28 56, 50 52, 70 56 C 82 60, 82 70, 68 74 C 48 78, 32 74, 30 68 Z" fill="#B91C1C" stroke="#4B2412" stroke-width="4"/>
+                    <!-- Vân mỡ cẩm thạch & Vết nướng caro -->
+                    <line x1="42" y1="58" x2="52" y2="72" stroke="#7F1D1D" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="56" y1="58" x2="66" y2="72" stroke="#7F1D1D" stroke-width="3" stroke-linecap="round"/>
+                    <!-- Viên bơ tỏi thảo mộc tan chảy trên mặt thịt -->
+                    <ellipse cx="54" cy="63" rx="9" ry="5.5" fill="#FDE047" stroke="#4B2412" stroke-width="3.5"/>
+                    <circle cx="54" cy="62" r="2.2" fill="#22C55E"/>
+                </g>
+                <!-- Bông cải xanh Broccoli & Trứng ốp la cạnh bên -->
+                <circle cx="84" cy="74" r="8" fill="#22C55E" stroke="#4B2412" stroke-width="3.8"/>
+                <!-- Hơi nóng xèo xèo -->
+                <path class="steam-line-1" d="M 40 46 Q 36 34 44 24" fill="none" stroke="#FBBF24" stroke-width="3.5" stroke-linecap="round"/>
+                <path class="steam-line-2" d="M 64 44 Q 70 32 62 22" fill="none" stroke="#FBBF24" stroke-width="3.5" stroke-linecap="round"/>
+            </g>
+
+            <!-- 12. Lẩu Hoàng Gia Cầu Vồng (500 Xu - Hoàng Gia - Food) -->
+            <g id="food-royal-hotpot">
+                <ellipse cx="60" cy="98" rx="48" ry="10" fill="#4B2412" opacity="0.22"/>
+                <!-- Quai nồi vàng hoàng gia hai bên -->
+                <path d="M 16 66 C 6 62, 6 78, 18 76" fill="none" stroke="#F59E0B" stroke-width="5.5" stroke-linecap="round"/>
+                <path d="M 104 66 C 114 62, 114 78, 102 76" fill="none" stroke="#F59E0B" stroke-width="5.5" stroke-linecap="round"/>
+                <!-- Nồi lẩu vàng ròng chạm ngọc -->
+                <path d="M 18 64 C 18 100, 102 100, 102 64 Z" fill="#FBBF24" stroke="#4B2412" stroke-width="4.8" stroke-linejoin="round"/>
+                <ellipse cx="60" cy="64" rx="42" ry="14" fill="#FEF08A" stroke="#4B2412" stroke-width="4.5"/>
+                <!-- Nước lẩu uyên ương 2 ngăn -->
+                <ellipse cx="60" cy="65" rx="36" ry="10" fill="#FB7185"/>
+                <!-- Tôm hùm đỏ, nấm đông cô, đậu hũ cá & trứng cút -->
+                <g class="food-jiggle">
+                    <path d="M 34 62 C 32 50, 48 46, 52 58" fill="none" stroke="#F43F5E" stroke-width="7" stroke-linecap="round"/>
+                    <ellipse cx="66" cy="58" rx="11" ry="8" fill="#92400E" stroke="#4B2412" stroke-width="3.5"/>
+                    <path d="M 62 56 L 70 60 M 70 56 L 62 60" stroke="#FEF3C7" stroke-width="2.5" stroke-linecap="round"/>
+                    <circle cx="48" cy="66" r="6.5" fill="#FFFFFF" stroke="#4B2412" stroke-width="3.2"/>
+                    <circle cx="80" cy="64" r="6" fill="#4ADE80" stroke="#4B2412" stroke-width="3.2"/>
+                </g>
+                <!-- Ngọc hồng bảo đính trước nồi -->
+                <polygon points="60,78 66,85 60,92 54,85" fill="#EC4899" stroke="#4B2412" stroke-width="3"/>
+                <!-- Khói hương cầu vồng & Sao lấp lánh -->
+                <path class="steam-line-1" d="M 38 42 Q 32 30 40 18" fill="none" stroke="#F472B6" stroke-width="3.8" stroke-linecap="round"/>
+                <path class="steam-line-2" d="M 60 38 Q 66 26 58 14" fill="none" stroke="#FACC15" stroke-width="3.8" stroke-linecap="round"/>
+                <path class="steam-line-3" d="M 80 42 Q 86 30 78 18" fill="none" stroke="#60A5FA" stroke-width="3.8" stroke-linecap="round"/>
+            </g>
+        </defs>
+    </svg>
+
+    <!-- =====================================================================
+         HEADER & THANH TRẠNG THÁI CHỈ SỐ THÚ CƯNG
+         ===================================================================== -->
+    <header class="w-full max-w-7xl mb-4 bg-white rounded-3xl px-4 py-3 kawaii-card flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-300 via-orange-300 to-rose-400 border-2 border-[#4B2412] flex items-center justify-center text-2xl shadow-inner">
+                🍱
+            </div>
+            <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <h1 class="text-lg md:text-xl font-extrabold text-[#4B2412] tracking-tight">
+                        PawQuest Bistro Studio — 12 Món Ăn & Đồ Uống Thú Cưng
+                    </h1>
+                    <span class="bg-amber-300 text-[#4B2412] border border-[#4B2412] text-[11px] font-extrabold px-2.5 py-0.5 rounded-full">
+                        💰 Giá Từ Rẻ Tới Đắt (10 Xu ➔ 500 Xu)
+                    </span>
+                </div>
+                <p class="text-xs text-[#8c5233] font-semibold">
+                    Chọn bất kỳ món ăn nào để đặt lên thảm trước mặt Mèo, Chó, Capybara hoặc Thỏ và xem animation ăn/uống kèm Source Code!
+                </p>
+            </div>
+        </div>
+
+        <!-- Ví Xu & Các nút tiện ích -->
+        <div class="flex items-center gap-2 flex-wrap">
+            <!-- Ví Coins -->
+            <div class="bg-yellow-100 border-2 border-[#4B2412] px-3 py-1 rounded-2xl flex items-center gap-2">
+                <span class="text-lg">🪙</span>
+                <div class="leading-tight">
+                    <div class="text-[9px] font-bold text-[#8c5233] uppercase">Ví Xu PawQuest</div>
+                    <div id="player-coins-val" class="text-sm font-extrabold text-[#4B2412]">1,500</div>
+                </div>
+                <button onclick="addFreeCoins()" class="ml-1 bg-amber-300 hover:bg-amber-400 border border-[#4B2412] text-[10px] font-extrabold px-2 py-0.5 rounded-lg" title="Cộng thêm 1,000 Xu để test thoải mái">
+                    +1,000 Xu
+                </button>
+            </div>
+
+            <!-- Cấp độ & EXP -->
+            <div class="bg-purple-100 border-2 border-[#4B2412] px-3 py-1 rounded-2xl flex items-center gap-2">
+                <span class="text-lg">⭐</span>
+                <div class="leading-tight">
+                    <div class="text-[9px] font-bold text-purple-900 uppercase">Level <span id="pet-level-val">1</span></div>
+                    <div id="pet-exp-val" class="text-xs font-extrabold text-purple-900">0 / 100 EXP</div>
+                </div>
+            </div>
+
+            <!-- Bật/Tắt Âm thanh -->
+            <button id="sound-toggle-btn" onclick="toggleSound()" class="kawaii-btn bg-pink-100 text-[#4B2412] text-xs font-extrabold px-2.5 py-1.5 rounded-xl">
+                🔊 BẬT
+            </button>
+
+            <!-- Chế độ hiển thị màn hình -->
+            <div class="flex items-center gap-1 bg-pink-50 p-1 rounded-2xl border-2 border-[#4B2412]">
+                <button id="layout-split" onclick="setWorkspaceLayout('split')" class="kawaii-btn active-btn bg-pink-300 text-[#4B2412] text-xs font-extrabold px-2.5 py-1 rounded-xl">
+                    🪟 Chia đôi
+                </button>
+                <button id="layout-preview" onclick="setWorkspaceLayout('preview')" class="kawaii-btn bg-white text-[#4B2412] text-xs font-extrabold px-2.5 py-1 rounded-xl">
+                    🍽️ Phóng to
+                </button>
+                <button id="layout-code" onclick="setWorkspaceLayout('code')" class="kawaii-btn bg-white text-[#4B2412] text-xs font-extrabold px-2.5 py-1 rounded-xl">
+                    💻 Xem Code
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- =====================================================================
+         MAIN WORKSPACE (CỘT TRÁI: SÂN KHẤU + MENU 12 MÓN | CỘT PHẢI: CODE)
+         ===================================================================== -->
+    <main class="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1">
+
+        <!-- =================================================================
+             CỘT TRÁI: SÂN KHẤU CHO THÚ CƯNG ĂN + THỰC ĐƠN 12 MÓN (7 CỘT)
+             ================================================================= -->
+        <section id="left-preview-pane" class="lg:col-span-7 flex flex-col gap-4">
+
+            <!-- KHỐI 1: SÂN KHẤU THÚ CƯNG ĂN UỐNG TƯƠNG TÁC -->
+            <div class="bg-white rounded-3xl kawaii-card overflow-hidden flex flex-col">
+
+                <!-- Thanh chọn 4 Thú cưng & Điều khiển trạng thái -->
+                <div class="bg-gradient-to-r from-[#4B2412] via-[#6D361C] to-[#8C4627] text-white px-3.5 py-2.5 border-b-2 border-[#4B2412] flex flex-wrap items-center justify-between gap-2">
+                    <!-- Chọn 1 trong 4 Thú cưng -->
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="text-[11px] font-bold text-amber-200 mr-1">🐾 Thú cưng:</span>
+                        <button onclick="switchPetSpecies('cat')" id="pet-btn-cat" class="kawaii-btn bg-amber-300 text-[#4B2412] text-xs font-extrabold px-2.5 py-1 rounded-xl">
+                            🐱 Mèo
+                        </button>
+                        <button onclick="switchPetSpecies('dog')" id="pet-btn-dog" class="kawaii-btn bg-white text-[#4B2412] text-xs font-extrabold px-2.5 py-1 rounded-xl">
+                            🐶 Cún
+                        </button>
+                        <button onclick="switchPetSpecies('capy')" id="pet-btn-capy" class="kawaii-btn bg-white text-[#4B2412] text-xs font-extrabold px-2.5 py-1 rounded-xl">
+                            🍊 Capybara
+                        </button>
+                        <button onclick="switchPetSpecies('bunny')" id="pet-btn-bunny" class="kawaii-btn bg-white text-[#4B2412] text-xs font-extrabold px-2.5 py-1 rounded-xl">
+                            🐰 Thỏ
+                        </button>
+                    </div>
+
+                    <!-- Bật/Tắt Lặp Animation để dễ soi chi tiết -->
+                    <div class="flex items-center gap-2">
+                        <label class="flex items-center gap-1.5 text-xs font-bold text-pink-100 cursor-pointer bg-black/25 px-2.5 py-1 rounded-xl border border-amber-300/40">
+                            <input type="checkbox" id="loop-anim-checkbox" class="accent-amber-400 w-3.5 h-3.5" onchange="toggleLoopMode()">
+                            <span>🔁 Giữ lặp trạng thái Ăn/Uống</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- SÂN KHẤU VECTOR (Căn phòng hồng + Thảm tím kẻ caro + Thú cưng + Đĩa thức ăn) -->
+                <div class="relative w-full h-[310px] bg-[#FFD6E7] overflow-hidden flex flex-col justify-between">
+                    <!-- Hiệu ứng chữ cộng chỉ số bay lên (+No bụng, +Vui vẻ, +EXP) -->
+                    <div id="floating-buff-container" class="absolute inset-0 pointer-events-none z-30 flex items-center justify-center"></div>
+
+                    <!-- Thanh chỉ số No bụng & Hạnh phúc nổi trên sân khấu -->
+                    <div class="relative z-20 px-4 pt-3 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-3 bg-white/95 border-2 border-[#4B2412] px-3 py-1.5 rounded-2xl shadow-sm">
+                            <!-- Thanh No bụng -->
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-sm">🍖</span>
+                                <div class="w-24">
+                                    <div class="flex justify-between text-[10px] font-extrabold text-[#4B2412]">
+                                        <span>No bụng</span>
+                                        <span id="hunger-bar-label">65%</span>
+                                    </div>
+                                    <div class="w-full h-2 bg-rose-100 rounded-full overflow-hidden border border-[#4B2412]">
+                                        <div id="hunger-bar-fill" class="h-full bg-gradient-to-r from-orange-400 to-rose-500 transition-all duration-300" style="width: 65%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Thanh Vui vẻ -->
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-sm">💖</span>
+                                <div class="w-24">
+                                    <div class="flex justify-between text-[10px] font-extrabold text-[#4B2412]">
+                                        <span>Vui vẻ</span>
+                                        <span id="happy-bar-label">70%</span>
+                                    </div>
+                                    <div class="w-full h-2 bg-pink-100 rounded-full overflow-hidden border border-[#4B2412]">
+                                        <div id="happy-bar-fill" class="h-full bg-gradient-to-r from-pink-400 to-purple-500 transition-all duration-300" style="width: 70%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nút chuyển nhanh trạng thái bằng tay -->
+                        <div class="flex items-center gap-1 bg-white/95 border-2 border-[#4B2412] p-1 rounded-2xl shadow-sm">
+                            <button onclick="setPetActionState('idle')" id="state-btn-idle" class="px-2 py-1 rounded-xl text-[11px] font-extrabold bg-amber-300 text-[#4B2412]">
+                                1. Đứng yên
+                            </button>
+                            <button onclick="setPetActionState('eating')" id="state-btn-eating" class="px-2 py-1 rounded-xl text-[11px] font-extrabold hover:bg-pink-100 text-[#4B2412]">
+                                2. Ăn
+                            </button>
+                            <button onclick="setPetActionState('drinking')" id="state-btn-drinking" class="px-2 py-1 rounded-xl text-[11px] font-extrabold hover:bg-pink-100 text-[#4B2412]">
+                                3. Uống
+                            </button>
+                            <button onclick="setPetActionState('happy')" id="state-btn-happy" class="px-2 py-1 rounded-xl text-[11px] font-extrabold hover:bg-pink-100 text-[#4B2412]">
+                                4. Cười No
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- CANVAS SVG CHÍNH CỦA CĂN PHÒNG, THÚ CƯNG & MÓN ĂN -->
+                    <svg id="bistro-stage-svg" viewBox="0 0 600 320" class="w-full h-full absolute inset-0" xmlns="http://www.w3.org/2000/svg">
+                        <!-- HẬU CẢNH: Tường hồng pastel & Thảm tím kẻ caro viền bèo hồng đúng chuẩn mẫu -->
+                        <rect width="600" height="175" fill="#FFC8DD"/>
+                        <g opacity="0.35" fill="#FFAFCC">
+                            <circle cx="90" cy="60" r="18"/>
+                            <circle cx="250" cy="45" r="14"/>
+                            <circle cx="430" cy="55" r="20"/>
+                            <circle cx="540" cy="70" r="14"/>
+                        </g>
+                        <!-- Viền ren bèo trắng & hồng phía trên thảm -->
+                        <path d="M 0 165 Q 30 145 60 165 T 120 165 T 180 165 T 240 165 T 300 165 T 360 165 T 420 165 T 480 165 T 540 165 T 600 165 L 600 190 L 0 190 Z" fill="#FFF0F6"/>
+                        <path d="M 0 176 Q 25 160 50 176 T 100 176 T 150 176 T 200 176 T 250 176 T 300 176 T 350 176 T 400 176 T 450 176 T 500 176 T 550 176 T 600 176 L 600 320 L 0 320 Z" fill="#F4A7E2" stroke="#B565A7" stroke-width="3"/>
+                        <!-- Mặt thảm tím kẻ caro -->
+                        <rect x="0" y="184" width="600" height="136" fill="#B695F8"/>
+                        <g stroke="#9D75EA" stroke-width="4" opacity="0.65">
+                            <line x1="0" y1="215" x2="600" y2="215"/>
+                            <line x1="0" y1="255" x2="600" y2="255"/>
+                            <line x1="0" y1="295" x2="600" y2="295"/>
+                            <line x1="95" y1="184" x2="65" y2="320"/>
+                            <line x1="210" y1="184" x2="185" y2="320"/>
+                            <line x1="325" y1="184" x2="315" y2="320"/>
+                            <line x1="440" y1="184" x2="450" y2="320"/>
+                            <line x1="555" y1="184" x2="575" y2="320"/>
+                        </g>
+
+                        <!-- Bóng đổ dưới chân thú cưng -->
+                        <ellipse cx="265" cy="282" rx="74" ry="15" fill="#6D4C9E" opacity="0.45"/>
+
+                        <!-- =========================================================
+                             KHUNG XƯƠNG THÚ CƯNG (#pet-stage-wrapper)
+                             ========================================================= -->
+                        <g id="pet-stage-wrapper" class="state-idle" transform="translate(15, 4)">
+                            <g id="pet-actor-root">
+                                <!-- Nội dung SVG của Mèo / Cún / Capybara / Thỏ được render động vào đây -->
+                            </g>
+
+                            <!-- Hiệu ứng Vụn thức ăn văng ra khi đang ăn -->
+                            <g id="fx-eating-crumbs">
+                                <circle class="crumb-l" cx="240" cy="195" r="4" fill="#FBBF24" stroke="#4B2412" stroke-width="2"/>
+                                <circle class="crumb-r" cx="275" cy="195" r="3.5" fill="#FB923C" stroke="#4B2412" stroke-width="2"/>
+                                <circle class="crumb-l" cx="248" cy="202" r="3" fill="#FEF08A"/>
+                            </g>
+
+                            <!-- Hiệu ứng Bong bóng sủi khi đang uống -->
+                            <g id="fx-drinking-bubbles">
+                                <circle class="drink-bubble-1" cx="282" cy="192" r="5" fill="#E0F2FE" stroke="#38BDF8" stroke-width="2"/>
+                                <circle class="drink-bubble-2" cx="296" cy="184" r="3.5" fill="#FCE7F3" stroke="#F472B6" stroke-width="2"/>
+                            </g>
+
+                            <!-- Hiệu ứng Trái tim bay lên khi ăn no vui sướng -->
+                            <g id="fx-happy-hearts">
+                                <path d="M 185 120 C 178 110, 166 116, 174 128 L 185 138 L 196 128 C 204 116, 192 110, 185 120 Z" fill="#FB7185" stroke="#4B2412" stroke-width="3"/>
+                                <path d="M 332 114 C 325 104, 313 110, 321 122 L 332 132 L 343 122 C 351 110, 339 104, 332 114 Z" fill="#F43F5E" stroke="#4B2412" stroke-width="3"/>
+                            </g>
+                        </g>
+
+                        <!-- =========================================================
+                             VỊ TRÍ ĐẶT MÓN ĂN TRƯỚC MẶT THÚ CƯNG (#stage-food-container)
+                             ========================================================= -->
+                        <g id="stage-food-container" transform="translate(302, 188) scale(1.02)">
+                            <g id="stage-food-slot" class="stage-dish-enter">
+                                <use href="#food-bone-biscuit" />
+                            </g>
+                        </g>
+                    </svg>
+
+                    <!-- Thanh mô tả món đang đặt trên thảm -->
+                    <div class="relative z-20 px-4 pb-2.5 flex items-center justify-between gap-2">
+                        <div id="active-food-banner" class="bg-white/95 border-2 border-[#4B2412] px-3.5 py-1 rounded-full text-xs font-extrabold text-[#4B2412] shadow-sm flex items-center gap-2">
+                            <span>🍽️ Món trên thảm: <strong>Bánh Quy Khúc Xương (10 Xu)</strong></span>
+                        </div>
+                        <button onclick="retriggerCurrentMeal()" class="kawaii-btn bg-emerald-400 hover:bg-emerald-300 text-[#4B2412] text-xs font-extrabold px-3.5 py-1 rounded-full shadow-sm">
+                            🍴 Cho ăn lại món này
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KHỐI 2: THỰC ĐƠN 12 MÓN ĂN & ĐỒ UỐNG (SẮP XẾP TỪ RẺ TỚI ĐẮT) -->
+            <div class="bg-white rounded-3xl kawaii-card p-4 flex flex-col gap-3">
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-pink-100 pb-2.5">
+                    <div>
+                        <h2 class="text-sm md:text-base font-extrabold text-[#4B2412] flex items-center gap-1.5">
+                            <span>🛒 Thực Đơn 12 Món Cho Thú Cưng (Từ Rẻ 10 Xu ➔ Đắt 500 Xu)</span>
+                        </h2>
+                        <p class="text-xs text-[#8c5233] font-semibold">
+                            Bấm vào bất kỳ thẻ món ăn nào để đặt ngay ra trước mặt thú cưng và kích hoạt animation ăn/uống tương ứng!
+                        </p>
+                    </div>
+
+                    <!-- Bộ lọc phân khúc giá -->
+                    <div class="flex items-center gap-1 flex-wrap">
+                        <button onclick="filterFoodByTier('all')" id="tier-btn-all" class="px-2.5 py-1 rounded-xl text-[11px] font-extrabold border-2 border-[#4B2412] bg-amber-300 text-[#4B2412]">
+                            Tất cả (12)
+                        </button>
+                        <button onclick="filterFoodByTier('Bình Dân')" id="tier-btn-Bình Dân" class="px-2.5 py-1 rounded-xl text-[11px] font-extrabold border-2 border-[#4B2412] bg-emerald-100 text-[#4B2412]">
+                            🌱 Bình Dân (10-20 Xu)
+                        </button>
+                        <button onclick="filterFoodByTier('Ngon Miệng')" id="tier-btn-Ngon Miệng" class="px-2.5 py-1 rounded-xl text-[11px] font-extrabold border-2 border-[#4B2412] bg-sky-100 text-[#4B2412]">
+                            🍙 Ngon Miệng (35-65 Xu)
+                        </button>
+                        <button onclick="filterFoodByTier('Cao Cấp')" id="tier-btn-Cao Cấp" class="px-2.5 py-1 rounded-xl text-[11px] font-extrabold border-2 border-[#4B2412] bg-purple-100 text-[#4B2412]">
+                            🍣 Cao Cấp (90-200 Xu)
+                        </button>
+                        <button onclick="filterFoodByTier('Hoàng Gia')" id="tier-btn-Hoàng Gia" class="px-2.5 py-1 rounded-xl text-[11px] font-extrabold border-2 border-[#4B2412] bg-amber-200 text-[#4B2412]">
+                            👑 Hoàng Gia (300-500 Xu)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lưới 12 Món Ăn (3 cột trên màn hình lớn) -->
+                <div id="food-catalog-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-[450px] overflow-y-auto pr-1">
+                    <!-- Được render tự động bằng JS từ mảng PAWQUEST_FOOD_MENU -->
+                </div>
+            </div>
+
+        </section>
+
+        <!-- =================================================================
+             CỘT PHẢI: TRÌNH XEM & COPY SOURCE CODE (SVG / JSON / CSS / CODEX)
+             ================================================================= -->
+        <section id="right-code-pane" class="lg:col-span-5 flex flex-col">
+            <div class="bg-[#1e1e2e] text-slate-100 rounded-3xl kawaii-card overflow-hidden flex flex-col h-full min-h-[680px]">
+
+                <!-- Thanh Tab Code -->
+                <div class="bg-[#181825] border-b border-slate-700 p-3 flex flex-col gap-2.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-xs font-extrabold text-amber-300 uppercase tracking-wider">💻 Source Code 12 Món Ăn & Prompt Codex</span>
+                        <button onclick="copyActiveCode()" class="kawaii-btn bg-emerald-400 hover:bg-emerald-300 text-[#4B2412] text-xs font-extrabold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
+                            <span>📋 Sao chép mã này</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                        <button id="code-tab-svg" onclick="switchCodeTab('svg')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold bg-pink-500 text-white text-left truncate">
+                            🍱 1. SVG 12 Món
+                        </button>
+                        <button id="code-tab-json" onclick="switchCodeTab('json')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold bg-slate-800 text-slate-300 hover:bg-slate-700 text-left truncate">
+                            📊 2. JSON & Giá
+                        </button>
+                        <button id="code-tab-css" onclick="switchCodeTab('css')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold bg-slate-800 text-slate-300 hover:bg-slate-700 text-left truncate">
+                            ✨ 3. CSS Ăn/Uống
+                        </button>
+                        <button id="code-tab-codex" onclick="switchCodeTab('codex')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold bg-slate-800 text-slate-300 hover:bg-slate-700 text-left truncate">
+                            🤖 4. Prompt Codex
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Ghi chú Tab -->
+                <div id="code-banner-desc" class="bg-slate-800/90 border-b border-slate-700 px-4 py-2 text-xs text-pink-200 flex items-center justify-between">
+                    <span>💡 Toàn bộ 12 hình vẽ Vector SVG món ăn từ rẻ tới đắt (`#food-bone-biscuit` ➔ `#food-royal-hotpot`).</span>
+                    <span class="font-mono text-[11px] text-amber-300">PawQuestFoods.svg</span>
+                </div>
+
+                <!-- Khung hiển thị Code -->
+                <div class="relative flex-1 overflow-auto p-4 bg-[#1e1e2e]">
+                    <pre class="text-xs leading-relaxed font-mono text-emerald-300 whitespace-pre-wrap break-words"><code id="code-output-box"></code></pre>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Toast thông báo -->
+    <div id="toast-box" class="fixed bottom-5 right-5 z-50 pointer-events-none opacity-0 translate-y-3 transition-all duration-300 bg-[#4B2412] text-amber-100 border-2 border-amber-300 px-4 py-2.5 rounded-2xl shadow-xl text-xs md:text-sm font-extrabold flex items-center gap-2">
+        <span>✨</span>
+        <span id="toast-text">Đã sao chép mã nguồn!</span>
+    </div>
+
+    <script id="pawquest-bistro-script">
+        // =========================================================================
+        // 1. DANH SÁCH 12 MÓN ĂN & ĐỒ UỐNG THÚ CƯNG (SẮP XẾP TỪ RẺ TỚI ĐẮT)
+        // =========================================================================
+        const PAWQUEST_FOOD_MENU = [
+            {
+                id: 'food-bone-biscuit',
+                order: 1,
+                name: 'Bánh Quy Khúc Xương',
+                tier: 'Bình Dân',
+                tierBadgeClass: 'bg-emerald-100 text-emerald-900',
+                type: 'food', // Kích hoạt .state-eating
+                price: 10,
+                hungerRestore: 15,
+                happinessBonus: 5,
+                expBonus: 5,
+                description: 'Bánh quy giòn rụm kèm hạt dinh dưỡng cơ bản cho bữa nhẹ hằng ngày.'
+            },
+            {
+                id: 'food-fresh-carrot',
+                order: 2,
+                name: 'Cà Rốt & Lá Non',
+                tier: 'Bình Dân',
+                tierBadgeClass: 'bg-emerald-100 text-emerald-900',
+                type: 'food',
+                price: 15,
+                hungerRestore: 20,
+                happinessBonus: 5,
+                expBonus: 8,
+                description: 'Cà rốt hữu cơ tươi giòn ngọt mát cùng xà lách và cà chua bi.'
+            },
+            {
+                id: 'food-warm-milk',
+                order: 3,
+                name: 'Sữa Tươi Ấm',
+                tier: 'Bình Dân',
+                tierBadgeClass: 'bg-emerald-100 text-emerald-900',
+                type: 'drink', // Kích hoạt .state-drinking
+                price: 20,
+                hungerRestore: 15,
+                happinessBonus: 12,
+                expBonus: 10,
+                description: 'Bát sứ sữa tươi tiệt trùng ấm nóng có ống hút sọc hồng.'
+            },
+            {
+                id: 'food-taiyaki',
+                order: 4,
+                name: 'Cá Nướng Taiyaki',
+                tier: 'Ngon Miệng',
+                tierBadgeClass: 'bg-sky-100 text-sky-900',
+                type: 'food',
+                price: 35,
+                hungerRestore: 30,
+                happinessBonus: 15,
+                expBonus: 15,
+                description: 'Bánh nướng hình cá vàng ươm thơm lừng nhân đậu đỏ ngọt dịu.'
+            },
+            {
+                id: 'food-onigiri',
+                order: 5,
+                name: 'Cơm Nắm Onigiri Cá Hồi',
+                tier: 'Ngon Miệng',
+                tierBadgeClass: 'bg-sky-100 text-sky-900',
+                type: 'food',
+                price: 50,
+                hungerRestore: 38,
+                happinessBonus: 18,
+                expBonus: 22,
+                description: 'Cơm nắm Nhật dẻo thơm bọc lá rong biển Nori và cá hồi nướng.'
+            },
+            {
+                id: 'food-boba-tea',
+                order: 6,
+                name: 'Trà Sữa Trân Châu Đường Đen',
+                tier: 'Ngon Miệng',
+                tierBadgeClass: 'bg-sky-100 text-sky-900',
+                type: 'drink',
+                price: 65,
+                hungerRestore: 25,
+                happinessBonus: 30,
+                expBonus: 28,
+                description: 'Ly trà sữa nắp tai gấu ngọt ngào với trân châu hoàng kim dẻo dai.'
+            },
+            {
+                id: 'food-cat-pudding',
+                order: 7,
+                name: 'Bánh Pudding Mèo Caramel',
+                tier: 'Cao Cấp',
+                tierBadgeClass: 'bg-purple-100 text-purple-900',
+                type: 'food',
+                price: 90,
+                hungerRestore: 45,
+                happinessBonus: 35,
+                expBonus: 40,
+                description: 'Pudding trứng tạo hình mèo núng nính phủ sốt caramel và cherry.'
+            },
+            {
+                id: 'food-ramen-bowl',
+                order: 8,
+                name: 'Mì Ramen Trứng Lòng Đào',
+                tier: 'Cao Cấp',
+                tierBadgeClass: 'bg-purple-100 text-purple-900',
+                type: 'food',
+                price: 120,
+                hungerRestore: 60,
+                happinessBonus: 40,
+                expBonus: 55,
+                description: 'Tô mì Ramen nước hầm xương đậm đà kèm chả cá xoắn và trứng lòng đào.'
+            },
+            {
+                id: 'food-salmon-sushi',
+                order: 9,
+                name: 'Sushi Cá Hồi Thượng Hạng',
+                tier: 'Cao Cấp',
+                tierBadgeClass: 'bg-purple-100 text-purple-900',
+                type: 'food',
+                price: 160,
+                hungerRestore: 70,
+                happinessBonus: 50,
+                expBonus: 75,
+                description: 'Khay gỗ Geta gồm Nigiri cá hồi tươi bóng và Sushi trứng cuộn Tamago.'
+            },
+            {
+                id: 'food-berry-parfait',
+                order: 10,
+                name: 'Sinh Tố Dâu Tây Kem Tươi',
+                tier: 'Cao Cấp',
+                tierBadgeClass: 'bg-purple-100 text-purple-900',
+                type: 'drink',
+                price: 200,
+                hungerRestore: 45,
+                happinessBonus: 65,
+                expBonus: 90,
+                description: 'Ly Parfait 3 tầng kem bông, sốt dâu rừng, dâu tươi và bánh quế.'
+            },
+            {
+                id: 'food-wagyu-steak',
+                order: 11,
+                name: 'Bít Tết Wagyu Áp Chảo',
+                tier: 'Hoàng Gia',
+                tierBadgeClass: 'bg-gradient-to-r from-amber-200 to-yellow-300 text-[#4B2412]',
+                type: 'food',
+                price: 300,
+                hungerRestore: 90,
+                happinessBonus: 80,
+                expBonus: 140,
+                description: 'Thịt bò Wagyu vân cẩm thạch áp chảo gang nóng hổi cùng bơ tỏi thảo mộc.'
+            },
+            {
+                id: 'food-royal-hotpot',
+                order: 12,
+                name: 'Lẩu Hoàng Gia Cầu Vồng',
+                tier: 'Hoàng Gia',
+                tierBadgeClass: 'bg-gradient-to-r from-amber-300 via-pink-200 to-yellow-300 text-[#4B2412]',
+                type: 'food',
+                price: 500,
+                hungerRestore: 100,
+                happinessBonus: 100,
+                expBonus: 250,
+                description: 'Đại tiệc nồi lẩu vàng chạm ngọc đầy ắp tôm hùm, nấm quý và đậu hũ cá!'
+            }
+        ];
+
+        // =========================================================================
+        // 2. ĐỒ HỌA SVG 4 THÚ CƯNG (MÈO, CÚN, CAPYBARA, THỎ) CHUẨN 100% MẪU GỐC
+        // =========================================================================
+        const PET_TEMPLATES = {
+            cat: `
+                <!-- Đuôi mèo -->
+                <g id="pet-tail-rig">
+                    <path d="M 205 268 C 165 266, 138 278, 118 286 C 106 290, 104 276, 118 270 C 142 260, 174 252, 205 256 Z" fill="#FFFDF9" stroke="#4B2412" stroke-width="5.5" stroke-linejoin="round"/>
+                    <ellipse cx="155" cy="266" rx="12" ry="6" fill="#F6B26B"/>
+                    <ellipse cx="185" cy="262" rx="10" ry="6" fill="#F6B26B"/>
+                </g>
+                <!-- Thân mèo -->
+                <g id="pet-body-rig">
+                    <path d="M 205 198 C 188 225, 184 258, 196 278 C 204 286, 294 286, 300 276 C 306 254, 300 224, 288 198 Z" fill="#FFFDF9" stroke="#4B2412" stroke-width="5.5" stroke-linejoin="round"/>
+                    <path d="M 205 204 C 190 226, 188 254, 198 274 C 218 270, 226 244, 218 206 Z" fill="#F6B26B"/>
+                    <path d="M 232 242 C 232 264, 236 280, 246 280 C 254 280, 256 264, 254 242" fill="#FFFDF9" stroke="#4B2412" stroke-width="5" stroke-linecap="round"/>
+                    <path d="M 272 242 C 272 264, 276 280, 286 280 C 294 280, 296 264, 294 242" fill="#FFFDF9" stroke="#4B2412" stroke-width="5" stroke-linecap="round"/>
+                </g>
+                <!-- Đầu mèo -->
+                <g id="pet-head-rig">
+                    <path d="M 190 154 C 182 114, 212 104, 250 104 C 288 104, 318 114, 310 154 C 316 186, 292 208, 250 208 C 208 208, 184 186, 190 154 Z" fill="#FFFDF9" stroke="#4B2412" stroke-width="5.5" stroke-linejoin="round"/>
+                    <path d="M 192 150 C 188 116, 216 106, 248 106 C 254 136, 238 172, 192 176 Z" fill="#F6B26B"/>
+                    <!-- Hai tai mèo -->
+                    <path id="pet-ear-l" d="M 196 128 L 188 86 L 228 106 Z" fill="#F6B26B" stroke="#4B2412" stroke-width="5.5" stroke-linejoin="round"/>
+                    <polygon points="196,120 193,96 218,108" fill="#F4A27E"/>
+                    <path id="pet-ear-r" d="M 304 128 L 312 86 L 272 106 Z" fill="#FFFDF9" stroke="#4B2412" stroke-width="5.5" stroke-linejoin="round"/>
+                    <polygon points="300,120 305,96 280,108" fill="#F4A27E"/>
+                    <!-- Má hồng & Râu -->
+                    <ellipse cx="212" cy="170" rx="13" ry="7" fill="#F88379"/>
+                    <ellipse cx="288" cy="170" rx="13" ry="7" fill="#F88379"/>
+                    <line x1="176" y1="158" x2="194" y2="160" stroke="#4B2412" stroke-width="4.5" stroke-linecap="round"/>
+                    <line x1="178" y1="168" x2="195" y2="167" stroke="#4B2412" stroke-width="4.5" stroke-linecap="round"/>
+                    <line x1="306" y1="160" x2="324" y2="158" stroke="#4B2412" stroke-width="4.5" stroke-linecap="round"/>
+                    <line x1="305" y1="167" x2="322" y2="168" stroke="#4B2412" stroke-width="4.5" stroke-linecap="round"/>
+                    <!-- Biểu cảm khuôn mặt -->
+                    <g class="face-idle">
+                        <circle cx="224" cy="156" r="7" fill="#4B2412"/>
+                        <circle cx="276" cy="156" r="7" fill="#4B2412"/>
+                        <path d="M 243 164 Q 250 169 257 164" fill="none" stroke="#4B2412" stroke-width="4" stroke-linecap="round"/>
+                    </g>
+                    <g class="face-eating">
+                        <circle cx="224" cy="156" r="7" fill="#4B2412"/>
+                        <circle cx="276" cy="156" r="7" fill="#4B2412"/>
+                        <path class="chew-mouth-anim" d="M 239 162 Q 250 182 261 162 Z" fill="#E11D48" stroke="#4B2412" stroke-width="4"/>
+                    </g>
+                    <g class="face-drinking">
+                        <path d="M 216 156 Q 224 148 232 156 M 268 156 Q 276 148 284 156" fill="none" stroke="#4B2412" stroke-width="4.5" stroke-linecap="round"/>
+                        <ellipse class="sip-tongue-anim" cx="250" cy="168" rx="6" ry="8" fill="#FB7185" stroke="#4B2412" stroke-width="3.5"/>
+                    </g>
+                    <g class="face-happy">
+                        <path d="M 215 158 Q 224 146 233 158 M 267 158 Q 276 146 285 158" fill="none" stroke="#4B2412" stroke-width="4.5" stroke-linecap="round"/>
+                        <path d="M 238 162 Q 250 180 262 162 Z" fill="#FB7185" stroke="#4B2412" stroke-width="4"/>
+                    </g>
+                </g>
+            `,
+            dog: `
+                <!-- Đuôi cún -->
+                <g id="pet-tail-rig">
+                    <path d="M 196 258 C 170 250, 158 232, 166 222 C 174 216, 186 234, 202 246 Z" fill="#FFF6E0" stroke="#4B2412" stroke-width="5.5" stroke-linejoin="round"/>
+                </g>
+                <!-- Thân cún quả lê bụng hồng -->
+                <g id="pet-body-rig">
+                    <path d="M 204 195 C 190 224, 186 258, 196 278 C 202 288, 298 288, 304 278 C 312 258, 306 224, 294 195 Z" fill="#FFF6E0" stroke="#4B2412" stroke-width="5.5"/>
+                    <ellipse cx="250" cy="252" rx="28" ry="30" fill="#F5D0C5"/>
+                    <!-- Hai tay nhỏ trước ngực -->
+                    <path d="M 222 214 C 218 232, 224 244, 234 242 C 242 240, 240 226, 236 214" fill="#FFF6E0" stroke="#4B2412" stroke-width="5" stroke-linecap="round"/>
+                    <path d="M 278 214 C 282 232, 276 244, 266 242 C 258 240, 260 226, 264 214" fill="#FFF6E0" stroke="#4B2412" stroke-width="5" stroke-linecap="round"/>
+                    <!-- Hai bàn chân sau lộ đệm thịt -->
+                    <ellipse cx="212" cy="276" rx="15" ry="11" fill="#FFF6E0" stroke="#4B2412" stroke-width="5"/>
+                    <circle cx="212" cy="278" r="4" fill="#D4A373"/>
+                    <ellipse cx="288" cy="276" rx="15" ry="11" fill="#FFF6E0" stroke="#4B2412" stroke-width="5"/>
+                    <circle cx="288" cy="278" r="4" fill="#D4A373"/>
+                </g>
+                <!-- Đầu cún -->
+                <g id="pet-head-rig">
+                    <path id="pet-ear-r" d="M 284 118 C 310 114, 330 144, 322 182 C 318 198, 302 196, 296 172 Z" fill="#C59361" stroke="#4B2412" stroke-width="5.5"/>
+                    <path d="M 192 158 C 188 118, 216 106, 250 106 C 284 106, 312 118, 308 158 C 312 188, 288 208, 250 208 C 212 208, 188 188, 192 158 Z" fill="#FFF6E0" stroke="#4B2412" stroke-width="5.5"/>
+                    <path d="M 194 154 C 192 122, 216 108, 244 108 C 254 138, 244 176, 196 180 Z" fill="#C59361"/>
+                    <path id="pet-ear-l" d="M 216 118 C 190 114, 170 144, 178 182 C 182 198, 198 196, 204 172 Z" fill="#C59361" stroke="#4B2412" stroke-width="5.5"/>
+                    <ellipse cx="212" cy="172" rx="13" ry="7" fill="#F69B95"/>
+                    <ellipse cx="288" cy="172" rx="13" ry="7" fill="#F69B95"/>
+                    <g class="face-idle">
+                        <circle cx="226" cy="156" r="7" fill="#4B2412"/>
+                        <circle cx="274" cy="156" r="7" fill="#4B2412"/>
+                        <ellipse cx="250" cy="162" rx="6" ry="4.5" fill="#4B2412"/>
+                        <path d="M 240 168 Q 250 176 260 168" fill="none" stroke="#4B2412" stroke-width="4" stroke-linecap="round"/>
+                    </g>
+                    <g class="face-eating">
+                        <circle cx="226" cy="156" r="7" fill="#4B2412"/>
+                        <circle cx="274" cy="156" r="7" fill="#4B2412"/>
+                        <path class="chew-mouth-anim" d="M 238 164 Q 250 184 262 164 Z" fill="#E11D48" stroke="#4B2412" stroke-width="4"/>
+                    </g>
+                    <g class="face-drinking">
+                        <path d="M 218 156 Q 226 148 234 156 M 266 156 Q 274 148 282 156" fill="none" stroke="#4B2412" stroke-width="4.5" stroke-linecap="round"/>
+                        <ellipse class="sip-tongue-anim" cx="250" cy="170" rx="6.5" ry="9" fill="#FB7185" stroke="#4B2412" stroke-width="3.5"/>
+                    </g>
+                    <g class="face-happy">
+                        <path d="M 216 158 Q 226 146 236 158 M 264 158 Q 274 146 284 158" fill="none" stroke="#4B2412" stroke-width="4.5" stroke-linecap="round"/>
+                        <path d="M 238 164 Q 250 182 262 164 Z" fill="#FB7185" stroke="#4B2412" stroke-width="4"/>
+                    </g>
+                </g>
+            `,
+            capy: `
+                <g id="pet-tail-rig"></g>
+                <!-- Thân Capybara -->
+                <g id="pet-body-rig">
+                    <path d="M 200 196 C 184 226, 180 260, 192 280 C 202 288, 296 288, 304 278 C 310 256, 304 224, 292 196 Z" fill="#C68F56" stroke="#4B2412" stroke-width="5.5"/>
+                    <path d="M 236 248 L 236 282 M 272 248 L 272 282" stroke="#4B2412" stroke-width="5" stroke-linecap="round"/>
+                </g>
+                <!-- Đầu Capybara & Quả Quýt -->
+                <g id="pet-head-rig">
+                    <ellipse id="pet-ear-l" cx="210" cy="120" rx="11" ry="14" fill="#9E6F44" stroke="#4B2412" stroke-width="5"/>
+                    <ellipse id="pet-ear-r" cx="278" cy="118" rx="10" ry="13" fill="#9E6F44" stroke="#4B2412" stroke-width="5"/>
+                    <path d="M 192 160 C 190 118, 218 108, 254 108 C 290 108, 318 126, 316 162 C 316 194, 290 210, 248 210 C 208 210, 190 194, 192 160 Z" fill="#C68F56" stroke="#4B2412" stroke-width="5.5"/>
+                    <!-- Mõm nâu đậm đặc trưng -->
+                    <path d="M 260 136 C 260 122, 310 122, 312 156 C 314 186, 294 198, 268 194 Z" fill="#9E6F44"/>
+                    <ellipse cx="218" cy="168" rx="13" ry="6.5" fill="#F69B95"/>
+                    <!-- Quả quýt cam đội trên đầu -->
+                    <ellipse cx="246" cy="96" rx="19" ry="15" fill="#FB923C" stroke="#4B2412" stroke-width="4.5"/>
+                    <path d="M 246 81 C 252 73, 262 75, 258 83 Z" fill="#4ADE80" stroke="#4B2412" stroke-width="3.5"/>
+                    <!-- Biểu cảm Capybara -->
+                    <g class="face-idle">
+                        <line x1="220" y1="150" x2="240" y2="148" stroke="#4B2412" stroke-width="5.5" stroke-linecap="round"/>
+                        <path d="M 284 156 L 284 176 M 276 182 L 284 176 L 292 182" fill="none" stroke="#4B2412" stroke-width="4" stroke-linecap="round"/>
+                    </g>
+                    <g class="face-eating">
+                        <line x1="220" y1="150" x2="240" y2="148" stroke="#4B2412" stroke-width="5.5" stroke-linecap="round"/>
+                        <ellipse class="chew-mouth-anim" cx="284" cy="178" rx="9" ry="7" fill="#E11D48" stroke="#4B2412" stroke-width="3.8"/>
+                    </g>
+                    <g class="face-drinking">
+                        <line x1="220" y1="150" x2="240" y2="148" stroke="#4B2412" stroke-width="5.5" stroke-linecap="round"/>
+                        <ellipse class="sip-tongue-anim" cx="284" cy="180" rx="6" ry="8" fill="#FB7185" stroke="#4B2412" stroke-width="3.5"/>
+                    </g>
+                    <g class="face-happy">
+                        <path d="M 218 152 Q 230 140 242 152" fill="none" stroke="#4B2412" stroke-width="5" stroke-linecap="round"/>
+                        <path d="M 274 174 Q 284 188 294 174 Z" fill="#FB7185" stroke="#4B2412" stroke-width="3.8"/>
+                    </g>
+                </g>
+            `,
+            bunny: `
+                <!-- Đuôi bông xù chú thỏ -->
+                <g id="pet-tail-rig">
+                    <path d="M 196 252 C 180 244, 178 262, 186 268 C 178 276, 192 286, 202 276 Z" fill="#FFF5F2" stroke="#4B2412" stroke-width="5" stroke-linejoin="round"/>
+                </g>
+                <!-- Thân thỏ bụng hồng -->
+                <g id="pet-body-rig">
+                    <path d="M 206 196 C 194 224, 190 258, 198 278 C 204 288, 296 288, 302 278 C 308 258, 302 224, 290 196 Z" fill="#FFF5F2" stroke="#4B2412" stroke-width="5.5"/>
+                    <ellipse cx="250" cy="250" rx="26" ry="30" fill="#F9CDC8"/>
+                    <path d="M 224 214 C 220 230, 226 242, 236 240 C 242 238, 240 224, 236 214" fill="#FFF5F2" stroke="#4B2412" stroke-width="5" stroke-linecap="round"/>
+                    <path d="M 276 214 C 280 230, 274 242, 264 240 C 258 238, 260 224, 264 214" fill="#FFF5F2" stroke="#4B2412" stroke-width="5" stroke-linecap="round"/>
+                </g>
+                <!-- Đầu thỏ tai cụp liền mạch (Không có nét thừa giữa tai phải) -->
+                <g id="pet-head-rig">
+                    <g id="pet-ear-r">
+                        <path d="M 272 118 C 294 114, 314 138, 320 176 C 324 208, 322 234, 306 238 C 292 242, 284 218, 282 186 Z" fill="#FFF5F2" stroke="#4B2412" stroke-width="5.5" stroke-linejoin="round"/>
+                        <ellipse cx="302" cy="198" rx="8" ry="24" fill="#F9CDC8"/>
+                    </g>
+                    <path d="M 192 158 C 188 118, 216 106, 250 106 C 284 106, 312 118, 308 158 C 312 188, 288 208, 250 208 C 212 208, 188 188, 192 158 Z" fill="#FFF5F2" stroke="#4B2412" stroke-width="5.5"/>
+                    <path id="pet-ear-l" d="M 214 118 C 192 114, 174 138, 166 178 C 160 212, 160 234, 176 238 C 190 240, 198 218, 202 184 Z" fill="#FFF5F2" stroke="#4B2412" stroke-width="5.5"/>
+                    <ellipse cx="212" cy="172" rx="12" ry="6.5" fill="#F69B95"/>
+                    <ellipse cx="288" cy="172" rx="12" ry="6.5" fill="#F69B95"/>
+                    <g class="face-idle">
+                        <circle cx="226" cy="158" r="6.5" fill="#4B2412"/>
+                        <circle cx="274" cy="158" r="6.5" fill="#4B2412"/>
+                        <path d="M 244 162 L 250 167 L 256 162 M 250 167 L 250 174 M 244 178 L 250 174 L 256 178" fill="none" stroke="#4B2412" stroke-width="4" stroke-linecap="round"/>
+                    </g>
+                    <g class="face-eating">
+                        <circle cx="226" cy="158" r="6.5" fill="#4B2412"/>
+                        <circle cx="274" cy="158" r="6.5" fill="#4B2412"/>
+                        <path class="chew-mouth-anim" d="M 239 164 Q 250 184 261 164 Z" fill="#E11D48" stroke="#4B2412" stroke-width="4"/>
+                    </g>
+                    <g class="face-drinking">
+                        <path d="M 218 158 Q 226 150 234 158 M 266 158 Q 274 150 282 158" fill="none" stroke="#4B2412" stroke-width="4.5" stroke-linecap="round"/>
+                        <ellipse class="sip-tongue-anim" cx="250" cy="172" rx="6" ry="8" fill="#FB7185" stroke="#4B2412" stroke-width="3.5"/>
+                    </g>
+                    <g class="face-happy">
+                        <path d="M 216 158 Q 226 146 236 158 M 264 158 Q 274 146 284 158" fill="none" stroke="#4B2412" stroke-width="4.5" stroke-linecap="round"/>
+                        <path d="M 238 164 Q 250 182 262 164 Z" fill="#FB7185" stroke="#4B2412" stroke-width="4"/>
+                    </g>
+                </g>
+            `
+        };
+
+        // =========================================================================
+        // 3. TRẠNG THÁI ỨNG DỤNG & LOGIC CHO ĂN / UỐNG
+        // =========================================================================
+        let currentPetSpecies = 'cat';
+        let currentPetState = 'idle';
+        let currentFoodItem = PAWQUEST_FOOD_MENU[0];
+        let activeTierFilter = 'all';
+        let loopAnimationMode = false;
+        let stateTimer = null;
+
+        let playerCoins = 1500;
+        let petHunger = 65;
+        let petHappiness = 70;
+        let petLevel = 1;
+        let petExp = 0;
+
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) audioCtx = new AudioCtx();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playBistroSound(kind = 'eat') {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                if (!audioCtx) return;
+                const notes = kind === 'drink'
+                    ? [392, 523.25, 659.25]
+                    : kind === 'happy'
+                    ? [523.25, 659.25, 783.99, 1046.5]
+                    : [440, 587.33, 659.25];
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    const start = audioCtx.currentTime + idx * 0.08;
+                    osc.frequency.setValueAtTime(freq, start);
+                    gain.gain.setValueAtTime(0.16, start);
+                    gain.gain.exponentialRampToValueAtTime(0.001, start + 0.22);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(start);
+                    osc.stop(start + 0.24);
+                });
+            } catch (e) {}
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('sound-toggle-btn').textContent = soundEnabled ? '🔊 BẬT' : '🔇 TẮT';
+        }
+
+        // Chuyển đổi giữa 4 thú cưng: Mèo, Cún, Capybara, Thỏ
+        function switchPetSpecies(species) {
+            currentPetSpecies = species;
+            document.getElementById('pet-actor-root').innerHTML = PET_TEMPLATES[species];
+
+            ['cat', 'dog', 'capy', 'bunny'].forEach(sp => {
+                const btn = document.getElementById(`pet-btn-${sp}`);
+                btn.className = sp === species
+                    ? 'kawaii-btn bg-amber-300 text-[#4B2412] text-xs font-extrabold px-2.5 py-1 rounded-xl'
+                    : 'kawaii-btn bg-white text-[#4B2412] text-xs font-extrabold px-2.5 py-1 rounded-xl';
+            });
+        }
+
+        // Đặt trạng thái chuyển động cho thú cưng
+        function setPetActionState(stateName) {
+            currentPetState = stateName;
+            const wrapper = document.getElementById('pet-stage-wrapper');
+            wrapper.className.baseVal = `state-${stateName}`;
+
+            ['idle', 'eating', 'drinking', 'happy'].forEach(st => {
+                const btn = document.getElementById(`state-btn-${st}`);
+                if (btn) {
+                    btn.className = st === stateName
+                        ? 'px-2 py-1 rounded-xl text-[11px] font-extrabold bg-amber-300 text-[#4B2412]'
+                        : 'px-2 py-1 rounded-xl text-[11px] font-extrabold hover:bg-pink-100 text-[#4B2412]';
+                }
+            });
+        }
+
+        function toggleLoopMode() {
+            loopAnimationMode = document.getElementById('loop-anim-checkbox').checked;
+            if (loopAnimationMode && stateTimer) {
+                clearTimeout(stateTimer);
+            }
+        }
+
+        // Đặt món ăn lên thảm và cho thú cưng thưởng thức
+        function feedPetWithItem(foodId) {
+            const item = PAWQUEST_FOOD_MENU.find(f => f.id === foodId);
+            if (!item) return;
+
+            if (playerCoins < item.price) {
+                showToast('🪙 Không đủ Xu! Hãy bấm nút [+1,000 Xu] trên thanh tiêu đề nhé.');
+                return;
+            }
+
+            playerCoins -= item.price;
+            petHunger = Math.min(100, petHunger + item.hungerRestore);
+            petHappiness = Math.min(100, petHappiness + item.happinessBonus);
+            petExp += item.expBonus;
+            while (petExp >= 100) {
+                petExp -= 100;
+                petLevel += 1;
+            }
+
+            currentFoodItem = item;
+            updateStatsHeaderUI();
+            renderFoodCatalogGrid();
+
+            // 1. Đặt SVG món ăn lên thảm trước mặt thú cưng
+            const foodSlot = document.getElementById('stage-food-slot');
+            foodSlot.classList.remove('stage-dish-enter');
+            void foodSlot.offsetWidth;
+            foodSlot.innerHTML = `<use href="#${item.id}" />`;
+            foodSlot.classList.add('stage-dish-enter');
+
+            document.getElementById('active-food-banner').innerHTML =
+                `<span>🍽️ Món trên thảm: <strong>${item.name} (${item.price} Xu)</strong> • +${item.hungerRestore} No bụng</span>`;
+
+            // 2. Hiển thị hiệu ứng chữ cộng chỉ số bay lên
+            spawnFloatingBuffBadge(item);
+
+            // 3. Kích hoạt trạng thái Ăn hoặc Uống tùy loại món
+            if (stateTimer) clearTimeout(stateTimer);
+            const targetAction = item.type === 'drink' ? 'drinking' : 'eating';
+            setPetActionState(targetAction);
+            playBistroSound(item.type);
+
+            if (!loopAnimationMode) {
+                stateTimer = setTimeout(() => {
+                    setPetActionState('happy');
+                    playBistroSound('happy');
+                    stateTimer = setTimeout(() => {
+                        if (!loopAnimationMode) setPetActionState('idle');
+                    }, 2000);
+                }, 3200);
+            }
+        }
+
+        function retriggerCurrentMeal() {
+            if (currentFoodItem) {
+                // Hoàn lại giá xu để test lại miễn phí
+                playerCoins += currentFoodItem.price;
+                feedPetWithItem(currentFoodItem.id);
+            }
+        }
+
+        function spawnFloatingBuffBadge(item) {
+            const container = document.getElementById('floating-buff-container');
+            const badge = document.createElement('div');
+            badge.className = 'floating-buff-badge bg-white/95 border-2 border-[#4B2412] px-3.5 py-1.5 rounded-2xl shadow-lg text-xs font-extrabold text-[#4B2412] flex items-center gap-2';
+            badge.innerHTML = `
+                <span class="text-rose-600">+${item.hungerRestore} 🍖</span>
+                <span class="text-pink-600">+${item.happinessBonus} 💖</span>
+                <span class="text-purple-700">+${item.expBonus} EXP</span>
+            `;
+            container.appendChild(badge);
+            setTimeout(() => badge.remove(), 1700);
+        }
+
+        function updateStatsHeaderUI() {
+            document.getElementById('player-coins-val').textContent = playerCoins.toLocaleString('vi-VN');
+            document.getElementById('pet-level-val').textContent = petLevel;
+            document.getElementById('pet-exp-val').textContent = `${petExp} / 100 EXP`;
+
+            document.getElementById('hunger-bar-label').textContent = `${petHunger}%`;
+            document.getElementById('hunger-bar-fill').style.width = `${petHunger}%`;
+
+            document.getElementById('happy-bar-label').textContent = `${petHappiness}%`;
+            document.getElementById('happy-bar-fill').style.width = `${petHappiness}%`;
+        }
+
+        function addFreeCoins() {
+            playerCoins += 1000;
+            updateStatsHeaderUI();
+            showToast('🪙 Đã cộng thêm +1,000 Xu vào ví PawQuest!');
+        }
+
+        // =========================================================================
+        // 4. RENDER DANH MỤC 12 MÓN ĂN TỪ RẺ TỚI ĐẮT
+        // =========================================================================
+        function filterFoodByTier(tier) {
+            activeTierFilter = tier;
+            ['all', 'Bình Dân', 'Ngon Miệng', 'Cao Cấp', 'Hoàng Gia'].forEach(t => {
+                const btn = document.getElementById(`tier-btn-${t}`);
+                if (btn) {
+                    btn.classList.toggle('ring-2', t === tier);
+                    btn.classList.toggle('ring-[#4B2412]', t === tier);
+                    btn.classList.toggle('scale-105', t === tier);
+                }
+            });
+            renderFoodCatalogGrid();
+        }
+
+        function renderFoodCatalogGrid() {
+            const grid = document.getElementById('food-catalog-grid');
+            const filtered = activeTierFilter === 'all'
+                ? PAWQUEST_FOOD_MENU
+                : PAWQUEST_FOOD_MENU.filter(item => item.tier === activeTierFilter);
+
+            grid.innerHTML = filtered.map(item => {
+                const isSelected = currentFoodItem && currentFoodItem.id === item.id;
+                return `
+                    <div onclick="feedPetWithItem('${item.id}')" class="cursor-pointer rounded-2xl p-3 border-2 border-[#4B2412] transition-all flex flex-col justify-between ${
+                        isSelected
+                            ? 'bg-gradient-to-br from-amber-100 via-pink-50 to-amber-50 shadow-md scale-[1.01]'
+                            : 'bg-pink-50/40 hover:bg-pink-50'
+                    }">
+                        <div>
+                            <!-- Hàng trên: Thứ tự + Phân khúc + Loại -->
+                            <div class="flex items-center justify-between gap-1 mb-1.5">
+                                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-[#4B2412] ${item.tierBadgeClass}">
+                                    #${item.order} • ${item.tier}
+                                </span>
+                                <span class="text-[10px] font-mono font-bold text-[#8c5233]">
+                                    ${item.type === 'drink' ? '🥤 Đồ uống' : '🍽️ Món ăn'}
+                                </span>
+                            </div>
+
+                            <!-- Hình vẽ SVG món ăn + Tên & Chỉ số -->
+                            <div class="flex items-center gap-2.5 my-1">
+                                <div class="w-16 h-16 rounded-2xl bg-white border-2 border-[#4B2412] p-1 shrink-0 flex items-center justify-center shadow-inner">
+                                    <svg viewBox="0 0 120 120" class="w-full h-full overflow-visible">
+                                        <use href="#${item.id}" />
+                                    </svg>
+                                </div>
+                                <div class="min-w-0">
+                                    <h3 class="text-xs font-extrabold text-[#4B2412] leading-snug">${item.name}</h3>
+                                    <p class="text-[10px] text-[#8c5233] font-semibold line-clamp-2 mt-0.5">${item.description}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hàng dưới: Buff chỉ số + Nút Mua Cho Ăn -->
+                        <div class="mt-2 pt-2 border-t border-pink-200/80 flex items-center justify-between gap-1">
+                            <div class="flex items-center gap-1 text-[10px] font-extrabold">
+                                <span class="bg-orange-100 text-orange-900 px-1.5 py-0.5 rounded border border-orange-300">+${item.hungerRestore}🍖</span>
+                                <span class="bg-pink-100 text-pink-900 px-1.5 py-0.5 rounded border border-pink-300">+${item.happinessBonus}💖</span>
+                                <span class="bg-purple-100 text-purple-900 px-1.5 py-0.5 rounded border border-purple-300">+${item.expBonus}⭐</span>
+                            </div>
+                            <button class="kawaii-btn bg-amber-300 hover:bg-amber-400 text-[#4B2412] text-[11px] font-extrabold px-2.5 py-1 rounded-xl shrink-0">
+                                🪙 ${item.price} Xu
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // =========================================================================
+        // 5. TRÌNH XUẤT MÃ NGUỒN (SVG / JSON / CSS / CODEX PROMPT)
+        // =========================================================================
+        let activeCodeTab = 'svg';
+
+        function switchCodeTab(tab) {
+            activeCodeTab = tab;
+            ['svg', 'json', 'css', 'codex'].forEach(t => {
+                const btn = document.getElementById(`code-tab-${t}`);
+                btn.className = t === tab
+                    ? 'px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold bg-pink-500 text-white text-left truncate'
+                    : 'px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold bg-slate-800 text-slate-300 hover:bg-slate-700 text-left truncate';
+            });
+            updateCodeOutput();
+        }
+
+        function updateCodeOutput() {
+            const box = document.getElementById('code-output-box');
+            const banner = document.getElementById('code-banner-desc');
+
+            if (activeCodeTab === 'svg') {
+                banner.innerHTML = '<span>🍱 Toàn bộ 12 Đồ họa Vector SVG Món ăn & Đồ uống (`viewBox="0 0 120 120"`).</span><span class="font-mono text-[11px] text-amber-300">PawQuestFoods.svg</span>';
+                box.textContent = document.getElementById('pawquest-food-svg-defs').outerHTML.trim();
+            } else if (activeCodeTab === 'json') {
+                banner.innerHTML = '<span>📊 Cấu hình JSON 12 Món ăn sắp xếp từ rẻ tới đắt (10 Xu -> 500 Xu) kèm chỉ số.</span><span class="font-mono text-[11px] text-amber-300">pawquest_food_menu.json</span>';
+                box.textContent = `const PAWQUEST_FOOD_MENU = ${JSON.stringify(PAWQUEST_FOOD_MENU, null, 2)};`;
+            } else if (activeCodeTab === 'css') {
+                banner.innerHTML = '<span>✨ Toàn bộ CSS Keyframes cho trạng thái Ăn (`.state-eating`), Uống (`.state-drinking`) và hiệu ứng món ăn.</span><span class="font-mono text-[11px] text-amber-300">PawQuestFeeding.css</span>';
+                box.textContent = document.getElementById('pawquest-bistro-styles').textContent.trim();
+            } else {
+                banner.innerHTML = '<span>🤖 Prompt kỹ thuật đầy đủ để dán sang Codex / Cursor / Copilot.</span><span class="font-mono text-[11px] text-pink-300">Codex Prompt</span>';
+                box.textContent =
+`Hãy tích hợp hệ thống "Cửa Hàng 12 Món Ăn & Đồ Uống Thú Cưng (PawQuest Bistro)" vào ứng dụng PawQuest theo các thông số kỹ thuật sau:
+
+1. Danh sách 12 Món ăn sắp xếp theo giá từ rẻ tới đắt (10 Xu -> 500 Xu):
+- Bình Dân:
+  1) #food-bone-biscuit (Bánh Quy Khúc Xương) - 10 Xu | +15 No bụng, +5 Vui vẻ, +5 EXP | type: 'food'
+  2) #food-fresh-carrot (Cà Rốt & Lá Non) - 15 Xu | +20 No bụng, +5 Vui vẻ, +8 EXP | type: 'food'
+  3) #food-warm-milk (Sữa Tươi Ấm) - 20 Xu | +15 No bụng, +12 Vui vẻ, +10 EXP | type: 'drink'
+- Ngon Miệng:
+  4) #food-taiyaki (Cá Nướng Taiyaki) - 35 Xu | +30 No bụng, +15 Vui vẻ, +15 EXP | type: 'food'
+  5) #food-onigiri (Cơm Nắm Onigiri Cá Hồi) - 50 Xu | +38 No bụng, +18 Vui vẻ, +22 EXP | type: 'food'
+  6) #food-boba-tea (Trà Sữa Trân Châu Đường Đen) - 65 Xu | +25 No bụng, +30 Vui vẻ, +28 EXP | type: 'drink'
+- Cao Cấp:
+  7) #food-cat-pudding (Bánh Pudding Mèo Caramel) - 90 Xu | +45 No bụng, +35 Vui vẻ, +40 EXP | type: 'food'
+  8) #food-ramen-bowl (Mì Ramen Trứng Lòng Đào) - 120 Xu | +60 No bụng, +40 Vui vẻ, +55 EXP | type: 'food'
+  9) #food-salmon-sushi (Sushi Cá Hồi Thượng Hạng) - 160 Xu | +70 No bụng, +50 Vui vẻ, +75 EXP | type: 'food'
+  10) #food-berry-parfait (Sinh Tố Dâu Tây Kem Tươi) - 200 Xu | +45 No bụng, +65 Vui vẻ, +90 EXP | type: 'drink'
+- Hoàng Gia:
+  11) #food-wagyu-steak (Bít Tết Wagyu Áp Chảo) - 300 Xu | +90 No bụng, +80 Vui vẻ, +140 EXP | type: 'food'
+  12) #food-royal-hotpot (Lẩu Hoàng Gia Cầu Vồng) - 500 Xu | +100 No bụng, +100 Vui vẻ, +250 EXP | type: 'food'
+
+2. Cơ chế Hiển thị & Animation Khi Cho Ăn:
+- Khi người chơi chọn 1 món trong thực đơn, trừ số Xu tương ứng và render thẻ \`<use href="#food-id" />\` vào vị trí \`#stage-food-slot\` ngay trước mặt thú cưng.
+- Nếu \`item.type === 'food'\`, bật class \`.state-eating\` trong 3.2 giây (đầu thú cưng cúi xuống nhấp nhô, miệng nhai liên tục, vụn bánh văng ra), sau đó chuyển sang \`.state-happy\` trong 2 giây rồi về \`.state-idle\`.
+- Nếu \`item.type === 'drink'\`, bật class \`.state-drinking\` trong 3.2 giây (đầu cúi nhẹ, lưỡi hút nước và bong bóng bay lên).`;
+            }
+        }
+
+        function copyActiveCode() {
+            const text = document.getElementById('code-output-box').textContent;
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            showToast('📋 Đã sao chép mã nguồn vào bộ nhớ tạm!');
+        }
+
+        function setWorkspaceLayout(mode) {
+            const left = document.getElementById('left-preview-pane');
+            const right = document.getElementById('right-code-pane');
+            ['split', 'preview', 'code'].forEach(m => {
+                const btn = document.getElementById(`layout-${m}`);
+                btn.classList.toggle('active-btn', m === mode);
+                btn.classList.toggle('bg-pink-300', m === mode);
+                btn.classList.toggle('bg-white', m !== mode);
+            });
+
+            if (mode === 'split') {
+                left.className = 'lg:col-span-7 flex flex-col gap-4';
+                right.className = 'lg:col-span-5 flex flex-col';
+            } else if (mode === 'preview') {
+                left.className = 'lg:col-span-10 lg:col-start-2 flex flex-col gap-4';
+                right.className = 'hidden';
+            } else {
+                left.className = 'hidden';
+                right.className = 'lg:col-span-12 flex flex-col';
+            }
+        }
+
+        let toastTimer = null;
+        function showToast(msg) {
+            const box = document.getElementById('toast-box');
+            document.getElementById('toast-text').textContent = msg;
+            box.classList.remove('opacity-0', 'translate-y-3');
+            box.classList.add('opacity-100', 'translate-y-0');
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                box.classList.remove('opacity-100', 'translate-y-0');
+                box.classList.add('opacity-0', 'translate-y-3');
+            }, 2600);
+        }
+
+        window.onload = () => {
+            switchPetSpecies('cat');
+            renderFoodCatalogGrid();
+            updateStatsHeaderUI();
+            updateCodeOutput();
+        };
+    </script>
+</body>
+</html>

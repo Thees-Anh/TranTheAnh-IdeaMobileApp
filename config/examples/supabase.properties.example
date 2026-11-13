@@ -1,0 +1,4 @@
+# Add these names to untracked local.properties or environment variables.
+# Only publishable (sb_publishable_...) or legacy anon keys are mobile-safe.
+SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+SUPABASE_PUBLISHABLE_KEY=

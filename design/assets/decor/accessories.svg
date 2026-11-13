@@ -1,0 +1,119 @@
+<!-- Vật phẩm: #acc-crown -->
+<g id="acc-crown" class="pet-acc">
+                                        <path d="M 272 142 L 266 108 L 286 124 L 300 100 L 314 124 L 334 108 L 328 142 Z" fill="#FACC15" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round"></path>
+                                        <rect x="270" y="136" width="60" height="9" rx="4" fill="#F59E0B" stroke="#4B2412" stroke-width="4"></rect>
+                                        <circle cx="266" cy="105" r="4.5" fill="#FFFBEB" stroke="#4B2412" stroke-width="3"></circle>
+                                        <circle cx="300" cy="97" r="5.5" fill="#FFFBEB" stroke="#4B2412" stroke-width="3"></circle>
+                                        <circle cx="334" cy="105" r="4.5" fill="#FFFBEB" stroke="#4B2412" stroke-width="3"></circle>
+                                        <polygon points="300,117 305,124 300,131 295,124" fill="#38BDF8" stroke="#4B2412" stroke-width="2.5"></polygon>
+                                    </g>
+
+<!-- Vật phẩm: #acc-wizard-hat -->
+<g id="acc-wizard-hat" class="pet-acc">
+                                        <ellipse cx="300" cy="140" rx="54" ry="13" fill="#7C3AED" stroke="#4B2412" stroke-width="4.5"></ellipse>
+                                        <path d="M 262 138 C 272 95, 292 68, 326 56 C 314 82, 322 108, 338 138 Z" fill="#8B5CF6" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round"></path>
+                                        <path d="M 264 128 Q 300 138 336 128 L 338 138 Q 300 148 262 138 Z" fill="#F59E0B" stroke="#4B2412" stroke-width="3.8"></path>
+                                        <rect x="293" y="126" width="14" height="14" rx="2" fill="#FDE047" stroke="#4B2412" stroke-width="3.2"></rect>
+                                        <polygon points="302,88 305,95 312,96 307,101 308,108 302,104 296,108 297,101 292,96 299,95" fill="#FDE047" stroke="#4B2412" stroke-width="2.2"></polygon>
+                                    </g>
+
+<!-- Vật phẩm: #acc-sprout -->
+<g id="acc-sprout" class="pet-acc">
+                                        <g id="sprout-stem">
+                                            <path d="M 300 138 Q 302 114 298 102" fill="none" stroke="#4B2412" stroke-width="4.5" stroke-linecap="round"></path>
+                                            <path d="M 298 106 C 278 96, 274 114, 298 114 Z" fill="#4ADE80" stroke="#4B2412" stroke-width="3.8" stroke-linejoin="round"></path>
+                                            <path d="M 298 104 C 318 92, 324 110, 298 112 Z" fill="#22C55E" stroke="#4B2412" stroke-width="3.8" stroke-linejoin="round"></path>
+                                        </g>
+                                        <!-- Kẹp hoa anh đào hồng bên thái dương -->
+                                        <circle cx="268" cy="148" r="10" fill="#F9A8D4" stroke="#4B2412" stroke-width="3.5"></circle>
+                                        <circle cx="268" cy="148" r="3.5" fill="#FACC15"></circle>
+                                    </g>
+
+<!-- Vật phẩm: #acc-headphones -->
+<g id="acc-headphones" class="pet-acc">
+                                        <path d="M 228 194 C 224 122, 376 122, 372 194" fill="none" stroke="#F472B6" stroke-width="10" stroke-linecap="round"></path>
+                                        <path d="M 228 194 C 224 122, 376 122, 372 194" fill="none" stroke="#4B2412" stroke-width="4.5" stroke-linecap="round"></path>
+                                        <!-- Ốp tai hai bên -->
+                                        <ellipse cx="230" cy="194" rx="12" ry="20" fill="#38BDF8" stroke="#4B2412" stroke-width="4.2"></ellipse>
+                                        <ellipse cx="230" cy="194" rx="6" ry="11" fill="#FEF08A"></ellipse>
+                                        <ellipse cx="370" cy="194" rx="12" ry="20" fill="#38BDF8" stroke="#4B2412" stroke-width="4.2"></ellipse>
+                                        <ellipse cx="370" cy="194" rx="6" ry="11" fill="#FEF08A"></ellipse>
+                                    </g>
+
+<!-- Vật phẩm: #acc-glasses -->
+<g id="acc-glasses" class="pet-acc">
+                                        <line x1="242" y1="192" x2="358" y2="192" stroke="#4B2412" stroke-width="4.5"></line>
+                                        <!-- Tròng ngôi sao trái -->
+                                        <polygon points="274,172 280,185 294,187 284,197 286,211 274,204 262,211 264,197 254,187 268,185" fill="#FB7185" stroke="#4B2412" stroke-width="4" stroke-linejoin="round"></polygon>
+                                        <!-- Tròng ngôi sao phải -->
+                                        <polygon points="328,172 334,185 348,187 338,197 340,211 328,204 316,211 318,197 308,187 322,185" fill="#38BDF8" stroke="#4B2412" stroke-width="4" stroke-linejoin="round"></polygon>
+                                        <line x1="268" y1="186" x2="274" y2="196" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"></line>
+                                        <line x1="322" y1="186" x2="328" y2="196" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"></line>
+                                    </g>
+
+<!-- Vật phẩm: #acc-monocle -->
+<g id="acc-monocle" class="pet-acc">
+                                        <!-- Dây xích vàng rủ xuống -->
+                                        <path d="M 344 202 Q 354 228 338 244" fill="none" stroke="#F59E0B" stroke-width="3.5" stroke-dasharray="4 3"></path>
+                                        <!-- Tròng kính đơn bên mắt phải -->
+                                        <circle cx="328" cy="195" r="16" fill="#E0F2FE" fill-opacity="0.55" stroke="#FACC15" stroke-width="5"></circle>
+                                        <circle cx="328" cy="195" r="16" fill="none" stroke="#4B2412" stroke-width="3.5"></circle>
+                                        <!-- Bộ ria mép quý tộc vểnh hai bên -->
+                                        <path d="M 302 212 C 288 204, 276 218, 268 210 C 276 224, 292 222, 302 214 Z" fill="#5C3A21" stroke="#4B2412" stroke-width="3" stroke-linejoin="round"></path>
+                                        <path d="M 302 212 C 316 204, 328 218, 336 210 C 328 224, 312 222, 302 214 Z" fill="#5C3A21" stroke="#4B2412" stroke-width="3" stroke-linejoin="round"></path>
+                                    </g>
+
+<!-- Vật phẩm: #acc-bowtie -->
+<g id="acc-bowtie" class="pet-acc item-visible">
+                                    <!-- Dây vòng cổ đỏ -->
+                                    <path d="M 255 244 Q 300 262 345 244" fill="none" stroke="#EF4444" stroke-width="9" stroke-linecap="round"></path>
+                                    <path d="M 255 244 Q 300 262 345 244" fill="none" stroke="#4B2412" stroke-width="4.2" stroke-linecap="round"></path>
+                                    <!-- Cánh nơ hai bên -->
+                                    <polygon points="300,252 274,238 274,264" fill="#F43F5E" stroke="#4B2412" stroke-width="4" stroke-linejoin="round"></polygon>
+                                    <polygon points="300,252 326,238 326,264" fill="#F43F5E" stroke="#4B2412" stroke-width="4" stroke-linejoin="round"></polygon>
+                                    <!-- Chuông vàng ở giữa -->
+                                    <g id="golden-bell">
+                                        <circle cx="300" cy="254" r="10.5" fill="#FACC15" stroke="#4B2412" stroke-width="4"></circle>
+                                        <line x1="293" y1="252" x2="307" y2="252" stroke="#4B2412" stroke-width="3"></line>
+                                        <circle cx="300" cy="257" r="2.8" fill="#4B2412"></circle>
+                                    </g>
+                                </g>
+
+<!-- Vật phẩm: #acc-scarf -->
+<g id="acc-scarf" class="pet-acc">
+                                    <path d="M 248 238 Q 300 260 352 238 C 358 248, 354 260, 342 262 Q 300 276 256 262 C 246 258, 242 248, 248 238 Z" fill="#FB7185" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round"></path>
+                                    <!-- Vạt khăn rủ xuống ngực -->
+                                    <path d="M 316 254 L 312 298 L 338 296 L 340 250 Z" fill="#F43F5E" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round"></path>
+                                    <line x1="314" y1="276" x2="338" y2="275" stroke="#FEF08A" stroke-width="5"></line>
+                                    <line x1="316" y1="298" x2="315" y2="306" stroke="#4B2412" stroke-width="3.5" stroke-linecap="round"></line>
+                                    <line x1="325" y1="298" x2="325" y2="306" stroke="#4B2412" stroke-width="3.5" stroke-linecap="round"></line>
+                                    <line x1="334" y1="297" x2="335" y2="305" stroke="#4B2412" stroke-width="3.5" stroke-linecap="round"></line>
+                                </g>
+
+<!-- Vật phẩm: #acc-wings -->
+<g id="acc-wings" class="pet-acc item-visible">
+                                    <g id="wing-left">
+                                        <path d="M 255 256 C 210 218, 178 232, 192 262 C 178 268, 188 286, 208 284 C 198 296, 215 306, 248 286 Z" fill="#FFFFFF" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round"></path>
+                                        <path d="M 238 262 C 216 248, 204 256, 212 268" fill="none" stroke="#BAE6FD" stroke-width="3" stroke-linecap="round"></path>
+                                    </g>
+                                    <g id="wing-right">
+                                        <path d="M 345 256 C 390 218, 422 232, 408 262 C 422 268, 412 286, 392 284 C 402 296, 385 306, 352 286 Z" fill="#FFFFFF" stroke="#4B2412" stroke-width="4.5" stroke-linejoin="round"></path>
+                                        <path d="M 362 262 C 384 248, 396 256, 388 268" fill="none" stroke="#BAE6FD" stroke-width="3" stroke-linecap="round"></path>
+                                    </g>
+                                </g>
+
+<!-- Vật phẩm: #acc-backpack -->
+<g id="acc-backpack" class="pet-acc">
+                                    <!-- Dây đeo chéo qua ngực -->
+                                    <path d="M 262 248 Q 300 282 346 308" fill="none" stroke="#EA580C" stroke-width="7" stroke-linecap="round"></path>
+                                    <path d="M 262 248 Q 300 282 346 308" fill="none" stroke="#4B2412" stroke-width="4" stroke-linecap="round"></path>
+                                    <!-- Túi hình củ cà rốt bên hông phải -->
+                                    <ellipse cx="348" cy="298" rx="16" ry="20" transform="rotate(-18 348 298)" fill="#FB923C" stroke="#4B2412" stroke-width="4.2"></ellipse>
+                                    <path d="M 342 276 C 338 264, 352 264, 350 276" fill="#4ADE80" stroke="#4B2412" stroke-width="3.5" stroke-linejoin="round"></path>
+                                    <!-- Bóng bay trái tim lơ lửng -->
+                                    <g id="acc-balloon-float">
+                                        <path d="M 352 284 Q 378 225 372 162" fill="none" stroke="#4B2412" stroke-width="2.8" stroke-dasharray="4 3"></path>
+                                        <path d="M 372 142 C 372 126, 350 122, 350 140 C 350 156, 372 166, 372 174 C 372 166, 394 156, 394 140 C 394 122, 372 126, 372 142 Z" fill="#FB7185" stroke="#4B2412" stroke-width="4" stroke-linejoin="round"></path>
+                                        <ellipse cx="362" cy="138" rx="4" ry="6" transform="rotate(-20 362 138)" fill="#FFFFFF" opacity="0.7"></ellipse>
+                                    </g>
+                                </g>

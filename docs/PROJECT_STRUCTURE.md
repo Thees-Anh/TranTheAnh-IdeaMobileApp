@@ -1,0 +1,92 @@
+# Cấu trúc dự án PawQuest
+
+Sắp xếp theo trách nhiệm và công cụ sử dụng. Các module chạy ứng dụng giữ cấu trúc KMP/Android/iOS tiêu chuẩn; file mẫu thiết kế, công cụ sinh dữ liệu và tài liệu được tách khỏi mã ứng dụng. Chưa tách thêm Gradle module khi chưa có ranh giới phụ thuộc hoặc nhu cầu build rõ ràng.
+
+```text
+PawQuest/
+├── androidApp/                    # Android host: Activity, Application, notifications, widgets
+├── shared/src/
+│   ├── commonMain/
+│   │   ├── kotlin/com/pawquest/
+│   │   │   ├── domain/            # Models, repository contracts, use cases
+│   │   │   ├── data/              # Repository implementations and Auth
+│   │   │   ├── presentation/      # Screens/ViewModels grouped by feature
+│   │   │   ├── localization/      # Shared bilingual catalog
+│   │   │   └── di/                # Koin composition
+│   │   └── composeResources/      # Packaged fonts, portraits, thumbnails
+│   ├── androidMain/               # Android adapters and active/legacy scene assets
+│   ├── iosMain/                   # Existing iOS platform implementations
+│   ├── commonTest/                # Shared unit tests
+│   └── androidDeviceTest/         # Device regression tests
+├── iosApp/                        # Xcode host/scaffold
+├── supabase/
+│   ├── migrations/                # Immutable ordered schema changes
+│   ├── tests/                     # SQL integrity and RLS tests
+│   └── templates/                 # Generator inputs
+├── config/
+│   ├── examples/                  # Public configuration templates only
+│   └── *-balance.json             # Canonical gameplay constants
+├── design/
+│   ├── prototypes/pets/           # Original Mochi/Capybara/Rabbit HTML
+│   ├── prototypes/focus/          # Original reading-companion HTML
+│   └── assets/
+│       ├── decor/                 # Supplied SVG, CSS and catalog
+│       └── pets/puppy/            # Original Puppy SVG/CSS
+├── tools/
+│   ├── assets/                    # Asset generators and artwork helpers
+│   ├── balance/                   # Constants/migration generators
+│   ├── validation/                # Structure, localization and GLB checks
+│   └── testing/fixtures/          # Test harnesses and local-only adapters
+├── docs/
+│   ├── features/                  # Feature behavior and setup
+│   ├── backend/                   # PostgreSQL/RLS documentation
+│   ├── rendering/                 # Legacy GLB/animation requirements
+│   ├── design/                    # Visual decisions and UI skill setup
+│   ├── product/                   # Product vision
+│   ├── archive/                   # Historical walkthroughs
+│   ├── media/design/              # Design reference images
+│   ├── media/previews/            # Offline previews and verification screenshots
+│   └── licenses/                  # Font license
+└── gradle/                        # Wrapper, version catalog, JVM criteria
+```
+
+## Quy tắc đặt file
+
+Các file mẫu trước đây ở thư mục gốc đã chuyển như sau:
+
+| Tên cũ | Vị trí hiện tại |
+|---|---|
+| `cat_prototype.html` | `design/prototypes/pets/mochi.html` |
+| `Capybara.html` | `design/prototypes/pets/capybara.html` |
+| `Rabbit.html` | `design/prototypes/pets/rabbit.html` |
+| `CatFocus.html` | `design/prototypes/focus/mochi-reading.html` |
+| `Accessories.svg` | `design/assets/decor/accessories.svg` |
+| `Furniture.svg` | `design/assets/decor/furniture.svg` |
+| `PawQuest-Idea.md` | `docs/product/VISION.md` |
+| `walkthrough.md` | `docs/archive/pet-home-walkthrough.md` |
+
+### Thêm file mới
+
+| Nội dung mới | Vị trí |
+|---|---|
+| Nghiệp vụ dùng chung | `shared/src/commonMain/kotlin/com/pawquest/domain/` |
+| Repository/Supabase | `shared/src/commonMain/kotlin/com/pawquest/data/` |
+| Screen/ViewModel | `shared/src/commonMain/kotlin/com/pawquest/presentation/<feature>/` |
+| Android host/rendering | `androidApp/src/main/` hoặc `shared/src/androidMain/` theo trách nhiệm |
+| Mẫu HTML/SVG | `design/prototypes/` hoặc `design/assets/` |
+| Asset app thực sự tải | Android assets hoặc shared Compose resources |
+| Công cụ tạo/check asset | `tools/assets/` hoặc `tools/validation/` |
+| Test tích hợp/fixture | `tools/testing/` và `tools/testing/fixtures/` |
+| Thay đổi database | Migration mới có timestamp trong `supabase/migrations/` |
+| Cấu hình mẫu không chứa secret | `config/examples/` |
+| Tài liệu tính năng | `docs/features/` |
+| Ý tưởng sản phẩm | `docs/product/` |
+| Log, APK, browser profile, kết quả tạm | `build/` hoặc module `build/`, không commit |
+
+Giữ ổn định `docs/AI_INSTRUCTIONS.md`, `docs/ARCHITECTURE.md`, `docs/IMPLEMENTATION_LOG.md` và `docs/TEST_REPORT.md`. `.agents/skills/` và `.run/` giữ vị trí công cụ tự phát hiện. `local.properties` vẫn ở root nhưng không được commit.
+
+Nguồn thiết kế không đóng gói trực tiếp vào app. Generator tạo assets ngoại tuyến trong Android assets/Compose resources. Bản mẫu gốc và 23 migrations giữ nguyên nội dung khi sắp xếp.
+
+Các chú thích “Generated by tools/...” trong migration cũ là thông tin lịch sử. Không sửa migration đã phát hành chỉ để đổi đường dẫn; dùng lệnh hiện tại ở [tools/README.md](../tools/README.md).
+
+Chạy `python tools/validation/check_project_structure.py` để kiểm tra layout và tham chiếu; sau khi di chuyển nguồn/generator chạy thêm các lệnh `--check` và Gradle trong README.

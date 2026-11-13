@@ -1,0 +1,205 @@
+* {
+            font-family: 'Quicksand', sans-serif;
+            user-select: none;
+        }
+        code, pre, .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+            user-select: text;
+        }
+        body {
+            background-color: #fdf2f8;
+            color: #4B2412;
+        }
+
+        /* =========================================================
+           1. HỆ THỐNG RIGGING CHUYỂN ĐỘNG THÚ CƯNG & PHỤ KIỆN
+           (Phụ kiện gắn trong #pet-head-rig & #pet-body-rig sẽ tự động
+            nghiêng và nhún nhảy đồng bộ 100% với thú cưng)
+           ========================================================= */
+        #pet-root-stage {
+            transform-origin: 300px 330px;
+        }
+        #pet-body-rig {
+            transform-origin: 300px 330px;
+        }
+        #pet-head-rig {
+            transform-origin: 300px 235px;
+        }
+
+        /* Chế độ 1: Đứng yên thở nhẹ (Idle) */
+        @keyframes petIdleBreath {
+            0%, 100% { transform: scale(1, 1) translateY(0px); }
+            50% { transform: scale(1.018, 0.985) translateY(2px); }
+        }
+        @keyframes petIdleHeadTilt {
+            0%, 100% { transform: rotate(-1.6deg) translateY(0px); }
+            50% { transform: rotate(1.8deg) translateY(2.5px); }
+        }
+
+        /* Chế độ 2: Nhún nhảy vui vẻ (Happy Bounce) */
+        @keyframes petHappyBounce {
+            0%, 100% { transform: translateY(0px) scale(1, 1); }
+            40% { transform: translateY(-14px) scale(0.96, 1.04); }
+            75% { transform: translateY(2px) scale(1.04, 0.96); }
+        }
+        @keyframes petHappyHeadWag {
+            0%, 100% { transform: rotate(-4deg) translateY(0px); }
+            50% { transform: rotate(4deg) translateY(-4px); }
+        }
+
+        .anim-idle #pet-body-rig {
+            animation: petIdleBreath 3.2s ease-in-out infinite;
+        }
+        .anim-idle #pet-head-rig {
+            animation: petIdleHeadTilt 3.2s ease-in-out infinite;
+        }
+
+        .anim-bounce #pet-body-rig {
+            animation: petHappyBounce 0.65s ease-in-out infinite;
+        }
+        .anim-bounce #pet-head-rig {
+            animation: petHappyHeadWag 0.65s ease-in-out infinite;
+        }
+
+        /* =========================================================
+           2. ANIMATION RIÊNG CHO TỪNG PHỤ KIỆN THÚ CƯNG (#acc-1 -> #acc-10)
+           ========================================================= */
+        /* Cánh thiên thần vẫy (#acc-wings) */
+        @keyframes wingFlapLeft {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(-12deg) translateY(-3px); }
+        }
+        @keyframes wingFlapRight {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(12deg) translateY(-3px); }
+        }
+        #wing-left { transform-origin: 255px 255px; animation: wingFlapLeft 1.4s ease-in-out infinite; }
+        #wing-right { transform-origin: 345px 255px; animation: wingFlapRight 1.4s ease-in-out infinite; }
+
+        /* Bóng bay trái tim của Balo (#acc-backpack) */
+        @keyframes balloonBob {
+            0%, 100% { transform: translateY(0px) rotate(-3deg); }
+            50% { transform: translateY(-9px) rotate(4deg); }
+        }
+        #acc-balloon-float {
+            transform-origin: 375px 150px;
+            animation: balloonBob 2.6s ease-in-out infinite;
+        }
+
+        /* Mầm cây đung đưa (#acc-sprout) */
+        @keyframes sproutSway {
+            0%, 100% { transform: rotate(-4deg); }
+            50% { transform: rotate(6deg); }
+        }
+        #sprout-stem {
+            transform-origin: 300px 134px;
+            animation: sproutSway 2.2s ease-in-out infinite;
+        }
+
+        /* Chuông vàng lắc nhẹ (#acc-bowtie) */
+        @keyframes bellRing {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+        #golden-bell {
+            transform-origin: 300px 254px;
+            animation: bellRing 1.8s ease-in-out infinite;
+        }
+
+        /* =========================================================
+           3. ANIMATION CHO 10 NỘI THẤT CĂN PHÒNG (#furn-1 -> #furn-10)
+           ========================================================= */
+        /* 1. Mây trôi ngoài cửa sổ (#furn-window) */
+        @keyframes cloudDrift {
+            0%, 100% { transform: translateX(-6px); }
+            50% { transform: translateX(8px); }
+        }
+        .window-cloud { animation: cloudDrift 5s ease-in-out infinite; }
+
+        /* 2. Quả lắc đồng hồ mèo (#furn-clock) */
+        @keyframes pendulumSwing {
+            0%, 100% { transform: rotate(-14deg); }
+            50% { transform: rotate(14deg); }
+        }
+        #clock-pendulum {
+            transform-origin: 430px 128px;
+            animation: pendulumSwing 1.6s ease-in-out infinite;
+        }
+
+        /* 3. Dây đèn LED nhấp nháy (#furn-lights) */
+        @keyframes bulbTwinkle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.55; transform: scale(0.88); }
+        }
+        .led-bulb-odd { transform-box: fill-box; transform-origin: center; animation: bulbTwinkle 1.8s ease-in-out infinite; }
+        .led-bulb-even { transform-box: fill-box; transform-origin: center; animation: bulbTwinkle 1.8s ease-in-out 0.9s infinite; }
+
+        /* 5. Bóng bông trên trụ mèo (#furn-cat-tree) */
+        @keyframes pomPomSwing {
+            0%, 100% { transform: rotate(-10deg); }
+            50% { transform: rotate(10deg); }
+        }
+        #cat-tree-toy {
+            transform-origin: 118px 180px;
+            animation: pomPomSwing 2s ease-in-out infinite;
+        }
+
+        /* 8. Khói ấm trà bay lên (#furn-tea-table) */
+        @keyframes steamRise {
+            0% { opacity: 0; transform: translateY(4px) scale(0.8); }
+            50% { opacity: 0.75; }
+            100% { opacity: 0; transform: translateY(-16px) scale(1.2); }
+        }
+        .tea-steam-1 { animation: steamRise 2.4s ease-out infinite; }
+        .tea-steam-2 { animation: steamRise 2.4s ease-out 1.2s infinite; }
+
+        /* 9. Nốt nhạc bay lên từ máy đĩa than (#furn-gramophone) */
+        @keyframes noteFloat {
+            0% { opacity: 0; transform: translate(0, 6px) scale(0.6); }
+            45% { opacity: 1; }
+            100% { opacity: 0; transform: translate(-14px, -26px) scale(1.15); }
+        }
+        .music-note-1 { animation: noteFloat 2.6s ease-out infinite; }
+        .music-note-2 { animation: noteFloat 2.6s ease-out 1.3s infinite; }
+
+        /* 10. Ánh sáng đèn Hoa Linh Lan (#furn-lamp) */
+        @keyframes lampGlowPulse {
+            0%, 100% { opacity: 0.45; transform: scale(1); }
+            50% { opacity: 0.75; transform: scale(1.08); }
+        }
+        .lamp-glow {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: lampGlowPulse 2.8s ease-in-out infinite;
+        }
+
+        /* Ẩn các vật phẩm mặc định khi chưa bật class .item-visible */
+        .room-item, .pet-acc, .pet-model {
+            display: none;
+        }
+        .room-item.item-visible, .pet-acc.item-visible, .pet-model.pet-active {
+            display: block;
+        }
+
+        /* UI Kawaii Card & Button */
+        .kawaii-card {
+            border: 3px solid #4B2412;
+            box-shadow: 0 6px 0 rgba(75, 36, 18, 0.14);
+        }
+        .kawaii-btn {
+            border: 2.5px solid #4B2412;
+            box-shadow: 0 3px 0 #4B2412;
+            transition: all 0.12s ease;
+        }
+        .kawaii-btn:hover:not(:disabled) {
+            transform: translateY(-1.5px);
+            box-shadow: 0 4.5px 0 #4B2412;
+        }
+        .kawaii-btn:active:not(:disabled), .kawaii-btn.active-btn {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #4B2412;
+        }
+
+        ::-webkit-scrollbar { width: 7px; height: 7px; }
+        ::-webkit-scrollbar-track { background: #181825; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb { background: #f472b6; border-radius: 6px; }

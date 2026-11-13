@@ -1,0 +1,5 @@
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/pawquest_brand_background" />
+    <foreground android:drawable="@drawable/pawquest_brand_foreground_hungry" />
+    <monochrome android:drawable="@drawable/pawquest_brand_mono_hungry" />
+</adaptive-icon>

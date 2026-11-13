@@ -1,0 +1,212 @@
+[
+  {
+    "id": "acc-crown",
+    "name": "Vương Miện Vàng",
+    "slot": "HEAD",
+    "price": 150,
+    "desc": "Vương miện hoàng gia đính ngọc bích",
+    "category": "ACCESSORY",
+    "code": "acc_crown",
+    "uuid": "e2300000-0000-0000-0000-000000000001"
+  },
+  {
+    "id": "acc-wizard-hat",
+    "name": "Mũ Phù Thủy",
+    "slot": "HEAD",
+    "price": 140,
+    "desc": "Mũ tím huyền bí gắn ngôi sao vàng",
+    "category": "ACCESSORY",
+    "code": "acc_wizard_hat",
+    "uuid": "e2300000-0000-0000-0000-000000000002"
+  },
+  {
+    "id": "acc-sprout",
+    "name": "Mầm Cây & Hoa",
+    "slot": "HEAD",
+    "price": 80,
+    "desc": "Mầm lá non rung rinh & kẹp hoa anh đào",
+    "category": "ACCESSORY",
+    "code": "acc_sprout",
+    "uuid": "e2300000-0000-0000-0000-000000000003"
+  },
+  {
+    "id": "acc-headphones",
+    "name": "Tai Nghe Pastel",
+    "slot": "HEAD",
+    "price": 160,
+    "desc": "Tai nghe chụp tai phát sáng êm ái",
+    "category": "ACCESSORY",
+    "code": "acc_headphones",
+    "uuid": "e2300000-0000-0000-0000-000000000004"
+  },
+  {
+    "id": "acc-glasses",
+    "name": "Kính Ngôi Sao",
+    "slot": "FACE",
+    "price": 110,
+    "desc": "Kính mát hình ngôi sao lấp lánh",
+    "category": "ACCESSORY",
+    "code": "acc_glasses",
+    "uuid": "e2300000-0000-0000-0000-000000000005"
+  },
+  {
+    "id": "acc-monocle",
+    "name": "Kính Quý Tộc",
+    "slot": "FACE",
+    "price": 130,
+    "desc": "Kính đơn dây xích vàng & bộ ria vểnh",
+    "category": "ACCESSORY",
+    "code": "acc_monocle",
+    "uuid": "e2300000-0000-0000-0000-000000000006"
+  },
+  {
+    "id": "acc-bowtie",
+    "name": "Nơ Chuông Vàng",
+    "slot": "NECK",
+    "price": 90,
+    "desc": "Vòng cổ nơ đỏ kèm chuông vàng lắc lư",
+    "category": "ACCESSORY",
+    "code": "acc_bowtie",
+    "uuid": "e2300000-0000-0000-0000-000000000007"
+  },
+  {
+    "id": "acc-scarf",
+    "name": "Khăn Len Ấm",
+    "slot": "NECK",
+    "price": 95,
+    "desc": "Khăn choàng len mùa đông kẻ sọc",
+    "category": "ACCESSORY",
+    "code": "acc_scarf",
+    "uuid": "e2300000-0000-0000-0000-000000000008"
+  },
+  {
+    "id": "acc-wings",
+    "name": "Cánh Thiên Thần",
+    "slot": "BACK",
+    "price": 200,
+    "desc": "Đôi cánh trắng muốt vẫy nhịp nhàng",
+    "category": "ACCESSORY",
+    "code": "acc_wings",
+    "uuid": "e2300000-0000-0000-0000-000000000009"
+  },
+  {
+    "id": "acc-backpack",
+    "name": "Balo & Bóng Bay",
+    "slot": "BACK",
+    "price": 175,
+    "desc": "Túi cà rốt đeo chéo & bóng bay trái tim",
+    "category": "ACCESSORY",
+    "code": "acc_backpack",
+    "uuid": "e2300000-0000-0000-0000-000000000010"
+  },
+  {
+    "id": "furn-window",
+    "name": "Cửa Sổ Cầu Vồng",
+    "zone": "wall",
+    "price": 220,
+    "desc": "Cửa sổ vòm ngắm mây trôi & cầu vồng",
+    "category": "FURNITURE",
+    "code": "furn_window",
+    "uuid": "e2300000-0000-0000-0000-000000000011",
+    "slot": "WINDOW"
+  },
+  {
+    "id": "furn-clock",
+    "name": "Đồng Hồ Mèo",
+    "zone": "wall",
+    "price": 150,
+    "desc": "Đồng hồ treo tường quả lắc đung đưa",
+    "category": "FURNITURE",
+    "code": "furn_clock",
+    "uuid": "e2300000-0000-0000-0000-000000000012",
+    "slot": "CLOCK"
+  },
+  {
+    "id": "furn-lights",
+    "name": "Đèn LED Sao",
+    "zone": "wall",
+    "price": 120,
+    "desc": "Dây đèn ngôi sao nhấp nháy ấm áp",
+    "category": "FURNITURE",
+    "code": "furn_lights",
+    "uuid": "e2300000-0000-0000-0000-000000000013",
+    "slot": "LIGHTS"
+  },
+  {
+    "id": "furn-bookshelf",
+    "name": "Kệ Sách Gỗ",
+    "zone": "wall",
+    "price": 160,
+    "desc": "Kệ sách pastel kèm chậu xương rồng",
+    "category": "FURNITURE",
+    "code": "furn_bookshelf",
+    "uuid": "e2300000-0000-0000-0000-000000000014",
+    "slot": "BOOKSHELF"
+  },
+  {
+    "id": "furn-cat-tree",
+    "name": "Trụ Cào Móng",
+    "zone": "floor-left",
+    "price": 280,
+    "desc": "Nhà cây 3 tầng có bóng bông lắc lư",
+    "category": "FURNITURE",
+    "code": "furn_cat_tree",
+    "uuid": "e2300000-0000-0000-0000-000000000015",
+    "slot": "CAT_TREE"
+  },
+  {
+    "id": "furn-bed",
+    "name": "Đệm Vương Miện",
+    "zone": "floor-right",
+    "price": 210,
+    "desc": "Đệm nhung hồng êm ái góc phòng",
+    "category": "FURNITURE",
+    "code": "furn_bed",
+    "uuid": "e2300000-0000-0000-0000-000000000016",
+    "slot": "BED"
+  },
+  {
+    "id": "furn-plant",
+    "name": "Chậu Cây Cười",
+    "zone": "floor-right",
+    "price": 110,
+    "desc": "Cây Monstera trong chậu sứ mặt cười",
+    "category": "FURNITURE",
+    "code": "furn_plant",
+    "uuid": "e2300000-0000-0000-0000-000000000017",
+    "slot": "PLANT"
+  },
+  {
+    "id": "furn-tea-table",
+    "name": "Bàn Trà & Bánh",
+    "zone": "front-right",
+    "price": 190,
+    "desc": "Bàn gỗ thấp, ấm trà bốc khói & Macaron",
+    "category": "FURNITURE",
+    "code": "furn_tea_table",
+    "uuid": "e2300000-0000-0000-0000-000000000018",
+    "slot": "TEA_TABLE"
+  },
+  {
+    "id": "furn-gramophone",
+    "name": "Máy Đĩa Than",
+    "zone": "front-left",
+    "price": 250,
+    "desc": "Máy phát nhạc cổ điển bay nốt nhạc",
+    "category": "FURNITURE",
+    "code": "furn_gramophone",
+    "uuid": "e2300000-0000-0000-0000-000000000019",
+    "slot": "GRAMOPHONE"
+  },
+  {
+    "id": "furn-lamp",
+    "name": "Đèn Hoa Linh Lan",
+    "zone": "floor-right",
+    "price": 180,
+    "desc": "Đèn cây hoa chuông tỏa hào quang",
+    "category": "FURNITURE",
+    "code": "furn_lamp",
+    "uuid": "e2300000-0000-0000-0000-000000000020",
+    "slot": "LAMP"
+  }
+]

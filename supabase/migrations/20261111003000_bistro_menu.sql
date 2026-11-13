@@ -1,0 +1,27 @@
+begin;
+-- Exact supplied 12-item menu; existing pantry food and Wheel Food stay unchanged.
+insert into public.item_catalog(id,code,name,category,price_coins,asset_id,max_quantity) values ('e2900000-0000-0000-0000-000000000001','bistro_bone_biscuit','Bánh Quy Khúc Xương','FOOD',10,'food-bone-biscuit',1000000);
+insert into public.bistro_foods(item_id,menu_order,tier,meal_type,hunger_gain,happiness_gain,xp_gain) values ('e2900000-0000-0000-0000-000000000001',1,'BASIC','food',15,5,5);
+insert into public.item_catalog(id,code,name,category,price_coins,asset_id,max_quantity) values ('e2900000-0000-0000-0000-000000000002','bistro_fresh_carrot','Cà Rốt & Lá Non','FOOD',15,'food-fresh-carrot',1000000);
+insert into public.bistro_foods(item_id,menu_order,tier,meal_type,hunger_gain,happiness_gain,xp_gain) values ('e2900000-0000-0000-0000-000000000002',2,'BASIC','food',20,5,8);
+insert into public.item_catalog(id,code,name,category,price_coins,asset_id,max_quantity) values ('e2900000-0000-0000-0000-000000000003','bistro_warm_milk','Sữa Tươi Ấm','FOOD',20,'food-warm-milk',1000000);
+insert into public.bistro_foods(item_id,menu_order,tier,meal_type,hunger_gain,happiness_gain,xp_gain) values ('e2900000-0000-0000-0000-000000000003',3,'BASIC','drink',15,12,10);
+insert into public.item_catalog(id,code,name,category,price_coins,asset_id,max_quantity) values ('e2900000-0000-0000-0000-000000000004','bistro_taiyaki','Cá Nướng Taiyaki','FOOD',35,'food-taiyaki',1000000);
+insert into public.bistro_foods(item_id,menu_order,tier,meal_type,hunger_gain,happiness_gain,xp_gain) values ('e2900000-0000-0000-0000-000000000004',4,'TASTY','food',30,15,15);
+insert into public.item_catalog(id,code,name,category,price_coins,asset_id,max_quantity) values ('e2900000-0000-0000-0000-000000000005','bistro_onigiri','Cơm Nắm Onigiri Cá Hồi','FOOD',50,'food-onigiri',1000000);
+insert into public.bistro_foods(item_id,menu_order,tier,meal_type,hunger_gain,happiness_gain,xp_gain) values ('e2900000-0000-0000-0000-000000000005',5,'TASTY','food',38,18,22);
+insert into public.item_catalog(id,code,name,category,price_coins,asset_id,max_quantity) values ('e2900000-0000-0000-0000-000000000006','bistro_boba_tea','Trà Sữa Trân Châu Đường Đen','FOOD',65,'food-boba-tea',1000000);
+insert into public.bistro_foods(item_id,menu_order,tier,meal_type,hunger_gain,happiness_gain,xp_gain) values ('e2900000-0000-0000-0000-000000000006',6,'TASTY','drink',25,30,28);
+insert into public.item_catalog(id,code,name,category,price_coins,asset_id,max_quantity) values ('e2900000-0000-0000-0000-000000000007','bistro_cat_pudding','Bánh Pudding Mèo Caramel','FOOD',90,'food-cat-pudding',1000000);
+insert into public.bistro_foods(item_id,menu_order,tier,meal_type,hunger_gain,happiness_gain,xp_gain) values ('e2900000-0000-0000-0000-000000000007',7,'PREMIUM','food',45,35,40);
+insert into public.item_catalog(id,code,name,category,price_coins,asset_id,max_quantity) values ('e2900000-0000-0000-0000-000000000008','bistro_ramen_bowl','Mì Ramen Trứng Lòng Đào','FOOD',120,'food-ramen-bowl',1000000);
+insert into public.bistro_foods(item_id,menu_order,tier,meal_type,hunger_gain,happiness_gain,xp_gain) values ('e2900000-0000-0000-0000-000000000008',8,'PREMIUM','food',60,40,55);
+insert into public.item_catalog(id,code,name,category,price_coins,asset_id,max_quantity) values ('e2900000-0000-0000-0000-000000000009','bistro_salmon_sushi','Sushi Cá Hồi Thượng Hạng','FOOD',160,'food-salmon-sushi',1000000);
+insert into public.bistro_foods(item_id,menu_order,tier,meal_type,hunger_gain,happiness_gain,xp_gain) values ('e2900000-0000-0000-0000-000000000009',9,'PREMIUM','food',70,50,75);
+insert into public.item_catalog(id,code,name,category,price_coins,asset_id,max_quantity) values ('e2900000-0000-0000-0000-000000000010','bistro_berry_parfait','Sinh Tố Dâu Tây Kem Tươi','FOOD',200,'food-berry-parfait',1000000);
+insert into public.bistro_foods(item_id,menu_order,tier,meal_type,hunger_gain,happiness_gain,xp_gain) values ('e2900000-0000-0000-0000-000000000010',10,'PREMIUM','drink',45,65,90);
+insert into public.item_catalog(id,code,name,category,price_coins,asset_id,max_quantity) values ('e2900000-0000-0000-0000-000000000011','bistro_wagyu_steak','Bít Tết Wagyu Áp Chảo','FOOD',300,'food-wagyu-steak',1000000);
+insert into public.bistro_foods(item_id,menu_order,tier,meal_type,hunger_gain,happiness_gain,xp_gain) values ('e2900000-0000-0000-0000-000000000011',11,'ROYAL','food',90,80,140);
+insert into public.item_catalog(id,code,name,category,price_coins,asset_id,max_quantity) values ('e2900000-0000-0000-0000-000000000012','bistro_royal_hotpot','Lẩu Hoàng Gia Cầu Vồng','FOOD',500,'food-royal-hotpot',1000000);
+insert into public.bistro_foods(item_id,menu_order,tier,meal_type,hunger_gain,happiness_gain,xp_gain) values ('e2900000-0000-0000-0000-000000000012',12,'ROYAL','food',100,100,250);
+commit;

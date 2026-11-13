@@ -1,0 +1,37 @@
+begin;
+create function pg_temp.play_assert(value boolean,message text) returns void language plpgsql as $$
+begin if value is distinct from true then raise exception 'Play ASSERT: %',message; end if; end $$;
+insert into auth.users(id,email) values('fb100000-0000-0000-0000-000000000001','play@example.invalid');
+select set_config('request.jwt.claim.sub','fb100000-0000-0000-0000-000000000001',true);
+set local role authenticated;
+select pg_temp.play_assert(public.pet_state('play','fb200000-0000-0000-0000-000000000001')->'care_result'->>'code'='played','full hidden mood permits play');
+select public.pet_state('play','fb200000-0000-0000-0000-000000000001');
+select pg_temp.play_assert((select hunger=98 and hydration=97 and energy=95 and happiness=100 and xp=0 from public.pets),'three costs applied exactly once');
+select pg_temp.play_assert((select coins=0 from public.wallets),'no Coins cost or reward');
+select pg_temp.play_assert((select quantity=3 from public.pet_food_inventory),'no food item consumed');
+select public.pet_state('play','fb200000-0000-0000-0000-000000000002');
+select pg_temp.play_assert((select hunger=96 and hydration=94 and energy=90 from public.pets),'can play repeatedly at full hidden mood');
+reset role;
+update public.pets set hunger=2,hydration=3,energy=5 where user_id=auth.uid();
+set local role authenticated;
+select public.pet_state('play','fb200000-0000-0000-0000-000000000003');
+select pg_temp.play_assert((select hunger=0 and hydration=0 and energy=0 from public.pets),'exact costs reach zero');
+reset role;
+update public.pets set hunger=1,hydration=100,energy=100 where user_id=auth.uid();
+set local role authenticated;
+select pg_temp.play_assert(public.pet_state('play','fb200000-0000-0000-0000-000000000004')->'care_result'->>'code'='not_enough_hunger','hungry rejection');
+select pg_temp.play_assert((select hunger=1 and hydration=100 and energy=100 from public.pets),'hungry rejection no partial costs');
+reset role;
+update public.pets set hunger=100,hydration=2 where user_id=auth.uid();
+set local role authenticated;
+select pg_temp.play_assert(public.pet_state('play','fb200000-0000-0000-0000-000000000005')->'care_result'->>'code'='not_enough_water','water rejection');
+select pg_temp.play_assert((select hunger=100 and hydration=2 and energy=100 from public.pets),'water rejection no partial costs');
+reset role;
+update public.pets set hydration=100,energy=4 where user_id=auth.uid();
+set local role authenticated;
+select pg_temp.play_assert(public.pet_state('play','fb200000-0000-0000-0000-000000000006')->'care_result'->>'code'='not_enough_energy','energy rejection');
+select pg_temp.play_assert((select hunger=100 and hydration=100 and energy=4 from public.pets),'energy rejection no partial costs');
+reset role;
+select pg_temp.play_assert(not has_function_privilege('authenticated','pawquest_private.play_balance()','execute'),'private balance not callable');
+rollback;
+\echo PASS Play full-mood repeat, exact costs, request replay, insufficient needs atomicity and unchanged economy

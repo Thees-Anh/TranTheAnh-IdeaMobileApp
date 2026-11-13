@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home-screen widget palette; values-night/ follows the launcher's dark mode. -->
+<resources>
+    <color name="widget_surface_top">#FFFFFF</color>
+    <color name="widget_surface_bottom">#FDF2F8</color>
+    <color name="widget_outline">#F3D3E4</color>
+    <color name="widget_text">#4A2412</color>
+    <color name="widget_muted">#8C5A44</color>
+    <color name="widget_tile">#FFF5FA</color>
+    <color name="widget_tile_outline">#F6DCEA</color>
+    <color name="widget_track">#F4E4EC</color>
+    <color name="widget_food">#E8892F</color>
+    <color name="widget_water">#2C9CDB</color>
+    <color name="widget_streak">#E8590C</color>
+    <color name="widget_done">#2F9E6B</color>
+    <color name="widget_left">#9D174D</color>
+</resources>

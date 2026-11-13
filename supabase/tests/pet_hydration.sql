@@ -1,0 +1,35 @@
+begin;
+create function pg_temp.hydration_assert(value boolean,message text) returns void language plpgsql as $$
+begin if value is distinct from true then raise exception 'Hydration ASSERT: %',message; end if; end $$;
+insert into auth.users(id,email) values('f4100000-0000-0000-0000-000000000001','hydration@example.invalid');
+select set_config('request.jwt.claim.sub','f4100000-0000-0000-0000-000000000001',true);
+select pg_temp.hydration_assert((select hydration=100 from public.pets where user_id=auth.uid()),'new pets hydrated');
+select pg_temp.hydration_assert(public.pet_state('drink','f4200000-0000-0000-0000-000000000001')->'care_result'->>'code'='already_hydrated','full water rejected');
+update public.pets set hydration=10,hydration_updated_at=clock_timestamp()-interval '2 hours 30 minutes' where user_id=auth.uid();
+select public.pet_state();
+select pg_temp.hydration_assert((select hydration=4 from public.pets where user_id=auth.uid()),'server elapsed decay');
+select public.pet_state();
+select pg_temp.hydration_assert((select hydration=4 from public.pets where user_id=auth.uid()),'polling cannot accelerate decay');
+select public.pet_state('drink','f4200000-0000-0000-0000-000000000002');
+select public.pet_state('drink','f4200000-0000-0000-0000-000000000002');
+select pg_temp.hydration_assert((select hydration=24 and xp=0 from public.pets where user_id=auth.uid()),'repeated request applies once, no XP');
+select pg_temp.hydration_assert((select coins=0 from public.wallets where user_id=auth.uid()),'drink does not debit or credit Coins');
+select pg_temp.hydration_assert((select quantity=3 from public.pet_food_inventory where user_id=auth.uid()),'drink consumes no food');
+select pg_temp.hydration_assert(public.pet_state('drink','f4200000-0000-0000-0000-000000000001')->'care_result'->>'code'='already_hydrated','rejected request remains rejected');
+update public.pets set hydration=99 where user_id=auth.uid();
+select public.pet_state('drink','f4200000-0000-0000-0000-000000000003');
+select pg_temp.hydration_assert((select hydration=100 from public.pets where user_id=auth.uid()),'gain caps at 100');
+update public.pets set hydration=0,energy=0 where user_id=auth.uid();
+select public.pet_state('sleep','f4200000-0000-0000-0000-000000000004');
+select pg_temp.hydration_assert(public.pet_state('drink','f4200000-0000-0000-0000-000000000005')->'care_result'->>'code'='pet_sleeping','sleep blocks drink');
+select pg_temp.hydration_assert(not has_column_privilege('authenticated','public.pets','hydration','UPDATE'),'client cannot directly hydrate');
+select pg_temp.hydration_assert(not has_function_privilege('anon','public.pet_state(text,uuid)','EXECUTE'),'anonymous care prohibited');
+do $$begin
+    begin update public.pets set hydration=101 where user_id=auth.uid();raise exception 'Missing stat constraint';
+    exception when check_violation then null;end;
+    begin update public.pets set hydration_updated_at='infinity' where user_id=auth.uid();raise exception 'Missing finite constraint';
+    exception when check_violation then null;end;
+    begin perform public.pet_state('feed','f4200000-0000-0000-0000-000000000002');raise exception 'Missing replay identity guard';
+    exception when check_violation then null;end;
+end $$;
+rollback;

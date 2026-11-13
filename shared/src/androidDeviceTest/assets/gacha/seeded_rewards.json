@@ -1,0 +1,122 @@
+[
+  {
+    "itemId": "e2300000-0000-0000-0000-000000000003",
+    "assetId": "acc-sprout",
+    "name": "M\u1ea7m C\u00e2y & Hoa",
+    "rarity": "common"
+  },
+  {
+    "itemId": "e2300000-0000-0000-0000-000000000007",
+    "assetId": "acc-bowtie",
+    "name": "N\u01a1 Chu\u00f4ng V\u00e0ng",
+    "rarity": "common"
+  },
+  {
+    "itemId": "e2300000-0000-0000-0000-000000000008",
+    "assetId": "acc-scarf",
+    "name": "Kh\u0103n Len \u1ea4m",
+    "rarity": "common"
+  },
+  {
+    "itemId": "e2300000-0000-0000-0000-000000000017",
+    "assetId": "furn-plant",
+    "name": "Ch\u1eadu C\u00e2y C\u01b0\u1eddi",
+    "rarity": "common"
+  },
+  {
+    "itemId": "e2300000-0000-0000-0000-000000000014",
+    "assetId": "furn-bookshelf",
+    "name": "K\u1ec7 S\u00e1ch G\u1ed7",
+    "rarity": "common"
+  },
+  {
+    "itemId": "e2300000-0000-0000-0000-000000000013",
+    "assetId": "furn-lights",
+    "name": "\u0110\u00e8n LED Sao",
+    "rarity": "common"
+  },
+  {
+    "itemId": "e2300000-0000-0000-0000-000000000005",
+    "assetId": "acc-glasses",
+    "name": "K\u00ednh Ng\u00f4i Sao",
+    "rarity": "rare"
+  },
+  {
+    "itemId": "e2300000-0000-0000-0000-000000000010",
+    "assetId": "acc-backpack",
+    "name": "Balo & B\u00f3ng Bay",
+    "rarity": "rare"
+  },
+  {
+    "itemId": "e2300000-0000-0000-0000-000000000006",
+    "assetId": "acc-monocle",
+    "name": "K\u00ednh Qu\u00fd T\u1ed9c",
+    "rarity": "rare"
+  },
+  {
+    "itemId": "e2300000-0000-0000-0000-000000000012",
+    "assetId": "furn-clock",
+    "name": "\u0110\u1ed3ng H\u1ed3 M\u00e8o",
+    "rarity": "rare"
+  },
+  {
+    "itemId": "e2300000-0000-0000-0000-000000000018",
+    "assetId": "furn-tea-table",
+    "name": "B\u00e0n Tr\u00e0 & B\u00e1nh",
+    "rarity": "rare"
+  },
+  {
+    "itemId": "e2300000-0000-0000-0000-000000000020",
+    "assetId": "furn-lamp",
+    "name": "\u0110\u00e8n Hoa Linh Lan",
+    "rarity": "rare"
+  },
+  {
+    "itemId": "e2300000-0000-0000-0000-000000000002",
+    "assetId": "acc-wizard-hat",
+    "name": "M\u0169 Ph\u00f9 Th\u1ee7y",
+    "rarity": "epic"
+  },
+  {
+    "itemId": "e2300000-0000-0000-0000-000000000004",
+    "assetId": "acc-headphones",
+    "name": "Tai Nghe Pastel",
+    "rarity": "epic"
+  },
+  {
+    "itemId": "e2300000-0000-0000-0000-000000000015",
+    "assetId": "furn-cat-tree",
+    "name": "Tr\u1ee5 C\u00e0o M\u00f3ng",
+    "rarity": "epic"
+  },
+  {
+    "itemId": "e2300000-0000-0000-0000-000000000019",
+    "assetId": "furn-gramophone",
+    "name": "M\u00e1y \u0110\u0129a Than",
+    "rarity": "epic"
+  },
+  {
+    "itemId": "e2300000-0000-0000-0000-000000000011",
+    "assetId": "furn-window",
+    "name": "C\u1eeda S\u1ed5 C\u1ea7u V\u1ed3ng",
+    "rarity": "epic"
+  },
+  {
+    "itemId": "e2300000-0000-0000-0000-000000000001",
+    "assetId": "acc-crown",
+    "name": "V\u01b0\u01a1ng Mi\u1ec7n V\u00e0ng",
+    "rarity": "legendary"
+  },
+  {
+    "itemId": "e2300000-0000-0000-0000-000000000009",
+    "assetId": "acc-wings",
+    "name": "C\u00e1nh Thi\u00ean Th\u1ea7n",
+    "rarity": "legendary"
+  },
+  {
+    "itemId": "e2300000-0000-0000-0000-000000000016",
+    "assetId": "furn-bed",
+    "name": "\u0110\u1ec7m V\u01b0\u01a1ng Mi\u1ec7n",
+    "rarity": "legendary"
+  }
+]

@@ -1,0 +1,10 @@
+<resources>
+    <string name="widget_label">PawQuest · Little friend</string>
+    <string name="widget_description">Pet, food, water, daily streak and today\'s quests. Tap to open PawQuest.</string>
+    <string name="widget_sign_in">Sign in to see your pet</string>
+    <string name="widget_food_unknown">Food: —</string>
+    <string name="widget_water_unknown">Water: —</string>
+    <string name="widget_open_app">Tap to open the app</string>
+    <string name="widget_refresh">Refresh widget</string>
+    <string name="app_name" translatable="false">PawQuest</string>
+</resources>

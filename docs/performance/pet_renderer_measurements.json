@@ -1,0 +1,110 @@
+{
+  "date": "2026-11-11",
+  "scope": "Isolated packaged SVG/WebView fixture, debug test APK, SwiftShader; not presented FPS or full authenticated Pet Home",
+  "device": {
+    "android": "17",
+    "abi": "x86_64",
+    "model": "sdk_gphone64_x86_64",
+    "display": [
+      "activeMode={id=0, hwcId=0, resolution=1080x2400, vsyncRate=60.00 Hz, dpi=420.00x420.00, group=0, vrrConfig=N/A, hdrOutputType=SYSTEM}",
+      "{id=0, hwcId=0, resolution=1080x2400, vsyncRate=60.00 Hz, dpi=420.00x420.00, group=0, vrrConfig=N/A, hdrOutputType=SYSTEM}",
+      "mDisplayModePtr={id=0, hwcId=0, resolution=1080x2400, vsyncRate=60.00 Hz, dpi=420.00x420.00, group=0, vrrConfig=N/A, hdrOutputType=SYSTEM}",
+      "activeMode={id=0, hwcId=0, resolution=1080x2400, vsyncRate=60.00 Hz, dpi=420.00x420.00, group=0, vrrConfig=N/A, hdrOutputType=SYSTEM}",
+      "{id=0, hwcId=0, resolution=1080x2400, vsyncRate=60.00 Hz, dpi=420.00x420.00, group=0, vrrConfig=N/A, hdrOutputType=SYSTEM}",
+      "GLES: Google (Google Inc.), Android Emulator OpenGL ES Translator (Google SwiftShader), OpenGL ES 3.0 (OpenGL ES 3.0 SwiftShader 4.0.0.1)"
+    ]
+  },
+  "before": {
+    "idle30s": {
+      "raf_samples": 1413,
+      "raf_mean_ms": 21.283439490445947,
+      "raf_cadence_hz": 46.984887026784186,
+      "p50_ms": 16.700000000000728,
+      "p90_ms": 33.39999999999782,
+      "p95_ms": 33.400000000001455,
+      "p99_ms": 33.5,
+      "raf_over_25ms_pct": 26.610049539985845,
+      "app_cpu_pct": 80.42110838906177,
+      "main_cpu_ms": 1882.794807,
+      "app_pss_kb": 125199,
+      "gc_count": 1
+    },
+    "interaction30s": {
+      "raf_samples": 1202,
+      "raf_mean_ms": 24.988935108153196,
+      "raf_cadence_hz": 40.017711666061665,
+      "p50_ms": 16.700000000004366,
+      "p90_ms": 33.400000000001455,
+      "p95_ms": 33.5,
+      "p99_ms": 50,
+      "raf_over_25ms_pct": 44.84193011647255,
+      "app_cpu_pct": 105.52903739061257,
+      "main_cpu_ms": 1667.317934,
+      "app_pss_kb": 123696,
+      "gc_count": 1
+    },
+    "identical_20000_updates_ms": 148.857475
+  },
+  "after_sample_1": {
+    "idle30s": {
+      "raf_samples": 1434,
+      "raf_mean_ms": 20.975662482566396,
+      "raf_cadence_hz": 47.67429876558773,
+      "p50_ms": 16.700000000000728,
+      "p90_ms": 33.30000000000291,
+      "p95_ms": 33.399999999999636,
+      "p99_ms": 33.400000000001455,
+      "raf_over_25ms_pct": 24.75592747559275,
+      "app_cpu_pct": 84.51979641747637,
+      "main_cpu_ms": 1922.079487,
+      "app_pss_kb": 125384,
+      "gc_count": 1
+    },
+    "interaction30s": {
+      "raf_samples": 1184,
+      "raf_mean_ms": 25.473057432432512,
+      "raf_cadence_hz": 39.257164266696606,
+      "p50_ms": 16.799999999995634,
+      "p90_ms": 33.400000000001455,
+      "p95_ms": 49.900000000001455,
+      "p99_ms": 50.099999999998545,
+      "raf_over_25ms_pct": 46.79054054054054,
+      "app_cpu_pct": 108.23250140120669,
+      "main_cpu_ms": 1675.619048,
+      "app_pss_kb": 124142,
+      "gc_count": 1
+    },
+    "identical_20000_updates_ms": 59.101391
+  },
+  "after_sample_2": {
+    "idle30s": {
+      "raf_samples": 1412,
+      "raf_mean_ms": 21.29220963172799,
+      "raf_cadence_hz": 46.96553421632098,
+      "p50_ms": 16.700000000000728,
+      "p90_ms": 33.39999999999782,
+      "p95_ms": 33.400000000001455,
+      "p99_ms": 50,
+      "raf_over_25ms_pct": 25.35410764872521,
+      "app_cpu_pct": 83.75392756738879,
+      "main_cpu_ms": 2131.269109,
+      "app_pss_kb": 125056,
+      "gc_count": 1
+    },
+    "interaction30s": {
+      "raf_samples": 1189,
+      "raf_mean_ms": 25.234230445752573,
+      "raf_cadence_hz": 39.62870998383547,
+      "p50_ms": 16.700000000004366,
+      "p90_ms": 33.400000000001455,
+      "p95_ms": 50,
+      "p99_ms": 50.099999999998545,
+      "raf_over_25ms_pct": 44.827586206896555,
+      "app_cpu_pct": 105.9289192143354,
+      "main_cpu_ms": 1860.381414,
+      "app_pss_kb": 123650,
+      "gc_count": 1
+    },
+    "identical_20000_updates_ms": 41.383728
+  }
+}

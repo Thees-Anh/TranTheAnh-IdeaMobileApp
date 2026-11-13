@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MeowHabit - Chăm Mèo Rèn Thói Quen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Quicksand', sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: #fdf2f8;
+            color: #4a2511;
+        }
+
+        /* ==========================================
+           HỆ THỐNG KEYFRAME ANIMATION CHO CHÚ MÈO
+           ========================================== */
+        
+        /* Thiết lập tâm xoay (transform-origin) cho từng bộ phận SVG */
+        #cat-whole {
+            transform-origin: 210px 265px;
+            transition: transform 0.3s ease;
+        }
+        #cat-head-group {
+            transform-origin: 205px 190px;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        #cat-body-group {
+            transform-origin: 205px 255px;
+        }
+        #cat-tail {
+            transform-origin: 162px 252px;
+        }
+        #ear-left {
+            transform-origin: 168px 145px;
+        }
+        #ear-right {
+            transform-origin: 238px 138px;
+        }
+
+        /* 1. Trạng thái Đứng Yên (Idle) */
+        @keyframes idleHead {
+            0%, 100% { transform: rotate(-2deg) translateY(0px); }
+            50% { transform: rotate(2.5deg) translateY(3px); }
+        }
+        @keyframes idleBody {
+            0%, 100% { transform: scale(1, 1); }
+            50% { transform: scale(1.02, 0.98); }
+        }
+        @keyframes tailWagSlow {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(12deg); }
+        }
+        @keyframes earTwitch {
+            0%, 88%, 100% { transform: rotate(0deg); }
+            92% { transform: rotate(-8deg); }
+            96% { transform: rotate(4deg); }
+        }
+
+        .state-idle #cat-head-group {
+            animation: idleHead 3.2s ease-in-out infinite;
+        }
+        .state-idle #cat-body-group {
+            animation: idleBody 3.2s ease-in-out infinite;
+        }
+        .state-idle #cat-tail {
+            animation: tailWagSlow 2.6s ease-in-out infinite;
+        }
+        .state-idle #ear-left {
+            animation: earTwitch 5s ease-in-out infinite;
+        }
+
+        /* 2. Trạng thái Ăn (Eating) */
+        @keyframes eatHeadBob {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25%, 75% { transform: translateY(15px) rotate(-6deg); }
+            50% { transform: translateY(8px) rotate(-2deg); }
+        }
+        @keyframes eatChewMouth {
+            0%, 100% { transform: scale(0.85, 0.6); }
+            50% { transform: scale(1.15, 1.25); }
+        }
+        @keyframes tailWagFast {
+            0%, 100% { transform: rotate(-12deg); }
+            50% { transform: rotate(20deg); }
+        }
+        @keyframes crumbFloat {
+            0% { opacity: 1; transform: translate(0, 0) scale(1); }
+            100% { opacity: 0; transform: translate(-15px, -25px) scale(0.3); }
+        }
+
+        .state-eating #cat-head-group {
+            animation: eatHeadBob 0.9s ease-in-out infinite;
+        }
+        .state-eating #cat-tail {
+            animation: tailWagFast 0.45s ease-in-out infinite;
+        }
+        .state-eating #mouth-eating {
+            transform-origin: 205px 180px;
+            animation: eatChewMouth 0.25s ease-in-out infinite;
+        }
+        .state-eating .crumb-1 {
+            animation: crumbFloat 0.6s ease-out infinite;
+        }
+        .state-eating .crumb-2 {
+            animation: crumbFloat 0.6s ease-out 0.3s infinite;
+        }
+
+        /* 3. Trạng thái Uống (Drinking) */
+        @keyframes drinkSipHead {
+            0%, 100% { transform: translateY(10px) rotate(-8deg); }
+            50% { transform: translateY(14px) rotate(-11deg); }
+        }
+        @keyframes tongueLap {
+            0%, 100% { transform: translateY(0px) scaleY(0.6); }
+            50% { transform: translateY(6px) scaleY(1.3); }
+        }
+        @keyframes waterRipple {
+            0%, 100% { transform: scaleX(1); opacity: 0.7; }
+            50% { transform: scaleX(0.88); opacity: 1; }
+        }
+        @keyframes strawBubble {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            50% { opacity: 0.9; }
+            100% { transform: translateY(-18px) scale(1.2); opacity: 0; }
+        }
+
+        .state-drinking #cat-head-group {
+            animation: drinkSipHead 0.6s ease-in-out infinite;
+        }
+        .state-drinking #cat-tail {
+            animation: tailWagSlow 1.4s ease-in-out infinite;
+        }
+        .state-drinking #drink-tongue {
+            transform-origin: 204px 180px;
+            animation: tongueLap 0.3s ease-in-out infinite;
+        }
+        .state-drinking #water-surface {
+            transform-origin: 185px 282px;
+            animation: waterRipple 0.4s ease-in-out infinite;
+        }
+        .state-drinking .bubble-anim {
+            animation: strawBubble 0.8s ease-in infinite;
+        }
+
+        /* 4. Trạng thái Ngủ (Sleeping) */
+        @keyframes sleepBreatheBody {
+            0%, 100% { transform: scale(1.03, 0.94) translateY(6px); }
+            50% { transform: scale(1.08, 0.90) translateY(9px); }
+        }
+        @keyframes sleepHeadNod {
+            0%, 100% { transform: translateY(16px) rotate(-14deg); }
+            50% { transform: translateY(20px) rotate(-17deg); }
+        }
+        @keyframes sleepBubbleScale {
+            0%, 100% { transform: scale(0.55); opacity: 0.75; }
+            50% { transform: scale(1.25); opacity: 0.95; }
+        }
+        @keyframes zzzFloat {
+            0% { opacity: 0; transform: translate(0, 10px) scale(0.5) rotate(-10deg); }
+            40% { opacity: 1; }
+            100% { opacity: 0; transform: translate(30px, -45px) scale(1.2) rotate(12deg); }
+        }
+
+        .state-sleeping #cat-body-group {
+            animation: sleepBreatheBody 3.6s ease-in-out infinite;
+        }
+        .state-sleeping #cat-head-group {
+            animation: sleepHeadNod 3.6s ease-in-out infinite;
+        }
+        .state-sleeping #cat-tail {
+            transform: rotate(-18deg);
+            transition: transform 0.6s ease;
+        }
+        .state-sleeping #sleep-snot-bubble {
+            transform-origin: 218px 178px;
+            animation: sleepBubbleScale 3.6s ease-in-out infinite;
+        }
+        .state-sleeping .zzz-1 { animation: zzzFloat 3s ease-out infinite; }
+        .state-sleeping .zzz-2 { animation: zzzFloat 3s ease-out 1s infinite; }
+        .state-sleeping .zzz-3 { animation: zzzFloat 3s ease-out 2s infinite; }
+
+        /* 5. Trạng thái Cười / Vui Vẻ (Laughing / Happy) */
+        @keyframes happyBounceWhole {
+            0%, 100% { transform: translateY(0px) scale(1, 1); }
+            30% { transform: translateY(-16px) scale(0.96, 1.05); }
+            60% { transform: translateY(0px) scale(1.05, 0.95); }
+        }
+        @keyframes happyHeadWiggle {
+            0%, 100% { transform: rotate(-7deg); }
+            50% { transform: rotate(7deg); }
+        }
+        @keyframes heartPopFloat {
+            0% { opacity: 0; transform: translateY(10px) scale(0.4); }
+            40% { opacity: 1; transform: translateY(-10px) scale(1.1); }
+            100% { opacity: 0; transform: translateY(-38px) scale(0.8); }
+        }
+
+        .state-laughing #cat-whole {
+            animation: happyBounceWhole 0.65s ease-in-out infinite;
+        }
+        .state-laughing #cat-head-group {
+            animation: happyHeadWiggle 0.45s ease-in-out infinite;
+        }
+        .state-laughing #cat-tail {
+            animation: tailWagFast 0.3s ease-in-out infinite;
+        }
+        .state-laughing .happy-heart-1 { animation: heartPopFloat 1.2s ease-out infinite; }
+        .state-laughing .happy-heart-2 { animation: heartPopFloat 1.2s ease-out 0.4s infinite; }
+        .state-laughing .happy-heart-3 { animation: heartPopFloat 1.2s ease-out 0.8s infinite; }
+
+        /* Chớp mắt tự nhiên ở trạng thái đứng yên, ăn, uống */
+        @keyframes naturalBlink {
+            0%, 94%, 100% { transform: scaleY(1); }
+            97% { transform: scaleY(0.08); }
+        }
+        .eye-open-group {
+            transform-origin: 205px 168px;
+            animation: naturalBlink 4.2s infinite;
+        }
+
+        /* Ẩn/Hiện chi tiết theo từng trạng thái */
+        .prop-item, .face-variant, .fx-group {
+            display: none;
+        }
+        .state-idle .face-normal { display: block; }
+        .state-eating .face-eating, .state-eating .prop-food { display: block; }
+        .state-drinking .face-drinking, .state-drinking .prop-drink { display: block; }
+        .state-sleeping .face-sleeping, .state-sleeping .fx-sleeping { display: block; }
+        .state-laughing .face-laughing, .state-laughing .fx-laughing { display: block; }
+
+        /* Hiệu ứng nút bấm kiểu game */
+        .kawaii-btn {
+            border: 3px solid #592512;
+            box-shadow: 0 4px 0 #592512;
+            transition: all 0.12s ease;
+        }
+        .kawaii-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #592512;
+        }
+        .kawaii-btn:active:not(:disabled), .kawaii-btn.active-anim {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #592512;
+        }
+        .kawaii-card {
+            border: 3px solid #592512;
+            box-shadow: 0 6px 0 rgba(89, 37, 18, 0.15);
+        }
+
+        /* Thanh cuộn dễ thương */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #fce7f3; border-radius: 8px; }
+        ::-webkit-scrollbar-thumb { background: #f472b6; border-radius: 8px; }
+    </style>
+</head>
+<body class="min-h-screen p-3 md:p-6 flex flex-col items-center justify-center">
+
+    <!-- Header / Thanh Trạng Thái Chung -->
+    <header class="w-full max-w-6xl mb-4 flex flex-wrap items-center justify-between gap-3 bg-white px-5 py-3 rounded-3xl kawaii-card">
+        <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-pink-100 border-2 border-[#592512] flex items-center justify-center text-2xl shadow-inner">
+                🐾
+            </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-extrabold text-[#592512] tracking-tight leading-none">
+                    MeowHabit <span class="text-xs font-bold bg-pink-200 text-[#592512] px-2.5 py-0.5 rounded-full ml-1 align-middle">Talking Cat Studio</span>
+                </h1>
+                <p class="text-xs text-[#8c5233] font-semibold mt-0.5">Hoàn thành nhiệm vụ mỗi ngày • Nhận xu • Chăm mèo mập</p>
+            </div>
+        </div>
+
+        <!-- Túi Xu & Cấp Độ -->
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 bg-amber-100 border-2 border-[#592512] px-4 py-1.5 rounded-2xl">
+                <span class="text-xl">🪙</span>
+                <div>
+                    <div class="text-[10px] font-bold uppercase text-amber-900 leading-none">Xu Thưởng</div>
+                    <div id="coin-balance" class="text-lg font-extrabold text-[#592512] leading-tight">120</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 bg-purple-100 border-2 border-[#592512] px-4 py-1.5 rounded-2xl">
+                <span class="text-xl">⭐</span>
+                <div>
+                    <div class="text-[10px] font-bold uppercase text-purple-900 leading-none">Cấp Độ Mèo</div>
+                    <div id="cat-level" class="text-lg font-extrabold text-[#592512] leading-tight">Lv. 3 (40/100 XP)</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Khu vực chính: Trái (Sân khấu Mèo & Điều khiển Animation) - Phải (Nhiệm vụ & Cửa hàng) -->
+    <main class="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+        <!-- CỘT TRÁI: CĂN PHÒNG CỦA MÈO & BẢNG TEST ANIMATION (7 cột) -->
+        <section class="lg:col-span-7 flex flex-col gap-4">
+            
+            <!-- Khung Căn Phòng Mèo (Tái hiện đúng hình mẫu: Tường hồng trái tim + Thảm tím kẻ caro bèo hồng) -->
+            <div class="relative w-full bg-white rounded-3xl kawaii-card overflow-hidden flex flex-col">
+                
+                <!-- Thanh Chỉ Số Sinh Tồn Của Mèo (Overlay phía trên phòng) -->
+                <div class="absolute top-3 left-3 right-3 z-10 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+                    <div class="flex flex-wrap gap-2 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-2xl border-2 border-[#592512] shadow-sm">
+                        <!-- Độ no -->
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-sm" title="Độ no">🐟</span>
+                            <div class="w-16 h-3 bg-orange-100 rounded-full border border-[#592512] overflow-hidden">
+                                <div id="bar-hunger" class="h-full bg-orange-400 transition-all duration-500" style="width: 75%"></div>
+                            </div>
+                        </div>
+                        <!-- Độ khát -->
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-sm" title="Độ khát">🥛</span>
+                            <div class="w-16 h-3 bg-sky-100 rounded-full border border-[#592512] overflow-hidden">
+                                <div id="bar-thirst" class="h-full bg-sky-400 transition-all duration-500" style="width: 70%"></div>
+                            </div>
+                        </div>
+                        <!-- Năng lượng -->
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-sm" title="Năng lượng">💤</span>
+                            <div class="w-16 h-3 bg-indigo-100 rounded-full border border-[#592512] overflow-hidden">
+                                <div id="bar-energy" class="h-full bg-indigo-400 transition-all duration-500" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <!-- Hạnh phúc -->
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-sm" title="Vui vẻ">💖</span>
+                            <div class="w-16 h-3 bg-pink-100 rounded-full border border-[#592512] overflow-hidden">
+                                <div id="bar-happy" class="h-full bg-pink-400 transition-all duration-500" style="width: 90%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Badge Trạng Thái Hiện Tại -->
+                    <div id="state-badge" class="bg-[#592512] text-amber-100 text-xs font-bold px-3 py-1.5 rounded-full shadow">
+                        ✨ Đang đứng yên
+                    </div>
+                </div>
+
+                <!-- Bong bóng lời thoại của mèo -->
+                <div id="speech-bubble" class="absolute top-16 left-1/2 -translate-x-1/2 z-10 bg-white border-2 border-[#592512] px-4 py-1.5 rounded-2xl text-xs md:text-sm font-bold text-[#592512] shadow-md transition-all duration-300">
+                    Meow~ Hoàn thành nhiệm vụ để thưởng cho mình nhé! 💕
+                </div>
+
+                <!-- SÂN KHẤU SVG CHÍNH (400x340) -->
+                <div class="w-full aspect-[400/330] relative select-none cursor-pointer" onclick="petTheCat()" title="Nhấn vào mèo để xoa đầu!">
+                    <svg id="cat-stage-svg" viewBox="0 0 400 330" class="w-full h-full block state-idle" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <!-- Họa tiết tường sọc hồng & trái tim chìm giống ảnh gốc -->
+                            <pattern id="wallPattern" width="80" height="80" patternUnits="userSpaceOnUse">
+                                <rect width="80" height="80" fill="#ffd6e7"/>
+                                <path d="M 15 0 L 35 80 M 65 0 L 45 80" stroke="#ffc2dc" stroke-width="14" stroke-linecap="round"/>
+                                <path d="M 40 30 C 40 24, 30 20, 26 27 C 22 20, 12 24, 12 30 C 12 39, 26 46, 26 52 C 26 46, 40 39, 40 30 Z" fill="#ffc4de" opacity="0.7" transform="translate(14, 10) scale(0.95)"/>
+                            </pattern>
+
+                            <!-- Họa tiết kẻ caro trên tấm thảm tím -->
+                            <pattern id="rugPlaid" width="46" height="32" patternUnits="userSpaceOnUse">
+                                <rect width="46" height="32" fill="#b79ced"/>
+                                <line x1="0" y1="16" x2="46" y2="16" stroke="#a685e2" stroke-width="3.5"/>
+                                <line x1="23" y1="0" x2="23" y2="32" stroke="#a685e2" stroke-width="3.5"/>
+                                <circle cx="11" cy="8" r="2.2" fill="#cbb2f7"/>
+                                <circle cx="35" cy="24" r="1.8" fill="#cbb2f7"/>
+                            </pattern>
+
+                            <!-- ClipPath cho khuôn mặt mèo để mảng lông cam bám sát viền đầu -->
+                            <clipPath id="headClip">
+                                <path d="M 150 202 C 141 180, 152 145, 198 143 C 242 141, 265 170, 255 198 C 247 218, 224 222, 202 222 C 178 222, 157 216, 150 202 Z" />
+                            </clipPath>
+
+                            <!-- ClipPath cho thân mèo để mảng lông cam sau lưng bám sát viền thân -->
+                            <clipPath id="bodyClip">
+                                <path d="M 176 212 C 160 225, 154 248, 162 263 C 172 272, 232 271, 240 262 C 246 247, 241 220, 231 208 Z" />
+                            </clipPath>
+                        </defs>
+
+                        <!-- ================= 1. NỀN PHÒNG & ĐỒ TRANG TRÍ PHÒNG ================= -->
+                        <!-- Tường hồng pastel -->
+                        <rect x="0" y="0" width="400" height="205" fill="url(#wallPattern)" />
+
+                        <!-- Đồ trang trí phòng 1: Dây đèn ngôi sao lung linh (Mặc định ẩn, mở khóa trong shop) -->
+                        <g id="room-decor-lights" class="hidden">
+                            <path d="M 0 18 Q 100 55 200 22 Q 300 55 400 16" fill="none" stroke="#8c5233" stroke-width="2"/>
+                            <circle cx="50" cy="34" r="6" fill="#fde047" stroke="#592512" stroke-width="1.8"/>
+                            <circle cx="110" cy="40" r="6" fill="#f9a8d4" stroke="#592512" stroke-width="1.8"/>
+                            <circle cx="170" cy="29" r="6" fill="#93c5fd" stroke="#592512" stroke-width="1.8"/>
+                            <circle cx="240" cy="35" r="6" fill="#fde047" stroke="#592512" stroke-width="1.8"/>
+                            <circle cx="305" cy="40" r="6" fill="#c4b5fd" stroke="#592512" stroke-width="1.8"/>
+                            <circle cx="360" cy="27" r="6" fill="#f9a8d4" stroke="#592512" stroke-width="1.8"/>
+                        </g>
+
+                        <!-- Đồ trang trí phòng 2: Chậu cây Monstera đáng yêu góc trái -->
+                        <g id="room-decor-plant" class="hidden" transform="translate(22, 108)">
+                            <!-- Chậu sứ hồng -->
+                            <path d="M 12 52 L 38 52 L 34 78 L 16 78 Z" fill="#f472b6" stroke="#592512" stroke-width="2.5" stroke-linejoin="round"/>
+                            <rect x="9" y="46" width="32" height="8" rx="4" fill="#fbcfe8" stroke="#592512" stroke-width="2.5"/>
+                            <!-- Lá cây -->
+                            <path d="M 25 46 Q 5 30 8 15 Q 24 18 25 46 Z" fill="#4ade80" stroke="#592512" stroke-width="2.5"/>
+                            <path d="M 25 46 Q 45 26 42 10 Q 25 16 25 46 Z" fill="#22c55e" stroke="#592512" stroke-width="2.5"/>
+                            <path d="M 25 46 Q 25 18 25 4" fill="none" stroke="#592512" stroke-width="2.5" stroke-linecap="round"/>
+                        </g>
+
+                        <!-- Đồ trang trí phòng 3: Tranh treo tường hình cá vàng góc phải -->
+                        <g id="room-decor-frame" class="hidden" transform="translate(318, 62)">
+                            <line x1="25" y1="-10" x2="10" y2="5" stroke="#592512" stroke-width="2"/>
+                            <line x1="25" y1="-10" x2="40" y2="5" stroke="#592512" stroke-width="2"/>
+                            <rect x="2" y="4" width="46" height="36" rx="6" fill="#fffbeb" stroke="#592512" stroke-width="2.5"/>
+                            <ellipse cx="23" cy="22" rx="10" ry="6" fill="#fb923c" stroke="#592512" stroke-width="2"/>
+                            <polygon points="32,22 39,16 39,28" fill="#fb923c" stroke="#592512" stroke-width="2" stroke-linejoin="round"/>
+                        </g>
+
+                        <!-- Viền ren trắng có trái tim nhỏ phía sau thảm -->
+                        <path d="M -10 182 Q 10 162 30 182 Q 50 162 70 182 Q 90 162 110 182 Q 130 162 150 182 Q 170 162 190 182 Q 210 162 230 182 Q 250 162 270 182 Q 290 162 310 182 Q 330 162 350 182 Q 370 162 390 182 Q 410 162 430 182 L 430 210 L -10 210 Z" fill="#ffffff" />
+                        <!-- Các chấm trái tim cam nhạt trên viền ren trắng -->
+                        <g fill="#f9a8d4">
+                            <circle cx="10" cy="176" r="3"/><circle cx="50" cy="176" r="3"/><circle cx="90" cy="176" r="3"/>
+                            <circle cx="130" cy="176" r="3"/><circle cx="170" cy="176" r="3"/><circle cx="210" cy="176" r="3"/>
+                            <circle cx="250" cy="176" r="3"/><circle cx="290" cy="176" r="3"/><circle cx="330" cy="176" r="3"/><circle cx="370" cy="176" r="3"/>
+                        </g>
+
+                        <!-- Viền bèo nhún màu hồng phía trên thảm -->
+                        <path d="M -10 194 Q 8 176 26 194 Q 44 176 62 194 Q 80 176 98 194 Q 116 176 134 194 Q 152 176 170 194 Q 188 176 206 194 Q 224 176 242 194 Q 260 176 278 194 Q 296 176 314 194 Q 332 176 350 194 Q 368 176 386 194 Q 404 176 422 194 L 422 220 L -10 220 Z" fill="#f5b8e2" stroke="#e598ce" stroke-width="2" />
+
+                        <!-- Mặt thảm tím kẻ caro chính -->
+                        <rect x="-10" y="196" width="420" height="96" rx="18" fill="url(#rugPlaid)" stroke="#9b7ede" stroke-width="3"/>
+                        <!-- Đường chỉ khâu nét đứt màu trắng sát mép dưới thảm tím -->
+                        <line x1="6" y1="281" x2="394" y2="281" stroke="#efe8ff" stroke-width="2.5" stroke-dasharray="6,6" stroke-linecap="round"/>
+
+                        <!-- Viền bèo nhún màu hồng phía dưới thảm -->
+                        <path d="M -10 290 L 410 290 L 410 312 Q 392 328 374 312 Q 356 328 338 312 Q 320 328 302 312 Q 284 328 266 312 Q 248 328 230 312 Q 212 328 194 312 Q 176 328 158 312 Q 140 328 122 312 Q 104 328 86 312 Q 68 328 50 312 Q 32 328 14 312 Q -4 328 -10 312 Z" fill="#f5b8e2" stroke="#e598ce" stroke-width="2.5" />
+
+                        <!-- Bóng đổ màu tím đậm dưới chân mèo -->
+                        <ellipse id="cat-shadow" cx="204" cy="264" rx="58" ry="13" fill="#8265bf" opacity="0.55" />
+
+                        <!-- ================= 2. NHÂN VẬT CHÚ MÈO (CHUBBY KAWAII CAT) ================= -->
+                        <g id="cat-whole">
+
+                            <!-- A. CÁI ĐUÔI (Vẫy phía bên trái, có bốt trắng ở chóp và đốm cam) -->
+                            <g id="cat-tail">
+                                <!-- Phần nền đuôi trắng -->
+                                <path d="M 164 252 C 142 246, 128 238, 114 246 C 100 254, 91 268, 76 266 C 67 265, 68 253, 81 249 C 96 244, 108 232, 126 234 C 142 236, 154 242, 165 244 Z" fill="#ffffff" />
+                                <!-- Các khúc màu cam trên đuôi -->
+                                <path d="M 164 252 C 150 248, 140 243, 132 243 L 135 235 C 146 236, 155 241, 165 244 Z" fill="#fdb874" />
+                                <path d="M 118 244 C 110 248, 103 255, 96 260 L 90 246 C 98 242, 106 236, 116 235 Z" fill="#fdb874" />
+                                <!-- Đường viền nâu của đuôi -->
+                                <path d="M 164 252 C 142 246, 128 238, 114 246 C 100 254, 91 268, 76 266 C 67 265, 68 253, 81 249 C 96 244, 108 232, 126 234 C 142 236, 154 242, 165 244" fill="none" stroke="#592512" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+                            </g>
+
+                            <!-- B. PHẦN THÂN MÈO (Ngồi nghiêng mập mạp, lưng trái màu cam, ngực phải trắng) -->
+                            <g id="cat-body-group">
+                                <!-- Khối thân trắng cơ bản -->
+                                <path d="M 176 212 C 160 225, 154 248, 162 263 C 172 272, 232 271, 240 262 C 246 247, 241 220, 231 208 Z" fill="#ffffff" />
+
+                                <!-- Các mảng lông cam trên lưng trái và chân phải (dùng clipPath) -->
+                                <g clip-path="url(#bodyClip)">
+                                    <!-- Mảng cam lớn bên lưng trái -->
+                                    <path d="M 150 210 Q 192 222 183 252 Q 170 260 150 256 Z" fill="#fdb874" />
+                                    <!-- Đốm cam nhỏ gần chân trước -->
+                                    <ellipse cx="192" cy="262" rx="10" ry="6" fill="#fdb874" transform="rotate(-10 192 262)" />
+                                    <!-- Đốm cam bên hông phải -->
+                                    <ellipse cx="238" cy="246" rx="11" ry="13" fill="#fdb874" />
+                                    <!-- Bóng đổ nhẹ dưới cổ mèo -->
+                                    <ellipse cx="205" cy="218" rx="34" ry="10" fill="#e9decb" opacity="0.65" />
+                                </g>
+
+                                <!-- Viền ngoài của thân -->
+                                <path d="M 176 212 C 160 225, 154 248, 162 263 C 172 270, 192 269, 200 266" fill="none" stroke="#592512" stroke-width="3.6" stroke-linecap="round" />
+                                <path d="M 231 208 C 241 220, 246 247, 239 262" fill="none" stroke="#592512" stroke-width="3.6" stroke-linecap="round" />
+
+                                <!-- Hai chân trước mũm mĩm chụm vào nhau đúng theo mẫu -->
+                                <!-- Chân trước bên trái -->
+                                <path d="M 202 242 C 208 250, 214 259, 211 266 C 207 270, 194 270, 190 265" fill="#ffffff" stroke="#592512" stroke-width="3.4" stroke-linecap="round" />
+                                <line x1="201" y1="268" x2="200" y2="264" stroke="#592512" stroke-width="2.5" stroke-linecap="round"/>
+                                <line x1="206" y1="268" x2="205" y2="264" stroke="#592512" stroke-width="2.5" stroke-linecap="round"/>
+
+                                <!-- Chân trước bên phải -->
+                                <path d="M 225 236 C 223 248, 223 260, 227 266 C 231 270, 239 267, 240 260" fill="none" stroke="#592512" stroke-width="3.4" stroke-linecap="round" />
+                                <line x1="231" y1="267" x2="231" y2="263" stroke="#592512" stroke-width="2.5" stroke-linecap="round"/>
+                                <line x1="236" y1="266" x2="236" y2="262" stroke="#592512" stroke-width="2.5" stroke-linecap="round"/>
+
+                                <!-- Phụ kiện Cổ: Vòng cổ chuông vàng (Mặc định ẩn, bật qua shop) -->
+                                <g id="acc-collar" class="hidden">
+                                    <path d="M 173 216 Q 205 229 234 213" fill="none" stroke="#ef4444" stroke-width="6" stroke-linecap="round"/>
+                                    <path d="M 173 216 Q 205 229 234 213" fill="none" stroke="#592512" stroke-width="6.5" stroke-linecap="round" opacity="0.25"/>
+                                    <circle cx="206" cy="224" r="6.5" fill="#facc15" stroke="#592512" stroke-width="2.5"/>
+                                    <line x1="203" y1="225" x2="209" y2="225" stroke="#592512" stroke-width="2"/>
+                                </g>
+                            </g>
+
+                            <!-- C. PHẦN ĐẦU MÈO (Bầu bĩnh, tai trái cam, tai phải trắng viền cam, má hồng gạch chéo) -->
+                            <g id="cat-head-group">
+                                
+                                <!-- Tai Trái (Màu cam, lòng tai hồng cam) -->
+                                <g id="ear-left">
+                                    <path d="M 156 174 C 145 152, 144 126, 153 122 C 162 119, 182 132, 192 146 Z" fill="#fdb874" stroke="#592512" stroke-width="3.6" stroke-linejoin="round" />
+                                    <path d="M 159 164 C 153 149, 152 134, 157 131 C 162 129, 174 138, 180 147 Z" fill="#f4976c" />
+                                </g>
+
+                                <!-- Tai Phải (Viền trắng + chóp cam nhẹ bên phải, lòng tai hồng cam) -->
+                                <g id="ear-right">
+                                    <path d="M 215 144 C 225 126, 240 115, 248 119 C 255 123, 255 147, 249 166 Z" fill="#ffffff" stroke="#592512" stroke-width="3.6" stroke-linejoin="round" />
+                                    <path d="M 224 143 C 231 131, 240 125, 244 128 C 248 131, 248 145, 244 157 Z" fill="#f4976c" />
+                                </g>
+
+                                <!-- Khuôn mặt bánh bao trắng -->
+                                <path d="M 150 202 C 141 180, 152 145, 198 143 C 242 141, 265 170, 255 198 C 247 218, 224 222, 202 222 C 178 222, 157 216, 150 202 Z" fill="#ffffff" />
+
+                                <!-- Mảng lông màu cam trên trán trái và má phải (bám khít hình mẫu) -->
+                                <g clip-path="url(#headClip)">
+                                    <!-- Mảng cam lớn phủ từ tai trái qua mắt trái -->
+                                    <path d="M 135 135 L 201 135 C 203 158, 196 177, 175 186 C 158 193, 145 190, 135 186 Z" fill="#fdb874" />
+                                    <!-- Mảng cam nhỏ bên rìa má phải -->
+                                    <path d="M 244 152 C 236 164, 240 179, 262 184 L 265 150 Z" fill="#fdb874" />
+                                    <!-- Bóng đổ мяг dưới cằm làm mặt phúng phính -->
+                                    <path d="M 156 205 Q 204 224 252 200 L 255 225 L 150 225 Z" fill="#f3ead8" opacity="0.6" />
+                                </g>
+
+                                <!-- Viền nâu khuôn mặt (hở nhẹ ở đỉnh tai để nối liền mạch như tranh vẽ) -->
+                                <path d="M 188 144 C 194 143, 208 142, 218 144" fill="none" stroke="#592512" stroke-width="3.6" stroke-linecap="round" />
+                                <path d="M 155 170 C 144 185, 149 207, 168 215 C 186 223, 224 222, 242 212 C 258 202, 260 180, 249 163" fill="none" stroke="#592512" stroke-width="3.6" stroke-linecap="round" />
+
+                                <!-- Đôi má hồng phúng phính có 2 gạch chéo đặc trưng -->
+                                <g id="blush-cheeks">
+                                    <!-- Má hồng trái -->
+                                    <ellipse cx="171" cy="181" rx="9.5" ry="5.2" fill="#ff8da1" transform="rotate(-8 171 181)" />
+                                    <line x1="168" y1="179" x2="166" y2="183" stroke="#d9385a" stroke-width="1.6" stroke-linecap="round" />
+                                    <line x1="173" y1="179" x2="171" y2="183" stroke="#d9385a" stroke-width="1.6" stroke-linecap="round" />
+
+                                    <!-- Má hồng phải -->
+                                    <ellipse cx="238" cy="175" rx="9.5" ry="5.2" fill="#ff8da1" transform="rotate(-6 238 175)" />
+                                    <line x1="235" y1="173" x2="233" y2="177" stroke="#d9385a" stroke-width="1.6" stroke-linecap="round" />
+                                    <line x1="240" y1="173" x2="238" y2="177" stroke="#d9385a" stroke-width="1.6" stroke-linecap="round" />
+                                </g>
+
+                                <!-- Ria mép 2 bên (Mỗi bên 2 sợi ngắn mập đúng mẫu) -->
+                                <g stroke="#592512" stroke-width="3.6" stroke-linecap="round">
+                                    <!-- Ria trái -->
+                                    <line x1="142" y1="184" x2="155" y2="183" />
+                                    <line x1="143" y1="192" x2="156" y2="189" />
+                                    <!-- Ria phải -->
+                                    <line x1="249" y1="170" x2="262" y2="167" />
+                                    <line x1="251" y1="177" x2="264" y2="175" />
+                                </g>
+
+                                <!-- ================= BIỂU CẢM KHUÔN MẶT THEO 5 TRẠNG THÁI ================= -->
+
+                                <!-- 1. MẶT BÌNH THƯỜNG / ĐỨNG YÊN (Mắt tròn đen láy + miệng :3) -->
+                                <g class="face-variant face-normal">
+                                    <g class="eye-open-group">
+                                        <!-- Mắt trái -->
+                                        <ellipse cx="183" cy="172" rx="6.8" ry="6.2" fill="#471d0c" transform="rotate(-6 183 172)" />
+                                        <circle cx="181" cy="170" r="2.2" fill="#ffffff" />
+                                        <!-- Mắt phải -->
+                                        <ellipse cx="224" cy="168" rx="6.8" ry="6.2" fill="#471d0c" transform="rotate(-6 224 168)" />
+                                        <circle cx="222" cy="166" r="2.2" fill="#ffffff" />
+                                    </g>
+                                    <!-- Mũi nhỏ & miệng :3 -->
+                                    <ellipse cx="204" cy="170" rx="2.5" ry="1.8" fill="#592512" />
+                                    <path d="M 196 175 Q 200 179 204 174 Q 208 179 212 174" fill="none" stroke="#592512" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+                                </g>
+
+                                <!-- 2. MẶT ĐANG ĂN (Mắt híp vui sướng + Miệng nhai مăm măm) -->
+                                <g class="face-variant face-eating">
+                                    <!-- Mắt híp ^ ^ -->
+                                    <path d="M 176 173 Q 183 164 190 172" fill="none" stroke="#592512" stroke-width="3.2" stroke-linecap="round" />
+                                    <path d="M 217 169 Q 224 160 231 168" fill="none" stroke="#592512" stroke-width="3.2" stroke-linecap="round" />
+                                    <ellipse cx="204" cy="170" rx="2.5" ry="1.8" fill="#592512" />
+                                    <!-- Miệng nhai há mở co giãn -->
+                                    <g id="mouth-eating">
+                                        <path d="M 196 175 Q 204 173 212 175 Q 214 189 204 189 Q 194 189 196 175 Z" fill="#e15b64" stroke="#592512" stroke-width="2.5" stroke-linejoin="round" />
+                                        <path d="M 199 184 Q 204 180 209 184 Q 204 189 199 184 Z" fill="#ff9ebb" />
+                                    </g>
+                                    <!-- Vụn thức ăn bắn ra -->
+                                    <circle class="crumb-1" cx="190" cy="184" r="2.5" fill="#f59e0b" />
+                                    <circle class="crumb-2" cx="218" cy="182" r="2" fill="#f59e0b" />
+                                </g>
+
+                                <!-- 3. MẶT ĐANG UỐNG (Mắt long lanh + Lưỡi hồng liếm sữa/hút ống) -->
+                                <g class="face-variant face-drinking">
+                                    <g class="eye-open-group">
+                                        <ellipse cx="183" cy="173" rx="6.5" ry="6" fill="#471d0c" />
+                                        <circle cx="181" cy="171" r="2.2" fill="#ffffff" />
+                                        <ellipse cx="224" cy="169" rx="6.5" ry="6" fill="#471d0c" />
+                                        <circle cx="222" cy="167" r="2.2" fill="#ffffff" />
+                                    </g>
+                                    <ellipse cx="204" cy="171" rx="2.5" ry="1.8" fill="#592512" />
+                                    <!-- Lưỡi hồng thè nhẹ uống nước -->
+                                    <path id="drink-tongue" d="M 200 176 Q 204 186 208 176 Z" fill="#ff758f" stroke="#592512" stroke-width="2.2" stroke-linejoin="round" />
+                                    <path d="M 196 175 Q 200 179 204 174 Q 208 179 212 174" fill="none" stroke="#592512" stroke-width="2.6" stroke-linecap="round" />
+                                </g>
+
+                                <!-- 4. MẶT ĐANG NGỦ (Mắt nhắm bình yên + Bong bóng mũi phập phồng) -->
+                                <g class="face-variant face-sleeping">
+                                    <!-- Mắt nhắm cong xuống -->
+                                    <path d="M 176 172 Q 183 178 190 171" fill="none" stroke="#592512" stroke-width="3" stroke-linecap="round" />
+                                    <path d="M 217 168 Q 224 174 231 167" fill="none" stroke="#592512" stroke-width="3" stroke-linecap="round" />
+                                    <ellipse cx="204" cy="171" rx="2.3" ry="1.6" fill="#592512" />
+                                    <!-- Miệng nhỏ thở đều -->
+                                    <circle cx="204" cy="177" r="2.5" fill="#ff9ebb" stroke="#592512" stroke-width="2" />
+                                    <!-- Bong bóng ngủ ở mũi -->
+                                    <g id="sleep-snot-bubble">
+                                        <circle cx="218" cy="175" r="9" fill="#bae6fd" fill-opacity="0.75" stroke="#0284c7" stroke-width="2" />
+                                        <circle cx="215" cy="172" r="2.5" fill="#ffffff" />
+                                    </g>
+                                </g>
+
+                                <!-- 5. MẶT ĐANG CƯỜI / HẠNH PHÚC (Mắt cười cong tít + Miệng cười lớn lộ răng nanh nhỏ) -->
+                                <g class="face-variant face-laughing">
+                                    <!-- Mắt cười tít > < -->
+                                    <path d="M 175 174 Q 183 162 191 173" fill="none" stroke="#592512" stroke-width="3.4" stroke-linecap="round" />
+                                    <path d="M 216 170 Q 224 158 232 169" fill="none" stroke="#592512" stroke-width="3.4" stroke-linecap="round" />
+                                    <ellipse cx="204" cy="169" rx="2.5" ry="1.8" fill="#592512" />
+                                    <!-- Khuôn miệng cười lớn :D -->
+                                    <path d="M 193 174 Q 204 177 215 173 Q 214 190 204 190 Q 194 190 193 174 Z" fill="#e15b64" stroke="#592512" stroke-width="2.6" stroke-linejoin="round" />
+                                    <!-- Lưỡi hồng bên trong -->
+                                    <path d="M 197 184 Q 204 179 211 184 Q 204 190 197 184 Z" fill="#ff9ebb" />
+                                    <!-- Răng nanh nhỏ xinh -->
+                                    <polygon points="196,175 199,175 197.5,179" fill="#ffffff" />
+                                    <polygon points="209,174 212,174 210.5,178" fill="#ffffff" />
+                                </g>
+
+                                <!-- ================= PHỤ KIỆN ĐỘI ĐẦU (Mặc định ẩn, bật từ Shop) ================= -->
+                                <!-- Phụ kiện 1: Nơ hồng siêu yêu trên tai trái -->
+                                <g id="acc-bow" class="hidden" transform="translate(158, 126) rotate(-18)">
+                                    <path d="M 0 0 C -14 -12, -18 10, 0 4 Z" fill="#ff4d8d" stroke="#592512" stroke-width="2.5" stroke-linejoin="round"/>
+                                    <path d="M 4 0 C 18 -12, 22 10, 4 4 Z" fill="#ff4d8d" stroke="#592512" stroke-width="2.5" stroke-linejoin="round"/>
+                                    <circle cx="2" cy="2" r="4.5" fill="#ff85b3" stroke="#592512" stroke-width="2.5"/>
+                                </g>
+
+                                <!-- Phụ kiện 2: Vương miện Hoàng Thượng giữa đỉnh đầu -->
+                                <g id="acc-crown" class="hidden" transform="translate(185, 114) rotate(-4)">
+                                    <polygon points="4,28 0,8 12,17 20,2 28,17 40,8 36,28" fill="#facc15" stroke="#592512" stroke-width="2.8" stroke-linejoin="round"/>
+                                    <circle cx="20" cy="19" r="3" fill="#ef4444" stroke="#592512" stroke-width="1.5"/>
+                                    <circle cx="10" cy="22" r="2" fill="#38bdf8"/>
+                                    <circle cx="30" cy="22" r="2" fill="#38bdf8"/>
+                                </g>
+
+                            </g> <!-- Kết thúc #cat-head-group -->
+                        </g> <!-- Kết thúc #cat-whole -->
+
+                        <!-- ================= 3. ĐẠO CỤ ĂN / UỐNG & HIỆU ỨNG BAY LÊN ================= -->
+
+                        <!-- Đạo cụ khi ĂN: Bát sứ hồng đựng bánh cá Taiyaki & hạt thưởng -->
+                        <g class="prop-item prop-food" transform="translate(155, 256)">
+                            <!-- Đĩa lót -->
+                            <ellipse cx="45" cy="28" rx="34" ry="8" fill="#fbcfe8" stroke="#592512" stroke-width="2.5"/>
+                            <!-- Hạt thức ăn & Bánh cá -->
+                            <circle cx="32" cy="15" r="6" fill="#d97706" stroke="#592512" stroke-width="2"/>
+                            <circle cx="42" cy="12" r="6.5" fill="#b45309" stroke="#592512" stroke-width="2"/>
+                            <circle cx="55" cy="15" r="6" fill="#d97706" stroke="#592512" stroke-width="2"/>
+                            <!-- Bánh cá nhỏ màu cam vàng -->
+                            <path d="M 28 14 C 36 4, 52 4, 58 14 C 52 22, 36 22, 28 14 Z" fill="#fbbf24" stroke="#592512" stroke-width="2.2"/>
+                            <polygon points="56,14 65,7 64,20" fill="#fbbf24" stroke="#592512" stroke-width="2.2" stroke-linejoin="round"/>
+                            <circle cx="36" cy="12" r="1.5" fill="#592512"/>
+                            <!-- Thân bát ăn -->
+                            <path d="M 18 16 L 72 16 L 65 29 C 60 32, 30 32, 25 29 Z" fill="#f472b6" stroke="#592512" stroke-width="2.8" stroke-linejoin="round"/>
+                            <!-- Hình dấu chân trên bát -->
+                            <circle cx="45" cy="24" r="2.8" fill="#ffffff"/>
+                        </g>
+
+                        <!-- Đạo cụ khi UỐNG: Bát sữa tươi xanh pastel có ống hút và bọt khí -->
+                        <g class="prop-item prop-drink">
+                            <!-- Ống hút hồng hướng lên miệng mèo -->
+                            <path d="M 192 272 L 200 188 L 206 184" fill="none" stroke="#fb7185" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M 192 272 L 200 188 L 206 184" fill="none" stroke="#592512" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.2"/>
+                            <!-- Bát sữa -->
+                            <ellipse cx="185" cy="284" rx="28" ry="8" fill="#bae6fd" stroke="#592512" stroke-width="2.5"/>
+                            <path d="M 161 272 L 209 272 L 203 285 C 195 289, 175 289, 167 285 Z" fill="#38bdf8" stroke="#592512" stroke-width="2.8" stroke-linejoin="round"/>
+                            <ellipse cx="185" cy="272" rx="24" ry="5.5" fill="#e0f2fe" stroke="#592512" stroke-width="2.5"/>
+                            <!-- Mặt sữa sóng sánh -->
+                            <ellipse id="water-surface" cx="185" cy="273" rx="19" ry="3.5" fill="#ffffff"/>
+                            <!-- Bọt sữa bay lên khi uống -->
+                            <circle class="bubble-anim" cx="195" cy="255" r="3.5" fill="#ffffff" stroke="#38bdf8" stroke-width="1.5"/>
+                            <circle class="bubble-anim" cx="182" cy="260" r="2.5" fill="#ffffff" stroke="#38bdf8" stroke-width="1.5" style="animation-delay: 0.4s"/>
+                        </g>
+
+                        <!-- Hiệu ứng khi NGỦ: Chữ Zzz bay lên từ từ -->
+                        <g class="fx-group fx-sleeping" font-weight="800" fill="#7c3aed" stroke="#ffffff" stroke-width="1.5">
+                            <text class="zzz-1" x="245" y="140" font-size="18">Z</text>
+                            <text class="zzz-2" x="262" y="122" font-size="22">z</text>
+                            <text class="zzz-3" x="278" y="105" font-size="26">Z</text>
+                        </g>
+
+                        <!-- Hiệu ứng khi CƯỜI: Trái tim và hoa lấp lánh tung tăng -->
+                        <g class="fx-group fx-laughing">
+                            <!-- Trái tim 1 (Trái) -->
+                            <g class="happy-heart-1" transform="translate(120, 145)">
+                                <path d="M 12 6 C 12 2, 6 0, 3 4 C 0 0, -6 2, -6 6 C -6 12, 3 16, 3 20 C 3 16, 12 12, 12 6 Z" fill="#fb7185" stroke="#592512" stroke-width="2"/>
+                            </g>
+                            <!-- Trái tim 2 (Phải) -->
+                            <g class="happy-heart-2" transform="translate(268, 135)">
+                                <path d="M 12 6 C 12 2, 6 0, 3 4 C 0 0, -6 2, -6 6 C -6 12, 3 16, 3 20 C 3 16, 12 12, 12 6 Z" fill="#f43f5e" stroke="#592512" stroke-width="2"/>
+                            </g>
+                            <!-- Ngôi sao lấp lánh (Trên đầu) -->
+                            <g class="happy-heart-3" transform="translate(200, 100)">
+                                <path d="M 0 -10 L 3 -3 L 10 0 L 3 3 L 0 10 L -3 3 L -10 0 L -3 -3 Z" fill="#facc15" stroke="#592512" stroke-width="1.8"/>
+                            </g>
+                        </g>
+
+                    </svg>
+                </div>
+
+                <!-- Thanh Chăm Sóc Nhanh (Tiêu xu giống Talking Tom) -->
+                <div class="bg-pink-50 border-t-3 border-[#592512] p-3 flex flex-wrap items-center justify-between gap-2">
+                    <span class="text-xs font-extrabold text-[#592512] uppercase tracking-wider px-2">
+                        🎮 Chăm sóc nhanh:
+                    </span>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="careAction('eat', 15)" class="kawaii-btn bg-orange-200 hover:bg-orange-300 text-[#592512] text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5">
+                            <span>🐟 Cho Ăn</span>
+                            <span class="bg-white/80 px-1.5 py-0.5 rounded-md text-[11px]">-15 🪙</span>
+                        </button>
+                        <button onclick="careAction('drink', 10)" class="kawaii-btn bg-sky-200 hover:bg-sky-300 text-[#592512] text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5">
+                            <span>🥛 Cho Uống</span>
+                            <span class="bg-white/80 px-1.5 py-0.5 rounded-md text-[11px]">-10 🪙</span>
+                        </button>
+                        <button onclick="careAction('sleep', 0)" class="kawaii-btn bg-indigo-200 hover:bg-indigo-300 text-[#592512] text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5">
+                            <span>💤 Ru Ngủ</span>
+                            <span class="bg-white/80 px-1.5 py-0.5 rounded-md text-[11px]">Miễn phí</span>
+                        </button>
+                        <button onclick="careAction('laugh', 5)" class="kawaii-btn bg-pink-200 hover:bg-pink-300 text-[#592512] text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5">
+                            <span>逗 Chọc Cười</span>
+                            <span class="bg-white/80 px-1.5 py-0.5 rounded-md text-[11px]">-5 🪙</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BẢNG ĐIỀU KHIỂN PREVIEW ANIMATION (Dành cho Developer kiểm thử trực tiếp 5 trạng thái) -->
+            <div class="bg-white rounded-3xl p-4 kawaii-card">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h2 class="text-sm md:text-base font-extrabold text-[#592512] flex items-center gap-1.5">
+                            <span>🎬 Bộ Kiểm Thử Animation (5 Trạng Thái)</span>
+                        </h2>
+                        <p class="text-xs text-[#8c5233]">Bấm vào từng nút bên dưới để xem trước các chuyển động của mèo không tốn xu</p>
+                    </div>
+                    <span id="current-class-label" class="text-[11px] font-mono bg-amber-100 border border-[#592512] px-2.5 py-1 rounded-lg font-bold">
+                        .state-idle
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+                    <button id="btn-anim-idle" onclick="setCatAnimation('idle')" class="anim-trigger kawaii-btn active-anim bg-amber-200 text-[#592512] font-bold py-2.5 px-3 rounded-2xl text-xs flex flex-col items-center gap-1">
+                        <span class="text-lg">🐱</span>
+                        <span>1. Đứng Yên</span>
+                    </button>
+                    <button id="btn-anim-eating" onclick="setCatAnimation('eating')" class="anim-trigger kawaii-btn bg-white hover:bg-orange-100 text-[#592512] font-bold py-2.5 px-3 rounded-2xl text-xs flex flex-col items-center gap-1">
+                        <span class="text-lg">🍰</span>
+                        <span>2. Ăn (Eating)</span>
+                    </button>
+                    <button id="btn-anim-drinking" onclick="setCatAnimation('drinking')" class="anim-trigger kawaii-btn bg-white hover:bg-sky-100 text-[#592512] font-bold py-2.5 px-3 rounded-2xl text-xs flex flex-col items-center gap-1">
+                        <span class="text-lg">🧋</span>
+                        <span>3. Uống (Drinking)</span>
+                    </button>
+                    <button id="btn-anim-sleeping" onclick="setCatAnimation('sleeping')" class="anim-trigger kawaii-btn bg-white hover:bg-indigo-100 text-[#592512] font-bold py-2.5 px-3 rounded-2xl text-xs flex flex-col items-center gap-1">
+                        <span class="text-lg">😴</span>
+                        <span>4. Ngủ (Sleeping)</span>
+                    </button>
+                    <button id="btn-anim-laughing" onclick="setCatAnimation('laughing')" class="anim-trigger kawaii-btn bg-white hover:bg-pink-100 text-[#592512] font-bold py-2.5 px-3 rounded-2xl text-xs flex flex-col items-center gap-1 col-span-2 sm:col-span-1">
+                        <span class="text-lg">😸</span>
+                        <span>5. Cười (Laughing)</span>
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- CỘT PHẢI: NHIỆM VỤ HẰNG NGÀY (DAILY QUESTS) & CỬA HÀNG TRANG TRÍ (5 cột) -->
+        <section class="lg:col-span-5 flex flex-col gap-4">
+
+            <!-- 1. BẢNG NHIỆM VỤ HẰNG NGÀY (DAILY QUESTS) -->
+            <div class="bg-white rounded-3xl p-4 md:p-5 kawaii-card flex flex-col">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h2 class="text-base md:text-lg font-extrabold text-[#592512] flex items-center gap-2">
+                            <span>📋 Nhiệm Vụ Hằng Ngày</span>
+                        </h2>
+                        <p class="text-xs text-[#8c5233]">Hoàn thành thói quen tốt để nhận xu nuôi mèo!</p>
+                    </div>
+                    <span id="quest-counter" class="bg-pink-100 border-2 border-[#592512] text-[#592512] text-xs font-extrabold px-3 py-1 rounded-full">
+                        1/4 Hoàn thành
+                    </span>
+                </div>
+
+                <!-- Form thêm thói quen / nhiệm vụ mới -->
+                <form onsubmit="addNewQuest(event)" class="flex gap-2 mb-3">
+                    <input 
+                        id="quest-input" 
+                        type="text" 
+                        placeholder="Nhập thói quen mới (VD: Đọc 20 trang sách)..." 
+                        class="flex-1 bg-pink-50/70 border-2 border-[#592512] rounded-2xl px-3.5 py-2 text-xs md:text-sm font-semibold text-[#592512] placeholder-[#8c5233]/60 focus:outline-none focus:bg-white"
+                    />
+                    <button type="submit" class="kawaii-btn bg-pink-400 hover:bg-pink-500 text-white font-extrabold px-4 py-2 rounded-2xl text-xs md:text-sm shrink-0">
+                        + Thêm
+                    </button>
+                </form>
+
+                <!-- Danh sách Daily Quests -->
+                <div id="quest-list" class="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+                    <!-- Render bằng JS -->
+                </div>
+            </div>
+
+            <!-- 2. CỬA HÀNG TRANG SỨC & ĐỒ TRANG TRÍ PHÒNG -->
+            <div class="bg-white rounded-3xl p-4 md:p-5 kawaii-card flex-1 flex flex-col">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h2 class="text-base md:text-lg font-extrabold text-[#592512] flex items-center gap-2">
+                            <span>🛍️ Tủ Đồ & Trang Trí Phòng</span>
+                        </h2>
+                        <p class="text-xs text-[#8c5233]">Dùng xu thưởng mua trang sức cho mèo hoặc làm đẹp phòng</p>
+                    </div>
+                </div>
+
+                <div id="shop-list" class="grid grid-cols-2 gap-2.5">
+                    <!-- Render bằng JS -->
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Hộp thông báo nổi (Toast) thay thế hoàn toàn alert() -->
+    <div id="toast-box" class="fixed bottom-5 right-5 z-50 pointer-events-none opacity-0 translate-y-4 transition-all duration-300 bg-[#592512] text-amber-100 border-2 border-amber-200 px-4 py-2.5 rounded-2xl shadow-xl text-xs md:text-sm font-bold flex items-center gap-2">
+        <span id="toast-icon">✨</span>
+        <span id="toast-text">Thông báo!</span>
+    </div>
+
+    <script>
+        // =====================================================
+        // TRẠNG THÁI ỨNG DỤNG (STATE MANAGEMENT)
+        // =====================================================
+        let coins = 120;
+        let xp = 40;
+        let level = 3;
+        let currentAnimState = 'idle';
+        let animResetTimer = null;
+
+        // Chỉ số của mèo
+        const stats = {
+            hunger: 75,
+            thirst: 70,
+            energy: 85,
+            happy: 90
+        };
+
+        // Danh sách nhiệm vụ hằng ngày mẫu
+        let quests = [
+            { id: 1, title: 'Uống đủ 2 lít nước lọc', reward: 25, completed: true },
+            { id: 2, title: 'Tập thể dục / Đi bộ 30 phút', reward: 35, completed: false },
+            { id: 3, title: 'Học ngoại ngữ hoặc đọc sách 25 phút', reward: 30, completed: false },
+            { id: 4, title: 'Ngủ trước 11h30 tối, không lướt điện thoại', reward: 40, completed: false }
+        ];
+
+        // Danh sách vật phẩm Trang sức & Nội thất căn phòng
+        const shopItems = [
+            {
+                id: 'bow',
+                name: 'Nơ Hồng Tai Mèo',
+                type: 'Trang sức',
+                price: 30,
+                icon: '🎀',
+                svgTargetId: 'acc-bow',
+                owned: false,
+                equipped: false
+            },
+            {
+                id: 'collar',
+                name: 'Vòng Cổ Chuông Vàng',
+                type: 'Trang sức',
+                price: 40,
+                icon: '🔔',
+                svgTargetId: 'acc-collar',
+                owned: false,
+                equipped: false
+            },
+            {
+                id: 'crown',
+                name: 'Vương Miện Hoàng Thượng',
+                type: 'Trang sức',
+                price: 60,
+                icon: '👑',
+                svgTargetId: 'acc-crown',
+                owned: false,
+                equipped: false
+            },
+            {
+                id: 'lights',
+                name: 'Dây Đèn Pastel',
+                type: 'Nội thất',
+                price: 45,
+                icon: '💡',
+                svgTargetId: 'room-decor-lights',
+                owned: false,
+                equipped: false
+            },
+            {
+                id: 'plant',
+                name: 'Chậu Cây Monstera',
+                type: 'Nội thất',
+                price: 50,
+                icon: '🪴',
+                svgTargetId: 'room-decor-plant',
+                owned: false,
+                equipped: false
+            },
+            {
+                id: 'frame',
+                name: 'Tranh Cá Vàng Treo Tường',
+                type: 'Nội thất',
+                price: 35,
+                icon: '🖼️',
+                svgTargetId: 'room-decor-frame',
+                owned: false,
+                equipped: false
+            }
+        ];
+
+        // Thông điệp và cấu hình cho từng trạng thái animation
+        const animConfig = {
+            idle: {
+                badge: '✨ Đang đứng yên',
+                speech: 'Meow~ Hôm nay bạn đã hoàn thành nhiệm vụ nào chưa? 💕',
+                className: 'state-idle'
+            },
+            eating: {
+                badge: '🐟 Đang măm măm...',
+                speech: 'Nhoằm nhoằm~ Bánh cá và hạt thưởng ngon tuyệt cú mèo! 😋',
+                className: 'state-eating'
+            },
+            drinking: {
+                badge: '🥛 Đang uống sữa...',
+                speech: 'ực ực~ Sữa tươi mát lạnh giải khát quá đi! 🧋',
+                className: 'state-drinking'
+            },
+            sleeping: {
+                badge: '💤 Đang ngủ say...',
+                speech: 'Khò khò... Mơ thấy một núi cá hồi tươi ngon... 😴',
+                className: 'state-sleeping'
+            },
+            laughing: {
+                badge: '😸 Đang cười tít mắt!',
+                speech: 'Hehe nhột quá~ Yêu chủ nhân nhất trên đời luôn! 💖',
+                className: 'state-laughing'
+            }
+        };
+
+        // =====================================================
+        // HÀM ĐIỀU KHIỂN ANIMATION CỦA CHÚ MÈO
+        // =====================================================
+        function setCatAnimation(stateKey, autoReturnToIdleMs = 0) {
+            const svgStage = document.getElementById('cat-stage-svg');
+            const badge = document.getElementById('state-badge');
+            const speech = document.getElementById('speech-bubble');
+            const classLabel = document.getElementById('current-class-label');
+
+            if (animResetTimer) {
+                clearTimeout(animResetTimer);
+                animResetTimer = null;
+            }
+
+            currentAnimState = stateKey;
+            const cfg = animConfig[stateKey] || animConfig.idle;
+
+            // Xóa các class trạng thái cũ và gắn class trạng thái mới
+            svgStage.classList.remove('state-idle', 'state-eating', 'state-drinking', 'state-sleeping', 'state-laughing');
+            svgStage.classList.add(cfg.className);
+
+            // Cập nhật giao diện
+            badge.textContent = cfg.badge;
+            speech.textContent = cfg.speech;
+            classLabel.textContent = '.' + cfg.className;
+
+            // Highlight nút bấm tương ứng trong bảng Preview
+            document.querySelectorAll('.anim-trigger').forEach(btn => {
+                btn.classList.remove('active-anim', 'bg-amber-200');
+                btn.classList.add('bg-white');
+            });
+            const activeBtn = document.getElementById(`btn-anim-${stateKey}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-white');
+                activeBtn.classList.add('active-anim', 'bg-amber-200');
+            }
+
+            // Nếu là hành động tức thời (cho ăn/uống/cười từ thanh chăm sóc), tự động về Idle sau vài giây
+            if (autoReturnToIdleMs > 0) {
+                animResetTimer = setTimeout(() => {
+                    setCatAnimation('idle');
+                }, autoReturnToIdleMs);
+            }
+        }
+
+        // Nhấn trực tiếp vào chú mèo để xoa đầu -> Mèo cười
+        function petTheCat() {
+            stats.happy = Math.min(100, stats.happy + 5);
+            updateStatsUI();
+            setCatAnimation('laughing', 3500);
+            showToast('💖 Bạn vừa xoa đầu mèo! Độ vui vẻ +5');
+        }
+
+        // Thực hiện hành động chăm sóc mèo có tốn xu (Giống Talking Tom)
+        function careAction(type, cost) {
+            if (coins < cost) {
+                showToast('⚠️ Không đủ xu! Hãy hoàn thành thêm nhiệm vụ hằng ngày nhé.');
+                return;
+            }
+
+            coins -= cost;
+            addXP(15);
+
+            if (type === 'eat') {
+                stats.hunger = Math.min(100, stats.hunger + 22);
+                stats.happy = Math.min(100, stats.happy + 6);
+                setCatAnimation('eating', 4500);
+                showToast('🐟 Đã cho mèo ăn bánh cá! Độ no +22');
+            } else if (type === 'drink') {
+                stats.thirst = Math.min(100, stats.thirst + 25);
+                stats.happy = Math.min(100, stats.happy + 5);
+                setCatAnimation('drinking', 4500);
+                showToast('🥛 Đã cho mèo uống sữa tươi! Độ khát +25');
+            } else if (type === 'sleep') {
+                stats.energy = 100;
+                setCatAnimation('sleeping');
+                showToast('💤 Mèo đang ngủ say để hồi phục 100% năng lượng!');
+            } else if (type === 'laugh') {
+                stats.happy = Math.min(100, stats.happy + 18);
+                setCatAnimation('laughing', 4000);
+                showToast('😸 Chơi đùa cùng mèo! Độ vui vẻ +18');
+            }
+
+            updateHeaderUI();
+            updateStatsUI();
+        }
+
+        // =====================================================
+        // QUẢN LÝ NHIỆM VỤ HẰNG NGÀY (DAILY QUESTS)
+        // =====================================================
+        function renderQuests() {
+            const listEl = document.getElementById('quest-list');
+            const counterEl = document.getElementById('quest-counter');
+            const doneCount = quests.filter(q => q.completed).length;
+            counterEl.textContent = `${doneCount}/${quests.length} Hoàn thành`;
+
+            listEl.innerHTML = quests.map(q => `
+                <div class="flex items-center justify-between gap-2 p-3 rounded-2xl border-2 border-[#592512] transition-all ${q.completed ? 'bg-emerald-50/80 opacity-80' : 'bg-amber-50/50 hover:bg-amber-50'}">
+                    <label class="flex items-center gap-3 cursor-pointer flex-1">
+                        <input 
+                            type="checkbox" 
+                            ${q.completed ? 'checked' : ''} 
+                            onchange="toggleQuest(${q.id})"
+                            class="w-5 h-5 accent-pink-500 rounded cursor-pointer"
+                        />
+                        <span class="text-xs md:text-sm font-bold text-[#592512] ${q.completed ? 'line-through text-[#8c5233]' : ''}">
+                            ${q.title}
+                        </span>
+                    </label>
+                    <span class="shrink-0 text-xs font-extrabold px-2.5 py-1 rounded-xl border border-[#592512] ${q.completed ? 'bg-emerald-200 text-[#592512]' : 'bg-amber-200 text-[#592512]'}">
+                        +${q.reward} 🪙
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        function toggleQuest(id) {
+            const quest = quests.find(q => q.id === id);
+            if (!quest) return;
+
+            quest.completed = !quest.completed;
+            if (quest.completed) {
+                coins += quest.reward;
+                addXP(20);
+                setCatAnimation('laughing', 3200);
+                showToast(`🎉 Hoàn thành nhiệm vụ! Nhận +${quest.reward} Xu`);
+            } else {
+                coins = Math.max(0, coins - quest.reward);
+                showToast(`↩️ Đã hoàn tác nhiệm vụ (-${quest.reward} Xu)`);
+            }
+
+            updateHeaderUI();
+            renderQuests();
+        }
+
+        function addNewQuest(e) {
+            e.preventDefault();
+            const input = document.getElementById('quest-input');
+            const title = input.value.trim();
+            if (!title) {
+                showToast('✏️ Hãy nhập tên nhiệm vụ hằng ngày trước nhé!');
+                return;
+            }
+
+            quests.unshift({
+                id: Date.now(),
+                title: title,
+                reward: 30,
+                completed: false
+            });
+
+            input.value = '';
+            renderQuests();
+            showToast('📋 Đã thêm nhiệm vụ mới! Hoàn thành để nhận +30 Xu');
+        }
+
+        // =====================================================
+        // CỬA HÀNG TRANG SỨC & ĐỒ TRANG TRÍ PHÒNG
+        // =====================================================
+        function renderShop() {
+            const shopEl = document.getElementById('shop-list');
+            shopEl.innerHTML = shopItems.map(item => {
+                let btnText = `Mua (${item.price} 🪙)`;
+                let btnClass = 'bg-amber-200 hover:bg-amber-300 text-[#592512]';
+
+                if (item.owned) {
+                    if (item.equipped) {
+                        btnText = 'Đang dùng (Tháo)';
+                        btnClass = 'bg-emerald-300 hover:bg-emerald-400 text-[#592512]';
+                    } else {
+                        btnText = 'Trang bị ngay';
+                        btnClass = 'bg-pink-200 hover:bg-pink-300 text-[#592512]';
+                    }
+                }
+
+                return `
+                    <div class="p-3 rounded-2xl border-2 border-[#592512] bg-pink-50/40 flex flex-col justify-between gap-2">
+                        <div class="flex items-start justify-between gap-1">
+                            <div class="flex items-center gap-2">
+                                <span class="text-2xl bg-white w-10 h-10 rounded-xl border border-[#592512] flex items-center justify-center shrink-0">
+                                    ${item.icon}
+                                </span>
+                                <div>
+                                    <div class="text-xs font-extrabold text-[#592512] leading-tight">${item.name}</div>
+                                    <div class="text-[10px] font-bold text-[#8c5233]">${item.type}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="handleShopItem('${item.id}')" class="kawaii-btn ${btnClass} w-full py-1.5 rounded-xl text-xs font-extrabold">
+                            ${btnText}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function handleShopItem(itemId) {
+            const item = shopItems.find(i => i.id === itemId);
+            if (!item) return;
+
+            if (!item.owned) {
+                if (coins < item.price) {
+                    showToast('🪙 Bạn chưa đủ xu! Hãy tick hoàn thành nhiệm vụ hằng ngày nhé.');
+                    return;
+                }
+                coins -= item.price;
+                item.owned = true;
+                item.equipped = true;
+                addXP(25);
+                applySvgAccessory(item);
+                setCatAnimation('laughing', 3500);
+                showToast(`🛍️ Đã mua & trang bị "${item.name}"!`);
+            } else {
+                item.equipped = !item.equipped;
+                applySvgAccessory(item);
+                if (item.equipped) {
+                    setCatAnimation('laughing', 2500);
+                    showToast(`✨ Đã trang bị "${item.name}"!`);
+                } else {
+                    showToast(`📦 Đã cất "${item.name}" vào tủ đồ.`);
+                }
+            }
+
+            updateHeaderUI();
+            renderShop();
+        }
+
+        function applySvgAccessory(item) {
+            const targetEl = document.getElementById(item.svgTargetId);
+            if (!targetEl) return;
+            if (item.equipped) {
+                targetEl.classList.remove('hidden');
+            } else {
+                targetEl.classList.add('hidden');
+            }
+        }
+
+        // =====================================================
+        // CẬP NHẬT GIAO DIỆN & TIỆN ÍCH
+        // =====================================================
+        function addXP(amount) {
+            xp += amount;
+            if (xp >= 100) {
+                xp -= 100;
+                level += 1;
+                showToast(`🎊 Chúc mừng! Chú mèo đã lên Cấp ${level}!`);
+            }
+        }
+
+        function updateHeaderUI() {
+            document.getElementById('coin-balance').textContent = coins;
+            document.getElementById('cat-level').textContent = `Lv. ${level} (${xp}/100 XP)`;
+        }
+
+        function updateStatsUI() {
+            document.getElementById('bar-hunger').style.width = `${stats.hunger}%`;
+            document.getElementById('bar-thirst').style.width = `${stats.thirst}%`;
+            document.getElementById('bar-energy').style.width = `${stats.energy}%`;
+            document.getElementById('bar-happy').style.width = `${stats.happy}%`;
+        }
+
+        let toastTimeout = null;
+        function showToast(message) {
+            const box = document.getElementById('toast-box');
+            const text = document.getElementById('toast-text');
+            text.textContent = message;
+            box.classList.remove('opacity-0', 'translate-y-4');
+            box.classList.add('opacity-100', 'translate-y-0');
+
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                box.classList.remove('opacity-100', 'translate-y-0');
+                box.classList.add('opacity-0', 'translate-y-4');
+            }, 2800);
+        }
+
+        // Khởi tạo ban đầu
+        window.onload = () => {
+            renderQuests();
+            renderShop();
+            updateHeaderUI();
+            updateStatsUI();
+        };
+    </script>
+</body>
+</html>

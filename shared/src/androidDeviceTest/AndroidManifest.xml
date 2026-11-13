@@ -1,0 +1,16 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity android:name="com.pawquest.BistroFixtureActivity" android:exported="true"
+            android:screenOrientation="portrait" android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+        <activity android:name="com.pawquest.PetPerformanceActivity" android:exported="true"
+            android:screenOrientation="portrait" android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+        <activity android:name="com.pawquest.ShardFlightFixtureActivity" android:exported="true"
+            android:screenOrientation="portrait" android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+        <activity android:name="com.pawquest.LuckyWheelFixtureActivity" android:exported="true"
+            android:screenOrientation="portrait" android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+        <activity android:name="com.pawquest.CaseAnimationFixtureActivity" android:exported="true"
+            android:screenOrientation="portrait" android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+        <activity android:name="com.pawquest.MysteryShopFixtureActivity" android:exported="true"
+            android:screenOrientation="portrait" android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+    </application>
+</manifest>
