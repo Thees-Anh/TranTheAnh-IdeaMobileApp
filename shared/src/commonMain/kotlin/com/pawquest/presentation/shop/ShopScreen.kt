@@ -75,6 +75,9 @@ fun ShopScreen(
     luckyWheelModel: com.pawquest.presentation.gacha.LuckyWheelViewModel? = null,
     wheelPreview: (@Composable (com.pawquest.presentation.gacha.LuckyWheelAnimation,Modifier)->Unit)? = null,
     onPetCollection: (()->Unit)? = null,
+    /** Explore opens one activity at a time, so the section chips are hidden there. */
+    showSectionTabs: Boolean = true,
+    exchangeCategory: String = "Pets",
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val gridState=rememberLazyGridState()
@@ -133,7 +136,7 @@ fun ShopScreen(
                 modifier=Modifier.semantics {liveRegion=LiveRegionMode.Polite})
             onNavigateToQuests?.let {PawQuestButton("Earn Coins",it)}
         }
-        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+        if(showSectionTabs) Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
             ShopSection.entries.forEach {section -> CategoryTabChip(section.label,PawQuestIcons.ShoppingBag,
                 state.section==section,{viewModel.selectSection(section)},Modifier.widthIn(min=100.dp))}
         }
@@ -150,7 +153,7 @@ fun ShopScreen(
                 else Text(tr("Lucky Wheel data unavailable."))
             }
             state.section==ShopSection.SHARD_EXCHANGE -> com.pawquest.presentation.gacha.ShopShardExchange(luckyWheelModel,exchangeModel,
-                itemCaseModel,state.catalog,Modifier.weight(1f),onViewCaseItem,onUseCaseReward,actionableCaseItemIds,onPetCollection)
+                itemCaseModel,state.catalog,Modifier.weight(1f),onViewCaseItem,onUseCaseReward,actionableCaseItemIds,onPetCollection,exchangeCategory)
             state.section==ShopSection.ITEM_CASE -> {
                 if(itemCaseModel!=null) com.pawquest.presentation.gacha.MysteryCaseContent(itemCaseModel,effectiveCoins,
                     state.catalog.associate { it.id to it.name },casePreview,Modifier.weight(1f),caseAnimation,

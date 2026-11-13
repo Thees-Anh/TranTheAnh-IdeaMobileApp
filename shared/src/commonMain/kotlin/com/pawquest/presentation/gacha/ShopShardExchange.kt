@@ -14,8 +14,8 @@ import com.pawquest.presentation.components.*
 
 @Composable fun ShopShardExchange(wheel: LuckyWheelViewModel?,items: ItemExchangeViewModel?,cases: ItemCaseViewModel?,
     catalog: List<CatalogItem>,modifier: Modifier=Modifier,onInventory: ((String)->Unit)?=null,onUse: ((String)->Unit)?=null,
-    actionableIds: Set<String> = emptySet(),onPetCollection: (()->Unit)?=null) {
-    var category by remember {mutableStateOf("Pets")}
+    actionableIds: Set<String> = emptySet(),onPetCollection: (()->Unit)?=null,initialCategory: String="Pets") {
+    var category by remember(initialCategory) {mutableStateOf(initialCategory)}
     val itemState=items?.state?.collectAsStateWithLifecycle()?.value
     val caseState=cases?.state?.collectAsStateWithLifecycle()?.value
     val wheelState=wheel?.state?.collectAsStateWithLifecycle()?.value

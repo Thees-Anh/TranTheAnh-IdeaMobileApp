@@ -16,6 +16,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
@@ -96,8 +98,13 @@ private fun ProtectedApp(
     caseAnimation: (@Composable (com.pawquest.presentation.gacha.ItemCaseAnimation, Modifier)->Unit)?,
     wheelPreview: (@Composable (com.pawquest.presentation.gacha.LuckyWheelAnimation, Modifier)->Unit)?,
 ) {
-    var selectedRoute by rememberSaveable { mutableStateOf(Destination.PetHome.route) }
-    var showPetCollection by rememberSaveable {mutableStateOf(false)}
+    var selectedRoute by rememberSaveable { mutableStateOf(Destination.Home.route) }
+    var petRoomTab by rememberSaveable { mutableStateOf(com.pawquest.presentation.home.PetRoomTab.ROOM.name) }
+    var exploreCard by rememberSaveable { mutableStateOf<String?>(null) }
+    var settingsOpen by rememberSaveable { mutableStateOf(false) }
+    var progressOpen by rememberSaveable { mutableStateOf(false) }
+    fun openWardrobe() { petRoomTab = com.pawquest.presentation.home.PetRoomTab.WARDROBE.name; selectedRoute = Destination.PetRoom.route }
+    fun openExplore(card: com.pawquest.presentation.explore.ExploreCard?) { exploreCard = card?.name; selectedRoute = Destination.Explore.route }
     val destination = Destination.fromRoute(selectedRoute)
     val model = viewModel<PlaceholderViewModel>(key = destination.route) {
         container.koin.get<PlaceholderViewModel> { parametersOf(destination.route) }
@@ -127,6 +134,9 @@ private fun ProtectedApp(
         requestedRoute?.let {
             val target=Destination.fromRoute(it)
             selectedRoute=target.route
+            if(it=="inventory") petRoomTab=com.pawquest.presentation.home.PetRoomTab.WARDROBE.name
+            if(it=="pet_home") petRoomTab=com.pawquest.presentation.home.PetRoomTab.ROOM.name
+            if(target==Destination.Explore) exploreCard=null
             if(it=="focus") focus.show() else focus.hide()
             if(target==Destination.Quests) quests.openFromReminder()
             onRouteConsumed()
@@ -206,9 +216,9 @@ private fun ProtectedApp(
     }
 
     LaunchedEffect(selectedRoute) {
-        if (selectedRoute == Destination.Shop.route) { shop.loadCatalog(); itemCases.refresh();wheel.refresh() }
-        if (selectedRoute == Destination.Inventory.route) inventory.loadInventory()
-        if (selectedRoute == Destination.Profile.route) progress.refresh()
+        if (selectedRoute == Destination.Explore.route) { shop.loadCatalog(); itemCases.refresh();wheel.refresh() }
+        if (selectedRoute == Destination.PetRoom.route) inventory.loadInventory()
+        if (selectedRoute == Destination.Home.route) progress.refresh()
     }
 
     LaunchedEffect(shopState.lastPurchaseResult) {
@@ -224,12 +234,13 @@ private fun ProtectedApp(
     if (focusState.visible) {
         FocusScreen(focusState,focus,
             onBack={ selectedRoute=Destination.Quests.route; if(questState.page==com.pawquest.presentation.quests.QuestPage.DETAILS) quests.back();focus.hide() },
-            onPetHome={ selectedRoute=Destination.PetHome.route; focus.hide() },companion=focusCompanion,
+            onPetHome={ petRoomTab=com.pawquest.presentation.home.PetRoomTab.ROOM.name; selectedRoute=Destination.PetRoom.route; focus.hide() },companion=focusCompanion,
             walletBalance=petState.snapshot?.coins ?: account.coins)
         return
     }
     val currentCoins = petState.snapshot?.coins ?: account.coins
-    CompositionLocalProvider(LocalPetController provides PetController(petState,pet::care,pet::retry,pet::loadCollection,pet::selectSpecies,pet::companionVisible),
+    CompositionLocalProvider(com.pawquest.presentation.components.LocalOpenSettings provides { settingsOpen = true },
+        LocalPetController provides PetController(petState,pet::care,pet::retry,pet::loadCollection,pet::selectSpecies,pet::companionVisible),
         com.pawquest.presentation.bistro.LocalBistro provides bistro,
         com.pawquest.presentation.components.LocalShardBalances provides com.pawquest.presentation.components.ShardBalances(
             pet=wheelState.balances?.petShards,item=itemCaseState.itemShards),
@@ -238,26 +249,71 @@ private fun ProtectedApp(
     androidx.compose.runtime.CompositionLocalProvider(com.pawquest.presentation.progress.LocalProgress provides
         com.pawquest.presentation.progress.ProgressController(progressState,{progress.refresh()},progress::moveMonth)) {
     PetFeedbackDialog(petState,pet::dismissFeedback,
-        onShop={selectedRoute=Destination.Shop.route},onQuests={selectedRoute=Destination.Quests.route})
+        onShop={openExplore(com.pawquest.presentation.explore.ExploreCard.BISTRO)},onQuests={selectedRoute=Destination.Quests.route})
     PawQuestScaffold(
         destination = destination,
         state = state,
         onNavigate = { selectedRoute = it.route },
         onRetry = model::retry,
-        petScene = petScene,
-        account = account,
-        onLogout = onLogout,
-        logoutBusy = action.busy,
-        logoutError = action.error,
+        homeContent = { modifier ->
+            com.pawquest.presentation.home.TodayScreen(modifier)
+        },
         questContent = { QuestManagementScreen(quests, it, if(focusState.session!=null || focusState.error!=null) focus::show else null,focusState) },
-        shopContent = {
+        petRoomContent = { modifier ->
+            com.pawquest.presentation.home.PetRoomScreen(
+                tab = com.pawquest.presentation.home.PetRoomTab.valueOf(petRoomTab),
+                onTabChange = { petRoomTab = it.name; if (it == com.pawquest.presentation.home.PetRoomTab.WARDROBE) inventory.loadInventory() },
+                modifier = modifier,
+                room = { roomModifier ->
+                    if (petScene != null) petScene(roomModifier)
+                    else com.pawquest.presentation.home.PetHomeScreen(modifier = roomModifier) {}
+                },
+                wardrobe = { wardrobeModifier ->
+                    com.pawquest.presentation.inventory.InventoryScreen(
+                        viewModel = inventory,
+                        onNavigateToShop = { openExplore(com.pawquest.presentation.explore.ExploreCard.COZY_SHOP) },
+                        onUseItem = { invItem ->
+                            if (invItem.item.category == com.pawquest.domain.model.ItemCategory.FOOD) {
+                                pet.care(com.pawquest.domain.model.PetCareAction.FEED)
+                            }
+                        },
+                        modifier = wardrobeModifier,
+                        showHeader = false,
+                    )
+                },
+            )
+        },
+        exploreContent = { modifier ->
+            val openCard = exploreCard?.let { name -> com.pawquest.presentation.explore.ExploreCard.entries.firstOrNull { it.name == name } }
+            com.pawquest.presentation.explore.ExploreScreen(
+                coins = currentCoins,
+                openCard = openCard,
+                onOpen = { card ->
+                    when (card) {
+                        com.pawquest.presentation.explore.ExploreCard.BISTRO -> shop.selectSection(com.pawquest.presentation.shop.ShopSection.FOOD)
+                        com.pawquest.presentation.explore.ExploreCard.MYSTERY_BOX -> shop.selectSection(com.pawquest.presentation.shop.ShopSection.ITEM_CASE)
+                        com.pawquest.presentation.explore.ExploreCard.LUCKY_WHEEL -> shop.selectSection(com.pawquest.presentation.shop.ShopSection.LUCKY_WHEEL)
+                        com.pawquest.presentation.explore.ExploreCard.COZY_SHOP, com.pawquest.presentation.explore.ExploreCard.EXCHANGE ->
+                            shop.selectSection(com.pawquest.presentation.shop.ShopSection.SHARD_EXCHANGE)
+                        com.pawquest.presentation.explore.ExploreCard.COLLECTION -> { inventory.loadInventory(); pet.loadCollection() }
+                    }
+                    exploreCard = card.name
+                },
+                onBack = { exploreCard = null },
+                modifier = modifier,
+            ) { card, cardModifier ->
+              if (card == com.pawquest.presentation.explore.ExploreCard.COLLECTION) {
+                com.pawquest.presentation.inventory.PetCollectionContent(cardModifier.padding(horizontal = 16.dp))
+              } else {
             com.pawquest.presentation.shop.ShopScreen(
                 viewModel = shop,
                 userCoins = currentCoins,
                 ownedItemIds = inventoryState.items.map { item -> item.item.id }.toSet(),
-                onNavigateToInventory = { selectedRoute = Destination.Inventory.route },
+                onNavigateToInventory = { openWardrobe() },
                 onNavigateToQuests = { selectedRoute = Destination.Quests.route },
-                modifier = it,
+                modifier = cardModifier,
+                showSectionTabs = false,
+                exchangeCategory = if (card == com.pawquest.presentation.explore.ExploreCard.COZY_SHOP) "Accessories" else "Pets",
                 itemShards = itemCaseState.itemShards,
                 shardsLoading = itemCaseState.refreshing || itemCaseState.phase==com.pawquest.presentation.gacha.ItemCasePhase.Loading,
                 itemCaseModel = itemCases,
@@ -266,10 +322,10 @@ private fun ProtectedApp(
                 exchangeModel=exchange,
                 luckyWheelModel=wheel,
                 wheelPreview=wheelPreview,
-                onPetCollection={inventory.loadInventory();pet.loadCollection();showPetCollection=true;selectedRoute=Destination.Inventory.route},
+                onPetCollection={inventory.loadInventory();pet.loadCollection();exploreCard=com.pawquest.presentation.explore.ExploreCard.COLLECTION.name},
                 onViewCaseItem = { id ->
                     inventory.selectCategory(inventory.state.value.items.firstOrNull {row->row.item.id==id}?.item?.category)
-                    inventory.loadInventory(); selectedRoute=Destination.Inventory.route
+                    inventory.loadInventory(); openWardrobe()
                 },
                 actionableCaseItemIds = if(inventoryState.equipmentBusy || inventoryState.roomBusy ||
                     inventoryState.pendingEquipment!=null || inventoryState.pendingRoom!=null) emptySet() else inventoryState.items.filter { row ->
@@ -287,45 +343,29 @@ private fun ProtectedApp(
                             com.pawquest.domain.model.ItemCategory.FURNITURE -> if(id !in current.placedItemIds) inventory.togglePlace(row)
                             else -> Unit
                         }
-                        inventory.selectCategory(row.item.category); selectedRoute=Destination.Inventory.route
+                        inventory.selectCategory(row.item.category); openWardrobe()
                     }
                 },
             )
-        },
-        inventoryContent = {
-            com.pawquest.presentation.inventory.InventoryScreen(
-                viewModel = inventory,
-                showPetCollection=showPetCollection,
-                onPetCollectionShown={showPetCollection=false},
-                onNavigateToShop = { selectedRoute = Destination.Shop.route },
-                onUseItem = { invItem ->
-                    if (invItem.item.category == com.pawquest.domain.model.ItemCategory.FOOD) {
-                        pet.care(com.pawquest.domain.model.PetCareAction.FEED)
-                    }
-                },
-                modifier = it,
-            )
-        },
-        profileContent = {
-            com.pawquest.presentation.profile.ProfileDashboardScreen(
-                account = account,
-                questState = questState,
-                petState = petState,
-                focusState = focusState,
-                userCoins = currentCoins,
-                onLogout = onLogout,
-                logoutBusy = action.busy,
-                logoutError = action.error,
-                onDeleteAccount = onDeleteAccount,
-                onRefresh = {
-                    quests.refresh()
-                    pet.refresh()
-                },
-                modifier = it,
-            )
+              }
+            }
         },
         onReconnect = { pet.refresh(); quests.refresh(); progress.refresh(); inventory.loadInventory(); focus.reconcile(); itemCases.refresh(); wheel.refresh() },
     )
+    if (settingsOpen) com.pawquest.presentation.components.PawQuestSheet(onDismiss = { settingsOpen = false }) {
+        com.pawquest.presentation.profile.SettingsSheetContent(
+            account = account,
+            petState = petState,
+            userCoins = currentCoins,
+            onLogout = onLogout,
+            logoutBusy = action.busy,
+            logoutError = action.error,
+            onDeleteAccount = onDeleteAccount,
+        )
+    }
+    if (progressOpen) com.pawquest.presentation.components.PawQuestSheet(onDismiss = { progressOpen = false }) {
+        com.pawquest.presentation.profile.ProgressSheetContent()
+    }
     }
     }
 }
@@ -342,8 +382,8 @@ fun PawQuestTheme(content: @Composable () -> Unit) {
 fun PreviewPawQuest() {
     PawQuestTheme {
         PawQuestScaffold(
-            destination = Destination.PetHome,
-            state = UiState.Content(SectionPlaceholder("Pet Home", "Your pet's home will appear here.")),
+            destination = Destination.Home,
+            state = UiState.Content(SectionPlaceholder("Home page", "Today's quests will appear here.")),
             onNavigate = {},
             onRetry = {},
         )
@@ -354,7 +394,7 @@ fun PreviewPawQuest() {
 fun PreviewShowcase() {
     PawQuestTheme {
         PawQuestScaffold(
-            destination = Destination.Profile,
+            destination = Destination.Explore,
             state = UiState.Content(SectionPlaceholder("Design System", "PawQuest 3D mobile design system showcase.")),
             onNavigate = {},
             onRetry = {},

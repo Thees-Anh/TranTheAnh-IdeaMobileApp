@@ -73,13 +73,16 @@ fun PetHomeScreen(
             Row(Modifier.fillMaxWidth().heightIn(min=44.dp).padding(horizontal=4.dp),verticalAlignment=Alignment.CenterVertically,
                 horizontalArrangement=Arrangement.spacedBy(8.dp)) {
                 Column(Modifier.weight(1f)) {
-                    Text(tr("PawQuest"),style=PawQuestTheme.typography.titleLarge,color=c.textPrimary)
+                    Text(tr("Pet Room"),style=PawQuestTheme.typography.titleLarge,color=c.textPrimary,
+                        modifier=Modifier.semantics {heading()})
                     Text(tr("$name's little world"),style=PawQuestTheme.typography.labelSmall,color=c.textSecondary)
                 }
-                CurrencyBalances(snapshot?.coins ?: coins,Modifier.widthIn(max=230.dp))
+                // The wallet lives on Home and Explore; the room header stays compact so care controls fit.
+                if(LocalOpenSettings.current==null) CurrencyBalances(snapshot?.coins ?: coins,Modifier.widthIn(max=230.dp))
                 if(showDebugControls) IconButton(onClick={studio=true}) {
                     Icon(PawQuestIcons.Settings,"Animation preview",Modifier.size(20.dp),tint=c.textSecondary)
                 }
+                LocalOpenSettings.current?.let {AvatarButton(it,Modifier.size(44.dp))}
             }
             Row(Modifier.fillMaxWidth().padding(horizontal=6.dp),verticalAlignment=Alignment.CenterVertically,
                 horizontalArrangement=Arrangement.spacedBy(8.dp)) {

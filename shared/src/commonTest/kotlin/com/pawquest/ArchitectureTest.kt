@@ -31,8 +31,8 @@ class ArchitectureTest {
         try {
             val repository = container.koin.get<PlaceholderRepository>()
             assertSame(repository, container.koin.get<PlaceholderRepository>())
-            assertEquals(5, Destination.entries.size)
-            assertEquals(5, Destination.entries.map { it.route }.distinct().size)
+            assertEquals(4, Destination.entries.size)
+            assertEquals(4, Destination.entries.map { it.route }.distinct().size)
             Destination.entries.forEach { destination ->
                 val model = container.koin.get<PlaceholderViewModel> { parametersOf(destination.route) }
                 assertIs<UiState.Loading>(model.state.value)
@@ -89,6 +89,15 @@ class ArchitectureTest {
 
     @Test
     fun unknownSavedRouteFallsBackToHome() {
-        assertEquals(Destination.PetHome, Destination.fromRoute("removed_destination"))
+        assertEquals(Destination.Home, Destination.fromRoute("removed_destination"))
+    }
+
+    @Test
+    fun legacyRoutesLandOnTheMatchingHabitFirstTab() {
+        assertEquals(Destination.PetRoom, Destination.fromRoute("pet_home"))
+        assertEquals(Destination.Explore, Destination.fromRoute("shop"))
+        assertEquals(Destination.PetRoom, Destination.fromRoute("inventory"))
+        assertEquals(Destination.Home, Destination.fromRoute("profile"))
+        assertEquals(Destination.Quests, Destination.fromRoute("quests"))
     }
 }

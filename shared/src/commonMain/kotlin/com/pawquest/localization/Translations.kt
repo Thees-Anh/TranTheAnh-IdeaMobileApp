@@ -912,4 +912,35 @@ Pet Exchange data unavailable.|Chưa tải được dữ liệu đổi thú cưn
 Wheel preview unavailable.|Không hiển thị được vòng quay.
 Lucky Wheel data unavailable.|Chưa tải được dữ liệu vòng quay may mắn.
 Item Exchange data unavailable.|Chưa tải được dữ liệu đổi vật phẩm.
+Home page|Trang chủ
+Pet Room|Phòng thú cưng
+Explore|Khám phá
+Room|Phòng
+Wardrobe|Tủ đồ
+Preferences|Tùy chọn
+Your progress|Tiến độ của bạn
+The little steps you have already taken.|Những bước nhỏ bạn đã đi được.
+Coins today|Xu hôm nay
+Rewarded sessions|Phiên có thưởng
+Daily limits: up to 5 rewarded sessions and 250 Coins per UTC day. You can still finish Focus sessions after the limit.|Giới hạn mỗi ngày: tối đa 5 phiên có thưởng và 250 Xu mỗi ngày UTC. Sau giới hạn bạn vẫn có thể hoàn thành phiên tập trung.
+Paw Bistro|Paw Bistro
+Tasty meals for your pet|Món ngon cho bé
+Cozy Shop|Cozy Shop
+Decorations & accessories|Trang trí & phụ kiện
+A little surprise gift|Món quà bất ngờ
+Try your luck!|Thử vận may nhé!
+Exchange|Đổi quà
+Trade shards for gifts|Đổi mảnh lấy quà
+Collection|Bộ sưu tập
+Your companion treasures|Kho báu của bạn
+Your wallet|Ví của bạn
+Shops & activities|Cửa hàng và hoạt động
+Little games & cozy gifts.|Góc vui chơi & quà tặng nhỏ xinh.
+‹ Explore|‹ Khám phá
+Open settings|Mở cài đặt
+PawQuest · Your cozy space|PawQuest · Góc nhỏ của bạn
+Hello, friend!|Xin chào, bạn!
+One small step is still progress.|Một bước nhỏ cũng là tiến bộ.
+Today's quests will appear here.|Nhiệm vụ hôm nay sẽ hiển thị ở đây.
+Shops and activities will appear here.|Cửa hàng và hoạt động sẽ hiển thị ở đây.
 """

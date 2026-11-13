@@ -122,10 +122,10 @@ class MysteryShopFixtureActivity : ComponentActivity() {
             val state by model.state.collectAsState()
             val exchangeState by exchangeModel.state.collectAsState()
             LaunchedEffect(exchangeState.receipt?.id) {exchangeState.receipt?.let {model.refreshAfterExchange(it.balanceAfter)}}
-            var destination by remember { mutableStateOf(Destination.Shop) }
+            var destination by remember { mutableStateOf(Destination.Explore) }
             PawQuestTheme {
                 PawQuestScaffold(destination,UiState.Content(SectionPlaceholder("Shop","")),{destination=it},{},
-                    shopContent={ modifier -> ShopScreen(shop,state.coins ?: 1000,modifier,itemShards=state.itemShards,itemCaseModel=model,
+                    exploreContent={ modifier -> ShopScreen(shop,state.coins ?: 1000,modifier,itemShards=state.itemShards,itemCaseModel=model,
                         casePreview={MysteryCasePreview(it)},caseAnimation={animation,m->MysteryCasePreview(m,animation)},
                         onViewCaseItem={testInventoryViews++},onUseCaseReward={testEquipActions++},
                         actionableCaseItemIds=setOf("e2300000-0000-0000-0000-000000000005","e2300000-0000-0000-0000-000000000003"),exchangeModel=exchangeModel,
@@ -183,7 +183,7 @@ class MysteryShopUiDeviceTest {
             SystemClock.sleep(500) // Wait for horizontal scroll/fling to settle before hit testing.
             click("Mystery Box")
             waitText("Case preview"); waitText("Item Shards: 75")
-            waitText("Pet Home"); waitText("Inventory"); waitText("Profile")
+            waitText("Home page"); waitText("Pet Room"); waitText("Explore")
             var diagnostics=""
             val diagnosticReady=java.util.concurrent.CountDownLatch(1)
             instrumentation.runOnMainSync {

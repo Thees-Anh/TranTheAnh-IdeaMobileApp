@@ -70,267 +70,87 @@ import com.pawquest.presentation.quests.QuestManagementState
 import com.pawquest.presentation.theme.PawQuestColors
 import com.pawquest.presentation.theme.PawQuestTheme
 
-enum class ProfileViewTab {
-    ALL,
-    DASHBOARD,
-    PROFILE,
-}
-
-/**
- * PawQuest Portrait Progress Dashboard and Profile Screen.
- *
- * Implements:
- * - Single-column portrait scrollable layout with compact cards and responsive weekly bar chart
- * - Dashboard: completed quests today/week, daily reward progress (0-250 Coins),
- *   rewarded session count (0-5), pet level & XP, weekly completion statistics
- * - Profile: username, pet name, account info, basic settings, secure logout
- * - Real repository and ViewModel data integration
- * - Navigation smoke test compatibility: header text "Your journey, one little quest at a time."
- */
+/** Account, preferences and sign-out, opened from the avatar button on every tab. */
 @Composable
-fun ProfileDashboardScreen(
+fun SettingsSheetContent(
     account: UserAccount,
-    questState: QuestManagementState,
     petState: PetState,
-    focusState: FocusState,
     userCoins: Long,
     modifier: Modifier = Modifier,
     onLogout: (() -> Unit)? = null,
     logoutBusy: Boolean = false,
     logoutError: String? = null,
     onDeleteAccount: ((String) -> Unit)? = null,
-    onRefresh: (() -> Unit)? = null,
 ) {
     val colors = PawQuestTheme.colors
-    var selectedTab by rememberSaveable { mutableStateOf(ProfileViewTab.ALL) }
     var showLogoutConfirm by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
     // The password is deliberately not saveable: it never enters saved instance state.
     var deletePassword by remember { mutableStateOf("") }
-
-    // Settings local toggles
-    val companionSettings=com.pawquest.presentation.platform.LocalCompanionSettings.current
+    val companionSettings = com.pawquest.presentation.platform.LocalCompanionSettings.current
     var hapticsEnabled by rememberSaveable { mutableStateOf(true) }
-
-    // Derived statistics from real state
-    val habit=com.pawquest.presentation.progress.LocalProgress.current?.state?.snapshot
-    val completedToday = habit?.todayCount ?: 0
-    val rewardedSessionsCount = (habit?.rewardedToday ?: 0).coerceIn(0,5)
-    val dailyCoinsEarned = habit?.coinsToday ?: 0
-    val maxDailyCoins = 250
-
-    val completedThisWeek = habit?.week?.sumOf {it.count} ?: 0
-
-    // Pet progress calculation
     val petXp = petState.snapshot?.pet?.progress?.totalXp ?: account.petXp
-    val petProgress = remember(petXp) { PetProgress(petXp) }
     val petName = petState.snapshot?.pet?.name ?: account.petName
 
     Column(
         modifier = modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        // 1. Top Header: Title, Navigation smoke subtitle, Balance Badges
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(modifier = Modifier.weight(1f, fill = false)) {
+        Text(
+            text = tr("Settings"),
+            style = PawQuestTheme.typography.headlineLarge,
+            color = colors.textPrimary,
+            modifier = Modifier.semantics { heading() },
+        )
+        SectionHeader(
+            title = "Account Details",
+            subtitle = "Manage your authenticated PawQuest account",
+            icon = PawQuestIcons.User,
+        )
+        AccountInfoCard(account = account, petName = petName, userCoins = userCoins, petXp = petXp)
+        SectionHeader(
+            title = "Preferences",
+            subtitle = "Preferences and application controls",
+            icon = PawQuestIcons.Settings,
+        )
+        CompanionSettingsCard()
+        com.pawquest.localization.LanguageSelector()
+        com.pawquest.presentation.theme.AppearanceSelector()
+        SettingsCard(
+            soundEnabled = companionSettings?.state?.soundEnabled ?: true,
+            onSoundToggle = { companionSettings?.setSoundEnabled?.invoke(it) },
+            hapticsEnabled = hapticsEnabled,
+            onHapticsToggle = { hapticsEnabled = it },
+        )
+        if (logoutError != null) {
+            Surface(color = colors.errorContainer, shape = PawQuestTheme.shapes.card, modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = tr("Profile & Progress"),
-                    style = PawQuestTheme.typography.headlineLarge,
-                    color = colors.textPrimary,
-                    modifier = Modifier.semantics { heading() },
-                )
-                Text(
-                    text = tr("Your journey, one little quest at a time."),
+                    text = tr(logoutError),
                     style = PawQuestTheme.typography.bodyMedium,
-                    color = colors.textSecondary,
-                )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                com.pawquest.presentation.components.CurrencyBalances(userCoins,Modifier.widthIn(max=230.dp))
-            }
-        }
-
-        // 2. View Mode Selector Chips (All / Dashboard / Profile)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            ViewFilterChip(
-                label = "Overview",
-                icon = PawQuestIcons.Trophy,
-                selected = selectedTab == ProfileViewTab.ALL,
-                onClick = { selectedTab = ProfileViewTab.ALL },
-                modifier = Modifier.weight(1f),
-            )
-            ViewFilterChip(
-                label = "Dashboard",
-                icon = PawQuestIcons.ChartBar,
-                selected = selectedTab == ProfileViewTab.DASHBOARD,
-                onClick = { selectedTab = ProfileViewTab.DASHBOARD },
-                modifier = Modifier.weight(1f),
-            )
-            ViewFilterChip(
-                label = "Profile",
-                icon = PawQuestIcons.User,
-                selected = selectedTab == ProfileViewTab.PROFILE,
-                onClick = { selectedTab = ProfileViewTab.PROFILE },
-                modifier = Modifier.weight(1f),
-            )
-        }
-
-        if(selectedTab!=ProfileViewTab.PROFILE) com.pawquest.presentation.progress.HabitDashboard()
-        // 3. User Identity Hero Card (Shown in All and Profile)
-        if (selectedTab != ProfileViewTab.DASHBOARD) {
-            UserHeroCard(
-                displayName = account.displayName,
-                email = account.email,
-                petName = petName,
-                petLevel = petProgress.level.toInt(),
-                coins = userCoins,
-                totalXp = petXp,
-            )
-        }
-
-        // 4. Progress Dashboard Section (Shown in All and Dashboard)
-        if (selectedTab != ProfileViewTab.PROFILE) {
-            SectionHeader(
-                title = "Progress Dashboard",
-                subtitle = "Track your daily focus and pet growth",
-                icon = PawQuestIcons.ChartBar,
-            )
-
-            // Compact 2-column KPI Grid
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                CompactKpiCard(
-                    title = "Completed Today",
-                    value = "$completedToday",
-                    unit = "quests",
-                    subtext = "Goal: 5 / day",
-                    icon = PawQuestIcons.CheckCircle,
-                    tint = colors.primaryDark,
-                    containerColor = colors.primaryContainer,
-                    modifier = Modifier.weight(1f),
-                )
-                CompactKpiCard(
-                    title = "Completed This Week",
-                    value = "$completedThisWeek",
-                    unit = "quests",
-                    subtext = "Weekly active sessions",
-                    icon = PawQuestIcons.Calendar,
-                    tint = colors.petXpDark,
-                    containerColor = colors.petXpContainer,
-                    modifier = Modifier.weight(1f),
-                )
-            }
-
-            // Daily Reward Progress Card (0-250 Coins)
-            DailyCoinsProgressCard(
-                earnedCoins = dailyCoinsEarned,
-                maxCoins = maxDailyCoins,
-            )
-
-            // Rewarded Quest Count Card (0-5 sessions)
-            RewardedSessionCountCard(
-                completedCount = rewardedSessionsCount,
-                maxSessions = 5,
-            )
-
-            // Pet Level & XP Progress Card
-            PetLevelProgressCard(
-                petName = petName,
-                progress = petProgress,
-            )
-
-            // Responsive Weekly Completion Bar Chart
-            if(habit!=null) WeeklyCompletionBarChart(
-                dailyValues = habit.week.map {it.count},todayIndex=habit.today.dayOfWeek.ordinal,
-                weeklyTotal = completedThisWeek,
-            )
-        }
-
-        // 5. Profile & Settings Section (Shown in All and Profile)
-        if (selectedTab != ProfileViewTab.DASHBOARD) {
-            SectionHeader(
-                title = "Account Details",
-                subtitle = "Manage your authenticated PawQuest account",
-                icon = PawQuestIcons.User,
-            )
-
-            AccountInfoCard(
-                account = account,
-                petName = petName,
-                userCoins = userCoins,
-                petXp = petXp,
-            )
-
-            SectionHeader(
-                title = "Settings",
-                subtitle = "Preferences and application controls",
-                icon = PawQuestIcons.Settings,
-            )
-
-            CompanionSettingsCard()
-            com.pawquest.localization.LanguageSelector()
-            com.pawquest.presentation.theme.AppearanceSelector()
-            SettingsCard(
-                soundEnabled = companionSettings?.state?.soundEnabled ?: true,
-                onSoundToggle = { companionSettings?.setSoundEnabled?.invoke(it) },
-                hapticsEnabled = hapticsEnabled,
-                onHapticsToggle = { hapticsEnabled = it },
-            )
-
-            // Logout Error Notice
-            if (logoutError != null) {
-                Surface(
-                    color = colors.errorContainer,
-                    shape = PawQuestTheme.shapes.card,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(
-                        text = tr(logoutError),
-                        style = PawQuestTheme.typography.bodyMedium,
-                        color = colors.error,
-                        modifier = Modifier.padding(12.dp),
-                    )
-                }
-            }
-
-            // Logout Action Button
-            PawQuestButton(
-                text = "Sign Out",
-                onClick = { showLogoutConfirm = true },
-                variant = ButtonVariant.Outlined,
-                leadingIcon = PawQuestIcons.Logout,
-                loading = logoutBusy,
-                modifier = Modifier.fillMaxWidth().height(48.dp),
-            )
-
-            if (onDeleteAccount != null) {
-                PawQuestButton(
-                    text = "Delete account",
-                    onClick = { deletePassword = ""; showDeleteConfirm = true },
-                    variant = ButtonVariant.Ghost,
-                    enabled = !logoutBusy,
-                    labelColor = colors.error,
-                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    color = colors.error,
+                    modifier = Modifier.padding(12.dp),
                 )
             }
         }
-
+        if (onLogout != null) PawQuestButton(
+            text = "Sign Out",
+            onClick = { showLogoutConfirm = true },
+            variant = ButtonVariant.Outlined,
+            leadingIcon = PawQuestIcons.Logout,
+            loading = logoutBusy,
+            modifier = Modifier.fillMaxWidth().height(48.dp),
+        )
+        if (onDeleteAccount != null) PawQuestButton(
+            text = "Delete account",
+            onClick = { deletePassword = ""; showDeleteConfirm = true },
+            variant = ButtonVariant.Ghost,
+            enabled = !logoutBusy,
+            labelColor = colors.error,
+            modifier = Modifier.fillMaxWidth().height(48.dp),
+        )
         Spacer(modifier = Modifier.height(24.dp))
     }
 
@@ -388,7 +208,6 @@ fun ProfileDashboardScreen(
         )
     }
 
-    // Logout Confirmation Dialog
     if (showLogoutConfirm) {
         AlertDialog(
             onDismissRequest = { if (!logoutBusy) showLogoutConfirm = false },
@@ -431,49 +250,72 @@ fun ProfileDashboardScreen(
     }
 }
 
-// -------------------------------------------------------------------------
-// Subcomponents
-// -------------------------------------------------------------------------
+/** "Your progress" sheet: streak, rewarded sessions, Coins today, daily limits and the habit history. */
+@Composable
+fun ProgressSheetContent(modifier: Modifier = Modifier) {
+    val colors = PawQuestTheme.colors
+    val habit = com.pawquest.presentation.progress.LocalProgress.current?.state?.snapshot
+    val rewardedSessionsCount = (habit?.rewardedToday ?: 0).coerceIn(0, 5)
+    val dailyCoinsEarned = habit?.coinsToday ?: 0
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                text = tr("Your progress"),
+                style = PawQuestTheme.typography.headlineLarge,
+                color = colors.textPrimary,
+                modifier = Modifier.semantics { heading() },
+            )
+            Text(tr("The little steps you have already taken."), style = PawQuestTheme.typography.bodyMedium,
+                color = colors.textSecondary)
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            ProgressTile("${habit?.currentStreak ?: 0}", "Streak", Modifier.weight(1f))
+            ProgressTile("$rewardedSessionsCount", "Rewarded sessions", Modifier.weight(1f))
+            ProgressTile("$dailyCoinsEarned", "Coins today", Modifier.weight(1f))
+        }
+        Surface(color = colors.accentGoldContainer, shape = PawQuestTheme.shapes.card, modifier = Modifier.fillMaxWidth()) {
+            Text(
+                tr("Daily limits: up to 5 rewarded sessions and 250 Coins per UTC day. You can still finish Focus sessions after the limit."),
+                style = PawQuestTheme.typography.labelMedium,
+                color = colors.accentGoldDark,
+                modifier = Modifier.padding(12.dp),
+            )
+        }
+        DailyCoinsProgressCard(earnedCoins = dailyCoinsEarned, maxCoins = 250)
+        RewardedSessionCountCard(completedCount = rewardedSessionsCount, maxSessions = 5)
+        if (habit != null) WeeklyCompletionBarChart(
+            dailyValues = habit.week.map { it.count }, todayIndex = habit.today.dayOfWeek.ordinal,
+            weeklyTotal = habit.week.sumOf { it.count },
+        )
+        com.pawquest.presentation.progress.HabitDashboard()
+        Spacer(modifier = Modifier.height(24.dp))
+    }
+}
 
 @Composable
-private fun ViewFilterChip(
-    label: String,
-    icon: ImageVector,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun ProgressTile(value: String, label: String, modifier: Modifier = Modifier) {
     val colors = PawQuestTheme.colors
-    Surface(
-        onClick = onClick,
-        shape = PawQuestTheme.shapes.pill,
-        color = if (selected) colors.primaryContainer else colors.surface,
-        border = BorderStroke(1.dp, if (selected) colors.primary else colors.borderLight),
-        shadowElevation = if (selected) 2.dp else 0.dp,
-        modifier = modifier.height(48.dp),
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = if (selected) colors.primaryDark else colors.textMuted,
-                modifier = Modifier.size(16.dp),
-            )
-            Text(
-                text = tr(label),
-                style = PawQuestTheme.typography.labelMedium.copy(
-                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
-                ),
-                color = if (selected) colors.primaryDark else colors.textSecondary,
-                maxLines = 1,
-            )
+    Surface(modifier = modifier, color = colors.surface, shape = PawQuestTheme.shapes.lg,
+        border = BorderStroke(1.dp, colors.borderLight.copy(alpha = .15f))) {
+        Column(Modifier.padding(vertical = 14.dp, horizontal = 6.dp).semantics(mergeDescendants = true) {},
+            horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(value, style = PawQuestTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
+                color = colors.textPrimary)
+            Text(tr(label), style = PawQuestTheme.typography.labelSmall, color = colors.textSecondary,
+                textAlign = TextAlign.Center, maxLines = 2)
         }
     }
 }
+
+// -------------------------------------------------------------------------
+// Subcomponents
+// -------------------------------------------------------------------------
 
 @Composable
 private fun SectionHeader(
@@ -513,180 +355,6 @@ private fun SectionHeader(
                 text = tr(subtitle),
                 style = PawQuestTheme.typography.bodyMedium,
                 color = colors.textSecondary,
-            )
-        }
-    }
-}
-
-@Composable
-private fun UserHeroCard(
-    displayName: String,
-    email: String?,
-    petName: String,
-    petLevel: Int,
-    coins: Long,
-    totalXp: Long,
-    modifier: Modifier = Modifier,
-) {
-    val colors = PawQuestTheme.colors
-    PawQuestCard(
-        modifier = modifier.fillMaxWidth(),
-        variant = CardVariant.SoftTint,
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
-        ) {
-            // Avatar Circle
-            Surface(
-                shape = CircleShape,
-                color = colors.primary,
-                modifier = Modifier.size(56.dp),
-                border = BorderStroke(2.dp, colors.primaryDark),
-                shadowElevation = 2.dp,
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = tr(displayName.take(1).uppercase()),
-                        style = PawQuestTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
-                        color = colors.onPrimary,
-                    )
-                }
-            }
-
-            // Info Column
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(3.dp),
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    Text(
-                        text = displayName,
-                        style = PawQuestTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                        color = colors.textPrimary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-                if (email != null) {
-                    Text(
-                        text = email,
-                        style = PawQuestTheme.typography.bodyMedium,
-                        color = colors.textSecondary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier.padding(top = 2.dp),
-                ) {
-                    Surface(
-                        shape = PawQuestTheme.shapes.pill,
-                        color = colors.petXpContainer,
-                        modifier = Modifier.padding(0.dp),
-                    ) {
-                        Text(
-                            text = tr("🐾 $petName · Lvl $petLevel"),
-                            style = PawQuestTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                            color = colors.petXpDark,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                        )
-                    }
-                    Surface(
-                        shape = PawQuestTheme.shapes.pill,
-                        color = colors.accentGoldContainer,
-                        modifier = Modifier.padding(0.dp),
-                    ) {
-                        Text(
-                            text = tr("🪙 $coins"),
-                            style = PawQuestTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                            color = colors.accentGoldDark,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun CompactKpiCard(
-    title: String,
-    value: String,
-    unit: String,
-    subtext: String,
-    icon: ImageVector,
-    tint: Color,
-    containerColor: Color,
-    modifier: Modifier = Modifier,
-) {
-    val colors = PawQuestTheme.colors
-    PawQuestCard(
-        modifier = modifier,
-        variant = CardVariant.Elevated,
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(4.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = tr(title),
-                    style = PawQuestTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = colors.textSecondary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
-                )
-                Surface(
-                    shape = CircleShape,
-                    color = containerColor,
-                    modifier = Modifier.size(28.dp),
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = tint,
-                            modifier = Modifier.size(15.dp),
-                        )
-                    }
-                }
-            }
-
-            Row(
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Text(
-                    text = tr(value),
-                    style = PawQuestTheme.typography.headlineLarge.copy(fontWeight = FontWeight.ExtraBold),
-                    color = colors.textPrimary,
-                )
-                Text(
-                    text = tr(unit),
-                    style = PawQuestTheme.typography.labelSmall,
-                    color = colors.textSecondary,
-                    modifier = Modifier.padding(bottom = 3.dp),
-                )
-            }
-
-            Text(
-                text = tr(subtext),
-                style = PawQuestTheme.typography.labelSmall,
-                color = colors.textMuted,
-                maxLines = 1,
             )
         }
     }
@@ -859,91 +527,6 @@ private fun RewardedSessionCountCard(
                 style = PawQuestTheme.typography.labelSmall,
                 color = if (completedCount >= maxSessions) colors.successDark else colors.textSecondary,
             )
-        }
-    }
-}
-
-@Composable
-private fun PetLevelProgressCard(
-    petName: String,
-    progress: PetProgress,
-    modifier: Modifier = Modifier,
-) {
-    val colors = PawQuestTheme.colors
-    val progressFraction = (progress.xpInLevel.toFloat() / PetCareBalance.xpPerLevel).coerceIn(0f, 1f)
-    val animatedProgress by animateFloatAsState(
-        targetValue = progressFraction,
-        animationSpec = tween(durationMillis = 600),
-    )
-
-    PawQuestCard(
-        modifier = modifier.fillMaxWidth(),
-        variant = CardVariant.Elevated,
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(4.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Icon(
-                        imageVector = PawQuestIcons.StarXp,
-                        contentDescription = null,
-                        tint = colors.petXp,
-                        modifier = Modifier.size(20.dp),
-                    )
-                    Text(
-                        text = tr("$petName's Level & XP"),
-                        style = PawQuestTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = colors.textPrimary,
-                    )
-                }
-                Surface(
-                    shape = PawQuestTheme.shapes.pill,
-                    color = colors.petXpContainer,
-                ) {
-                    Text(
-                        text = tr("Level ${progress.level}"),
-                        style = PawQuestTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                        color = colors.petXpDark,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                    )
-                }
-            }
-
-            // Progress bar
-            LinearProgressIndicator(
-                progress = { animatedProgress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(10.dp)
-                    .clip(PawQuestTheme.shapes.pill),
-                color = colors.petXp,
-                trackColor = colors.petXpContainer,
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    text = tr("${progress.xpInLevel} / ${PetCareBalance.xpPerLevel} XP in Level ${progress.level}"),
-                    style = PawQuestTheme.typography.labelSmall,
-                    color = colors.textSecondary,
-                )
-                Text(
-                    text = tr("${progress.xpToNextLevel} XP to Level ${progress.level + 1}"),
-                    style = PawQuestTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    color = colors.petXpDark,
-                )
-            }
         }
     }
 }

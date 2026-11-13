@@ -67,15 +67,10 @@ fun PawQuestScaffold(
     state: UiState<SectionPlaceholder>,
     onNavigate: (Destination) -> Unit,
     onRetry: () -> Unit,
-    petScene: (@Composable (Modifier) -> Unit)? = null,
-    account: UserAccount? = null,
-    onLogout: (() -> Unit)? = null,
-    logoutBusy: Boolean = false,
-    logoutError: String? = null,
+    homeContent: (@Composable (Modifier) -> Unit)? = null,
     questContent: (@Composable (Modifier) -> Unit)? = null,
-    shopContent: (@Composable (Modifier) -> Unit)? = null,
-    inventoryContent: (@Composable (Modifier) -> Unit)? = null,
-    profileContent: (@Composable (Modifier) -> Unit)? = null,
+    petRoomContent: (@Composable (Modifier) -> Unit)? = null,
+    exploreContent: (@Composable (Modifier) -> Unit)? = null,
     onReconnect: (() -> Unit)? = null,
 ) {
     val colors = PawQuestTheme.colors
@@ -141,72 +136,17 @@ fun PawQuestScaffold(
             }
         },
     ) { padding ->
-        if (destination == Destination.Quests && questContent != null) {
-            questContent(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding))
+        val content = when (destination) {
+            Destination.Home -> homeContent
+            Destination.Quests -> questContent
+            Destination.PetRoom -> petRoomContent
+            Destination.Explore -> exploreContent
+        }
+        if (content != null) {
+            content(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding))
             return@Scaffold
         }
-        if (destination == Destination.Shop && shopContent != null) {
-            shopContent(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding))
-            return@Scaffold
-        }
-        if (destination == Destination.Inventory && inventoryContent != null) {
-            inventoryContent(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding))
-            return@Scaffold
-        }
-        if (destination == Destination.Profile && profileContent != null) {
-            profileContent(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding))
-            return@Scaffold
-        }
-        if (destination == Destination.PetHome) {
-            if (petScene != null) {
-                petScene(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding))
-            } else {
-                com.pawquest.presentation.home.PetHomeScreen(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .consumeWindowInsets(padding),
-                    petName = "Mochi",
-                    showDebugControls = false,
-                ) { previewModifier ->
-                    androidx.compose.foundation.layout.Box(
-                        modifier = previewModifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            Surface(
-                                shape = PawQuestTheme.shapes.pill,
-                                color = colors.primaryContainer,
-                                modifier = Modifier.size(72.dp),
-                            ) {
-                                androidx.compose.foundation.layout.Box(contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        imageVector = PawQuestIcons.Paw,
-                                        contentDescription = tr("3D cat preview"),
-                                        modifier = Modifier.size(36.dp),
-                                        tint = colors.primaryDark,
-                                    )
-                                }
-                            }
-                            Text(
-                                text = tr("Cozy 3D Bedroom"),
-                                style = PawQuestTheme.typography.titleMedium,
-                                color = colors.primaryDark,
-                            )
-                            Text(
-                                text = tr("3D Cat Preview (Active on Device)"),
-                                style = PawQuestTheme.typography.labelSmall,
-                                color = colors.textSecondary,
-                            )
-                        }
-                    }
-                }
-            }
-            return@Scaffold
-        }
+        // Previews and tests without wired features show the section heading and design-system samples.
         StateContent(
             state = state,
             onRetry = onRetry,
@@ -214,7 +154,6 @@ fun PawQuestScaffold(
                 .padding(padding)
                 .consumeWindowInsets(padding),
         ) { placeholder ->
-            // Top branding, heading & description
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -233,96 +172,7 @@ fun PawQuestScaffold(
                     textAlign = TextAlign.Center,
                 )
             }
-
-            // Top Status Bar (Coins & XP)
-            CurrencyHeaderBar(
-                coins = 120,
-                xp = 65,
-                level = 2,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
-            )
-
-            // Section Specific Design System Content
-            when (destination) {
-                Destination.PetHome -> {
-                    PetStatsOverview(
-                        hunger = 85,
-                        happiness = 92,
-                        energy = 70,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    PawQuestCard(
-                        variant = CardVariant.SoftTint,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text(
-                                text = tr("Your Cat is Feeling Great! 🐾"),
-                                style = PawQuestTheme.typography.titleMedium,
-                                color = colors.primaryDark,
-                            )
-                            Text(
-                                text = tr("Keep your cat healthy and happy by feeding and playing after focus quests."),
-                                style = PawQuestTheme.typography.bodyMedium,
-                                color = colors.textSecondary,
-                            )
-                        }
-                    }
-                }
-                Destination.Quests -> {
-                    var sampleQuestStatus by remember { mutableStateOf(QuestStatus.Ready) }
-                    QuestCard(
-                        title = "25-Minute Focus Session",
-                        durationMinutes = 25,
-                        category = "Productivity",
-                        status = sampleQuestStatus,
-                        onStartClick = { sampleQuestStatus = QuestStatus.InProgress },
-                    )
-                    QuestCard(
-                        title = "Quick Review Quest",
-                        durationMinutes = 10,
-                        category = "Habit",
-                        status = QuestStatus.Claimable,
-                        onClaimClick = {},
-                    )
-                }
-                Destination.Shop -> {
-                    PawQuestEmpty(
-                        title = "Shop Opening Soon",
-                        message = placeholder.message,
-                        icon = PawQuestIcons.Sparkle,
-                        actionText = "Earn Coins in Quests",
-                        onActionClick = { onNavigate(Destination.Quests) },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-                Destination.Inventory -> {
-                    PawQuestEmpty(
-                        title = "Backpack Empty",
-                        message = placeholder.message,
-                        icon = PawQuestIcons.Trophy,
-                        actionText = "Visit Shop",
-                        onActionClick = { onNavigate(Destination.Shop) },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-                Destination.Profile -> {
-                    if (account != null && onLogout != null) {
-                        PawQuestCard(modifier = Modifier.fillMaxWidth(), variant = CardVariant.Outlined) {
-                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                Text(account.displayName, style = PawQuestTheme.typography.titleLarge)
-                                account.email?.let { Text(tr(it)) }
-                                Text(tr("Your cat: ${account.petName}"))
-                                Text(tr("Coins: ${account.coins} · Pet XP: ${account.petXp}"))
-                                logoutError?.let { Text(tr(it)) }
-                                PawQuestButton("Sign out", onLogout, Modifier.fillMaxWidth(),
-                                    variant = ButtonVariant.Outlined, loading = logoutBusy)
-                            }
-                        }
-                    }
-                    DesignSystemShowcase(modifier = Modifier.fillMaxWidth())
-                }
-            }
+            DesignSystemShowcase(modifier = Modifier.fillMaxWidth())
         }
     }
 }

@@ -4,9 +4,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.pawquest.presentation.icons.CartoonIcons
 
 val Destination.icon: ImageVector get() = when(this) {
-    Destination.PetHome -> CartoonIcons.Home
+    Destination.Home -> CartoonIcons.Home
     Destination.Quests -> CartoonIcons.Quest
-    Destination.Shop -> CartoonIcons.Shop
-    Destination.Inventory -> CartoonIcons.Inventory
-    Destination.Profile -> CartoonIcons.Profile
+    Destination.PetRoom -> CartoonIcons.Profile
+    Destination.Explore -> CartoonIcons.Shop
 }

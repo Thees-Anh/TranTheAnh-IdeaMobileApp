@@ -58,6 +58,7 @@ fun InventoryScreen(
     onUseItem: ((InventoryItem) -> Unit)? = null,
     showPetCollection: Boolean = false,
     onPetCollectionShown: ()->Unit = {},
+    showHeader: Boolean = true,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val gridState=rememberLazyGridState()
@@ -73,7 +74,7 @@ fun InventoryScreen(
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         // Top Header: Title, Navigation smoke subtitle, Item Count Badge
-        Row(
+        if(showHeader) Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,

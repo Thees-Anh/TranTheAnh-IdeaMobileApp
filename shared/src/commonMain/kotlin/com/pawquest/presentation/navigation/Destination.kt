@@ -1,13 +1,19 @@
 package com.pawquest.presentation.navigation
 
+/** Habit-first tabs: today's tasks lead, the pet and rewards follow. */
 enum class Destination(val route: String, val label: String) {
-    PetHome("pet_home", "Pet Home"),
+    Home("home", "Home page"),
     Quests("quests", "Quests"),
-    Shop("shop", "Shop"),
-    Inventory("inventory", "Inventory"),
-    Profile("profile", "Profile");
+    PetRoom("pet_home", "Pet Room"),
+    Explore("explore", "Explore");
 
     companion object {
-        fun fromRoute(route: String): Destination = entries.firstOrNull { it.route == route } ?: PetHome
+        /** Routes from notifications, widgets and older builds still land on the matching new tab. */
+        fun fromRoute(route: String): Destination = when (route) {
+            "shop" -> Explore
+            "inventory" -> PetRoom
+            "profile" -> Home
+            else -> entries.firstOrNull { it.route == route } ?: Home
+        }
     }
 }
