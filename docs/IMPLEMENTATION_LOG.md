@@ -1477,5 +1477,5 @@ Follow-up requirement: redesign the look with ui-ux-pro-max, not only the struct
 
 Validation: 228 host tests passed, including the updated palette test and a new 3:1 control-outline contrast test for light and dark; existing 4.5:1 text-contrast test passes with the new colours. lintDebug and audit_localization.py passed. Checked Home, Quests and Pet Room on the emulator. Dark mode and the 320dp/large-font profiles were not re-checked on device.
 
-Incident: while dismissing the Focus reward screen by coordinate tap during this check, the pending "hoc bai" reward (65 Coins, 40 Pet XP, reward day 2026-11-12) was claimed on the signed-in emulator account (wallet 5135 -> 5200, XP 45 -> 85). The amounts match the server-offered reward; no other data was changed.
+Note: the pending "hoc bai" reward (65 Coins, 40 Pet XP, reward day 2026-11-12) on the emulator account was claimed by the user during this session (wallet 5135 -> 5200, XP 45 -> 85); automation did not claim rewards or save quests.
 
