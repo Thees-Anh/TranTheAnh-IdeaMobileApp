@@ -7,14 +7,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.layout.ContentScale
+import com.pawquest.resources.Res
+import com.pawquest.resources.avatar_cat_3d
+import org.jetbrains.compose.resources.painterResource
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -22,7 +26,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pawquest.localization.tr
-import com.pawquest.presentation.icons.CartoonIcons
 import com.pawquest.presentation.theme.PawQuestTheme
 
 /** Opens the account/settings sheet from any tab's avatar button; null hides the button. */
@@ -52,8 +55,10 @@ fun AvatarButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Surface(onClick = onClick, shape = PawQuestTheme.shapes.lg, color = colors.surface,
         border = BorderStroke(1.5.dp, colors.borderLight),
         modifier = modifier.size(52.dp).semantics { contentDescription = label }) {
+        // Same 3D cat portrait as the launcher icon, so the in-app button matches the home screen.
         Box(contentAlignment = Alignment.Center) {
-            Icon(CartoonIcons.Profile, null, Modifier.size(32.dp), tint = Color.Unspecified)
+            Image(painterResource(Res.drawable.avatar_cat_3d), null,
+                Modifier.padding(4.dp), contentScale = ContentScale.Fit)
         }
     }
 }

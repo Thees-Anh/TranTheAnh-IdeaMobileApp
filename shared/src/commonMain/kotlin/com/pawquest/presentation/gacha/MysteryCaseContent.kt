@@ -81,7 +81,7 @@ fun MysteryCaseContent(model: ItemCaseViewModel,coins: Long,itemNames: Map<Strin
                     if(state.rejection?.reason==ItemCaseRejection.PET_NEEDS_CARE && petNeed==null)
                         Text(tr("Your pet is hungry or thirsty. Care for it before opening a Mystery Box."),color=colors.error)
                     PawQuestButton(text="Open Case",onClick={panel="confirm"},enabled=canOpen,modifier=Modifier.fillMaxWidth(),
-                        trailingContent={CurrencyPrice(config?.priceCoins?.toLong(),com.pawquest.presentation.icons.PawQuestIcons.Coin,"Coins")})
+                        trailingContent={CurrencyPrice(config?.priceCoins?.toLong(),ShardIcons.Coin,"Coins")})
                     if(state.error!=null || state.synchronizationError!=null) PawQuestButton("Retry",model::retry,variant=ButtonVariant.Secondary)
                     if(state.rejection?.reason?.canDismiss==true) PawQuestButton("Close",model::dismissRejection,variant=ButtonVariant.Secondary)
                 }

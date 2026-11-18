@@ -542,9 +542,9 @@ private fun ShopItemCard(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Icon(
-                    imageVector = PawQuestIcons.Coin,
+                    imageVector = com.pawquest.presentation.components.ShardIcons.Coin,
                     contentDescription = null,
-                    tint = colors.accentGoldDark,
+                    tint = androidx.compose.ui.graphics.Color.Unspecified,
                     modifier = Modifier.size(14.dp),
                 )
                 Text(

@@ -8,6 +8,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -30,6 +32,26 @@ object ShardIcons {
             fill=SolidColor(Color(0xFFFFD35D)),stroke=SolidColor(Color(0xFF93611F)),strokeLineWidth=1.5f)
         .addPath(addPathNodes("M12,7 L13.5,10 L17,10.5 L14.5,13 L15,16.5 L12,15 L9,16.5 L9.5,13 L7,10.5 L10.5,10 Z"),
             fill=SolidColor(Color(0xFF93611F))).build()
+    /** Glossy gold paw coin, drawn in the same layered style as the shard crystals. */
+    val Coin=ImageVector.Builder("Coins",24.dp,24.dp,24f,24f).apply {
+        fun circle(cx: Float,cy: Float,r: Float)="M${cx-r},$cy A$r,$r 0 1,0 ${cx+r},$cy A$r,$r 0 1,0 ${cx-r},$cy Z"
+        fun ellipse(cx: Float,cy: Float,rx: Float,ry: Float)="M${cx-rx},$cy A$rx,$ry 0 1,0 ${cx+rx},$cy A$rx,$ry 0 1,0 ${cx-rx},$cy Z"
+        fun grad(top: Long,bottom: Long)=Brush.linearGradient(listOf(Color(top),Color(bottom)),Offset(6f,3f),Offset(18f,21f))
+        addPath(addPathNodes(circle(12f,12.9f,10.4f)),fill=SolidColor(Color(0xFFA9661A)))          // coin edge / thickness
+        addPath(addPathNodes(circle(12f,11.6f,10.4f)),fill=grad(0xFFFFE89A,0xFFE3A52B))            // outer rim
+        addPath(addPathNodes(circle(12f,11.6f,7.6f)),fill=grad(0xFFE09A24,0xFFFFD45C))             // recessed face
+        addPath(addPathNodes(circle(12f,11.6f,7.6f)),fill=null,stroke=SolidColor(Color(0xFFB8741C)),strokeLineWidth=0.7f)
+        val paw=listOf(
+            "M12,11.6 C10.1,11.6 9,13.4 9.3,14.8 C9.5,15.9 10.7,16.2 12,15.9 C13.3,16.2 14.5,15.9 14.7,14.8 C15,13.4 13.9,11.6 12,11.6 Z",
+            ellipse(8.9f,10.6f,1.05f,1.35f),ellipse(10.8f,8.5f,1.05f,1.35f),
+            ellipse(13.2f,8.5f,1.05f,1.35f),ellipse(15.1f,10.6f,1.05f,1.35f)).joinToString(" ")
+        addPath(addPathNodes(paw),fill=SolidColor(Color(0xFFB8741C)))                              // engraved shadow
+        addPath(addPathNodes(paw),fill=SolidColor(Color(0xFFFFF4C9)))
+        addPath(addPathNodes("M4.6,9.2 A8.2,8.2 0 0,1 10.4,3.7 L11,5 A6.8,6.8 0 0,0 6,9.7 Z"),
+            fill=SolidColor(Color.White.copy(alpha=0.75f)))                                        // gloss
+        addPath(addPathNodes("M19,2.2 L19.6,3.9 L21.3,4.5 L19.6,5.1 L19,6.8 L18.4,5.1 L16.7,4.5 L18.4,3.9 Z"),
+            fill=SolidColor(Color.White))                                                          // sparkle
+    }.build()
     val Pet=crystal("Pet Shards",Color(0xFF9256BE),Color(0xFFD8B4F0),
         "M9,14 C9,11 15,11 15,14 C17,18 7,18 9,14 Z M7,9 A1.3,1.7 0 1,0 9.6,9 A1.3,1.7 0 1,0 7,9 M10.7,7 A1.3,1.7 0 1,0 13.3,7 A1.3,1.7 0 1,0 10.7,7 M14.4,9 A1.3,1.7 0 1,0 17,9 A1.3,1.7 0 1,0 14.4,9")
     val Item=crystal("Item Shards",Color(0xFF258C9C),Color(0xFF9CE5DE),
@@ -82,6 +104,6 @@ object ShardIcons {
     Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(5.dp),
         modifier=Modifier.clearAndSetSemantics {contentDescription=if(amount==null) tr("Balances unavailable") else "${tr(label)}: $amount"}) {
         Text(amount?.toString() ?: "—",fontWeight=FontWeight.ExtraBold)
-        Icon(icon,null,Modifier.size(22.dp),tint=if(icon==ShardIcons.Ticket) Color.Unspecified else androidx.compose.material3.LocalContentColor.current)
+        Icon(icon,null,Modifier.size(22.dp),tint=Color.Unspecified)
     }
 }

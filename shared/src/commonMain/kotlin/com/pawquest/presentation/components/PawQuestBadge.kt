@@ -47,10 +47,10 @@ fun CoinBadge(
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Icon(
-                imageVector = PawQuestIcons.Coin,
+                imageVector = ShardIcons.Coin,
                 contentDescription = tr("Coins"),
-                modifier = Modifier.size(16.dp),
-                tint = colors.accentGoldDark,
+                modifier = Modifier.size(18.dp),
+                tint = androidx.compose.ui.graphics.Color.Unspecified,
             )
             Text(
                 text = tr(amount.toString()),
@@ -147,10 +147,10 @@ fun RewardIndicator(
                 horizontalArrangement = Arrangement.spacedBy(3.dp),
             ) {
                 Icon(
-                    imageVector = PawQuestIcons.Coin,
+                    imageVector = ShardIcons.Coin,
                     contentDescription = null,
                     modifier = Modifier.size(14.dp),
-                    tint = colors.accentGoldDark,
+                    tint = androidx.compose.ui.graphics.Color.Unspecified,
                 )
                 Text(
                     text = tr("+$coins"),

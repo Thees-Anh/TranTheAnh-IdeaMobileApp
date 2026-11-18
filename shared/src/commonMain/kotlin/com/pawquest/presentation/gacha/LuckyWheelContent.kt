@@ -86,7 +86,7 @@ internal fun wheelError(state: LuckyWheelState)=when(state.rejection) {
             if(b!=null && b.tickets<1) Text(tr("No Lucky Wheel Tickets. Choose Coins or earn a Ticket from the wheel."))
             petNeed?.let {PetNeedsCareCard(it)}
             PawQuestButton("Spin using Coins",{model.spin(WheelPayment.COINS)},enabled=state.canSpin && petNeed==null && b!=null && c!=null && b.coins>=c.priceCoins,modifier=Modifier.fillMaxWidth(),
-                trailingContent={CurrencyPrice(c?.priceCoins?.toLong(),com.pawquest.presentation.icons.PawQuestIcons.Coin,"Coins")})
+                trailingContent={CurrencyPrice(c?.priceCoins?.toLong(),ShardIcons.Coin,"Coins")})
             PawQuestButton("Spin using Ticket",{model.spin(WheelPayment.TICKET)},enabled=state.canSpin && petNeed==null && (b?.tickets ?: 0)>0,modifier=Modifier.fillMaxWidth(),variant=ButtonVariant.Secondary,
                 trailingContent={CurrencyPrice(1,ShardIcons.Ticket,"Lucky Wheel Ticket")})
             if(state.busy) Text(tr("Synchronizing..."))
