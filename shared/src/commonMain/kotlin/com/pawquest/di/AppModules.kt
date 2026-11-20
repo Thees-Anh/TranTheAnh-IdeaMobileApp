@@ -31,6 +31,7 @@ import com.pawquest.domain.usecase.ManageAuthentication
 import com.pawquest.presentation.auth.AuthenticationViewModel
 import org.koin.dsl.koinApplication
 import org.koin.dsl.module
+import kotlinx.coroutines.flow.map
 
 val dataModule = module {
     single<PlaceholderRepository> { LocalPlaceholderRepository() }
@@ -54,7 +55,8 @@ val presentationModule = module {
     factory {com.pawquest.presentation.gacha.LuckyWheelViewModel(get(),get(),get(),get(),get(),get())}
     factory {com.pawquest.presentation.gacha.ItemExchangeViewModel(get(),get(),get(),get())}
     factory { com.pawquest.presentation.gacha.ItemCaseViewModel(get(),get(),get(),get(),get(),get(),openItemCase=get()) }
-    factory { com.pawquest.presentation.shop.ShopViewModel(get(), get()) }
+    factory { com.pawquest.presentation.shop.ShopViewModel(get(), get(), get(),
+        get<AuthenticationRepository>().state.map { (it as? com.pawquest.domain.model.AuthenticationState.SignedIn)?.account?.userId }) }
     factory { com.pawquest.presentation.inventory.InventoryViewModel(get(),get(),get()) }
     // The lifecycle ViewModelStore owns instances, not the application singleton scope.
     factory { (sectionId: String) -> PlaceholderViewModel(sectionId, get()) }
@@ -83,6 +85,7 @@ fun createAppContainer(
     luckyWheel: com.pawquest.domain.repository.LuckyWheelRepository = com.pawquest.data.repository.UnconfiguredLuckyWheelRepository(),
     petExchange: com.pawquest.domain.repository.PetShardExchangeRepository = com.pawquest.data.repository.UnconfiguredLuckyWheelRepository(),
     pendingLucky: com.pawquest.domain.repository.PendingLuckyOperationStore = com.pawquest.domain.repository.UnavailableLuckyOperationStore(),
+    pendingPurchases: com.pawquest.domain.repository.PendingPurchaseStore = com.pawquest.domain.repository.InMemoryPendingPurchaseStore(),
 ) = koinApplication {
     modules(dataModule, domainModule, presentationModule, module {
         single<AuthenticationRepository> { authentication }
@@ -102,5 +105,6 @@ fun createAppContainer(
         single<com.pawquest.domain.repository.LuckyWheelRepository> {luckyWheel}
         single<com.pawquest.domain.repository.PetShardExchangeRepository> {petExchange}
         single<com.pawquest.domain.repository.PendingLuckyOperationStore> {pendingLucky}
+        single<com.pawquest.domain.repository.PendingPurchaseStore> {pendingPurchases}
     })
 }

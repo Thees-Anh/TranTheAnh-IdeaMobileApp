@@ -3,6 +3,7 @@ import java.util.Properties
 import java.util.Base64
 import java.net.URI
 import java.nio.file.Files
+import java.io.File
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 
@@ -21,6 +22,9 @@ fun quoted(value: String) = "\"" + value.replace("\\", "\\\\").replace("\"", "\\
     .replace("\n", "\\n").replace("\r", "\\r") + "\""
 val supabaseUrl = publicSetting("SUPABASE_URL")
 val supabaseKey = publicSetting("SUPABASE_PUBLISHABLE_KEY").ifBlank { publicSetting("SUPABASE_ANON_KEY") }
+// Public legal pages (Google Play User Data and account-deletion policies). Shown in the app.
+val privacyPolicyUrl = publicSetting("PAWQUEST_PRIVACY_POLICY_URL")
+val accountDeletionUrl = publicSetting("PAWQUEST_ACCOUNT_DELETION_URL")
 // Optional public development CA, scoped to this project's exact HTTPS host in DEBUG only.
 // No certificate/private key is committed; release builds keep Android's normal system trust.
 val developmentCaPath = publicSetting("PAWQUEST_DEBUG_CA_CERT")
@@ -65,6 +69,46 @@ androidComponents {
         variant.sources.res?.addGeneratedSourceDirectory(generateDebugTrust,GeneratePawQuestDebugTrust::outputDirectory)
     }
 }
+// The Play upload artifact must be signed, versioned and configured. assembleRelease stays
+// usable unsigned for local R8 checks; bundleRelease (what goes to Play) fails fast instead.
+abstract class VerifyPawQuestRelease : DefaultTask() {
+    @get:Input abstract val storeFile: org.gradle.api.provider.Property<String>
+    @get:Input abstract val signingComplete: org.gradle.api.provider.Property<Boolean>
+    @get:Input abstract val versionCode: org.gradle.api.provider.Property<String>
+    @get:Input abstract val backendUrl: org.gradle.api.provider.Property<String>
+    @get:Input abstract val backendKeyPresent: org.gradle.api.provider.Property<Boolean>
+    @get:Input abstract val privacyUrl: org.gradle.api.provider.Property<String>
+    @get:Input abstract val deletionUrl: org.gradle.api.provider.Property<String>
+
+    @TaskAction fun verify() {
+        val problems = buildList {
+            if (storeFile.get().isBlank() || !signingComplete.get())
+                add("PAWQUEST_RELEASE_STORE_FILE/_STORE_PASSWORD/_KEY_ALIAS/_KEY_PASSWORD must all be set")
+            else if (!File(storeFile.get()).isFile) add("Release keystore not found")
+            val code = versionCode.get().toIntOrNull()
+            if (code == null || code <= 0) add("PAWQUEST_VERSION_CODE must be set to a positive integer")
+            if (!backendUrl.get().startsWith("https://")) add("SUPABASE_URL must be an https:// project URL")
+            if (!backendKeyPresent.get()) add("SUPABASE_PUBLISHABLE_KEY must be set")
+            if (!privacyUrl.get().startsWith("https://")) add("PAWQUEST_PRIVACY_POLICY_URL must be an https:// URL")
+            if (!deletionUrl.get().startsWith("https://")) add("PAWQUEST_ACCOUNT_DELETION_URL must be an https:// URL")
+        }
+        if (problems.isNotEmpty()) throw GradleException(
+            "Release bundle is not publishable:\n - " + problems.joinToString("\n - "))
+    }
+}
+val verifyRelease = tasks.register<VerifyPawQuestRelease>("verifyPawQuestRelease") {
+    val store = publicSetting("PAWQUEST_RELEASE_STORE_FILE")
+    storeFile.set(if (store.isBlank()) "" else rootProject.file(store).absolutePath)
+    signingComplete.set(listOf("PAWQUEST_RELEASE_STORE_PASSWORD", "PAWQUEST_RELEASE_KEY_ALIAS",
+        "PAWQUEST_RELEASE_KEY_PASSWORD").all { publicSetting(it).isNotBlank() })
+    versionCode.set(publicSetting("PAWQUEST_VERSION_CODE"))
+    backendUrl.set(supabaseUrl)
+    backendKeyPresent.set(supabaseKey.isNotBlank())
+    privacyUrl.set(privacyPolicyUrl)
+    deletionUrl.set(accountDeletionUrl)
+}
+tasks.matching { it.name == "bundleRelease" }.configureEach { dependsOn(verifyRelease) }
+
 require(!supabaseKey.startsWith("sb_secret_")) { "Only a Supabase publishable/anon key belongs in the Android app." }
 if (supabaseKey.isNotBlank() && !supabaseKey.startsWith("sb_publishable_")) {
     val role = runCatching {
@@ -101,6 +145,8 @@ android {
     defaultConfig {
         buildConfigField("String", "SUPABASE_URL", quoted(supabaseUrl))
         buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", quoted(supabaseKey))
+        buildConfigField("String", "PRIVACY_POLICY_URL", quoted(privacyPolicyUrl))
+        buildConfigField("String", "ACCOUNT_DELETION_URL", quoted(accountDeletionUrl))
         applicationId = "com.pawquest"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
@@ -137,6 +183,13 @@ android {
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+    // The app switches language in-app (Vietnamese/English), so every language must ship
+    // in the base APK instead of Play's per-device language splits.
+    bundle {
+        language {
+            enableSplit = false
+        }
     }
     buildFeatures {
         compose = true

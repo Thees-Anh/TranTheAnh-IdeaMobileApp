@@ -207,6 +207,7 @@ fun AuthenticationScreen(
                                     AuthMode.RESET -> "Back to sign in"
                                 }), color = colors.textPrimary)
                             }
+                            com.pawquest.presentation.components.PrivacyPolicyLink(enabled = !action.busy)
                         }
                     }
                 }

@@ -1,10 +1,19 @@
 rootProject.name = "PawQuest"
 
+// Release and CI builds pass -Ppawquest.officialRepositoriesOnly=true (or set
+// PAWQUEST_OFFICIAL_REPOSITORIES_ONLY=true) so every artifact comes from Google Maven or
+// Maven Central. Local mirrors below exist only for development on a metered connection;
+// gradle/verification-metadata.xml pins checksums regardless of which repository served a file.
+val officialRepositoriesOnly = (providers.gradleProperty("pawquest.officialRepositoriesOnly").orNull
+    ?: providers.environmentVariable("PAWQUEST_OFFICIAL_REPOSITORIES_ONLY").orNull) == "true"
+
 pluginManagement {
+    val officialOnly = (providers.gradleProperty("pawquest.officialRepositoriesOnly").orNull
+        ?: providers.environmentVariable("PAWQUEST_OFFICIAL_REPOSITORIES_ONLY").orNull) == "true"
     repositories {
-        // Optional verified local artifacts for builds on a metered connection.
+        // Optional local copies of official artifacts (checksums verified) for metered connections.
         val localRepository = file(".gradle/local-maven")
-        if (localRepository.isDirectory) {
+        if (!officialOnly && localRepository.isDirectory) {
             maven { url = uri(localRepository) }
         }
         google {
@@ -14,6 +23,7 @@ pluginManagement {
                 includeGroupAndSubgroups("com.google")
             }
         }
+        // Maven Central (official host URL; kept so existing caches stay valid).
         maven { url = uri("https://repo1.maven.org/maven2") }
         mavenCentral()
         gradlePluginPortal()
@@ -22,8 +32,7 @@ pluginManagement {
 
 dependencyResolutionManagement {
     repositories {
-        // Native rendering AARs must come from Maven Central; the optional mirror
-        // used below blocks SceneView binary artifacts in this environment.
+        // Native rendering AARs must come from Maven Central.
         exclusiveContent {
             forRepository { maven { url = uri("https://repo1.maven.org/maven2") } }
             filter {
@@ -31,9 +40,10 @@ dependencyResolutionManagement {
                 includeGroup("com.google.android.filament")
             }
         }
-        // Browser-downloaded artifacts; restrict this to manually supplied dependencies.
+        // Development only: browser-downloaded copies of official artifacts, restricted to
+        // the modules below. Never used by release/CI builds.
         val manualRepository = file(".gradle/manual-maven")
-        if (manualRepository.isDirectory) {
+        if (!officialRepositoriesOnly && manualRepository.isDirectory) {
             maven {
                 url = uri(manualRepository)
                 content {
@@ -63,9 +73,10 @@ dependencyResolutionManagement {
                 includeGroupAndSubgroups("com.google")
             }
         }
-        maven { url = uri("https://maven.aliyun.com/repository/public") }
         maven { url = uri("https://repo1.maven.org/maven2") }
         mavenCentral()
+        // Development only: third-party mirror for networks where Maven Central is slow.
+        if (!officialRepositoriesOnly) maven { url = uri("https://maven.aliyun.com/repository/public") }
     }
 }
 

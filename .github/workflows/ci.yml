@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "release/**"]
+    tags: ["v*"]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Every dependency from Google Maven / Maven Central only (see settings.gradle.kts).
+  PAWQUEST_OFFICIAL_REPOSITORIES_ONLY: "true"
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK packages
+        run: sdkmanager "platforms;android-37" "build-tools;36.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Repository validators
+        run: |
+          python3 tools/validation/check_project_structure.py
+          python3 tools/validation/audit_localization.py
+          python3 tools/balance/generate_pet_care_balance.py --check
+          python3 tools/balance/generate_hydration.py --check
+          python3 tools/balance/generate_play_balance.py --check
+          python3 tools/balance/generate_gacha_care_gate.py --check
+      - name: Unit tests, release lint, release build (R8, unsigned)
+        run: ./gradlew --no-configuration-cache --dependency-verification=strict :shared:testAndroidHostTest :androidApp:lintRelease :androidApp:assembleRelease
+      - name: 16 KB page-size alignment of native libraries
+        run: |
+          for apk in androidApp/build/outputs/apk/release/*.apk; do
+            "$ANDROID_HOME/build-tools/36.0.0/zipalign" -c -P 16 -v 4 "$apk" | tail -n 1 | grep -q "Verification successful"
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-reports
+          path: |
+            shared/build/test-results/testAndroidHostTest
+            androidApp/build/reports/lint-results-release.html
+          retention-days: 14
+
+  database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["55439:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL 18 client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y postgresql-client-18
+      - name: Migrations, SQL/RLS suite and concurrency tests (disposable databases)
+        run: python3 tools/testing/test_database.py --pg-bin /usr/lib/postgresql/18/bin --port 55439
+
+  # Signed Play bundle, only for version tags and only when the upload key secrets exist.
+  bundle:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [android, database]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: release
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK packages
+        run: sdkmanager "platforms;android-37" "build-tools;36.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Restore upload keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.PAWQUEST_UPLOAD_KEYSTORE_BASE64 }}
+        run: echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+      - name: Build signed bundle
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          PAWQUEST_PRIVACY_POLICY_URL: ${{ vars.PAWQUEST_PRIVACY_POLICY_URL }}
+          PAWQUEST_ACCOUNT_DELETION_URL: ${{ vars.PAWQUEST_ACCOUNT_DELETION_URL }}
+          PAWQUEST_VERSION_CODE: ${{ vars.PAWQUEST_VERSION_CODE }}
+          PAWQUEST_RELEASE_STORE_FILE: ${{ runner.temp }}/upload.jks
+          PAWQUEST_RELEASE_STORE_PASSWORD: ${{ secrets.PAWQUEST_RELEASE_STORE_PASSWORD }}
+          PAWQUEST_RELEASE_KEY_ALIAS: ${{ secrets.PAWQUEST_RELEASE_KEY_ALIAS }}
+          PAWQUEST_RELEASE_KEY_PASSWORD: ${{ secrets.PAWQUEST_RELEASE_KEY_PASSWORD }}
+        run: PAWQUEST_VERSION_NAME="${GITHUB_REF_NAME#v}" ./gradlew --no-configuration-cache --dependency-verification=strict :androidApp:bundleRelease
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pawquest-release-aab
+          path: androidApp/build/outputs/bundle/release/*.aab
+          retention-days: 30

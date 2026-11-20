@@ -50,6 +50,7 @@ fun App(
     casePreview: (@Composable (Modifier)->Unit)? = null,
     caseAnimation: (@Composable (com.pawquest.presentation.gacha.ItemCaseAnimation, Modifier)->Unit)? = null,
     wheelPreview: (@Composable (com.pawquest.presentation.gacha.LuckyWheelAnimation, Modifier)->Unit)? = null,
+    legalLinks: com.pawquest.presentation.components.LegalLinks = com.pawquest.presentation.components.LegalLinks(),
 ) {
     val resolvedContainer = container ?: remember { createAppContainer() }
     DisposableEffect(resolvedContainer) {
@@ -62,6 +63,7 @@ fun App(
     val session by authentication.authenticationState.collectAsStateWithLifecycle()
     LaunchedEffect(session,platform) {platform?.authenticationChanged(session)}
     val action by authentication.action.collectAsStateWithLifecycle()
+    CompositionLocalProvider(com.pawquest.presentation.components.LocalLegalLinks provides legalLinks) {
     PawQuestTheme { com.pawquest.presentation.components.PortraitFrame {
         val signedIn = session as? AuthenticationState.SignedIn
         if (signedIn == null) {
@@ -81,6 +83,7 @@ fun App(
             }
         }
     } }
+    }
 }
 
 @Composable

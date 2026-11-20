@@ -2,3 +2,16 @@
 # Only publishable (sb_publishable_...) or legacy anon keys are mobile-safe.
 SUPABASE_URL=https://YOUR_PROJECT.supabase.co
 SUPABASE_PUBLISHABLE_KEY=
+
+# Release builds only (bundleRelease fails without them). See docs/operations/RELEASE_PROCESS.md.
+# Public legal pages (docs/legal/*.html after filling the placeholders and publishing).
+PAWQUEST_PRIVACY_POLICY_URL=https://YOUR_SITE/privacy-policy.html
+PAWQUEST_ACCOUNT_DELETION_URL=https://YOUR_SITE/account-deletion.html
+# versionCode = MAJOR*10000 + MINOR*100 + PATCH (1.0.0 -> 10000)
+PAWQUEST_VERSION_CODE=
+PAWQUEST_VERSION_NAME=
+# Upload key; keep the keystore outside the repository.
+PAWQUEST_RELEASE_STORE_FILE=
+PAWQUEST_RELEASE_STORE_PASSWORD=
+PAWQUEST_RELEASE_KEY_ALIAS=
+PAWQUEST_RELEASE_KEY_PASSWORD=

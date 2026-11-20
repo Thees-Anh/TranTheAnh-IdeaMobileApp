@@ -25,7 +25,7 @@ class PawQuestApplication : Application() {
         container = createAppContainer(repositories.authentication, repositories.quests, repositories.questSessions,
             repositories.focus,repositories.pets,repositories.items,repositories.inventory,repositories.equipment,repositories.room,repositories.progress,
             repositories.itemCases,repositories.shards,repositories.pendingItemCases,repositories.pendingItemExchange,
-            repositories.luckyWheel,repositories.petExchange,repositories.pendingLucky)
+            repositories.luckyWheel,repositories.petExchange,repositories.pendingLucky,repositories.pendingPurchases)
         companion=com.pawquest.companion.CompanionCoordinator(this,repositories)
     }
 }

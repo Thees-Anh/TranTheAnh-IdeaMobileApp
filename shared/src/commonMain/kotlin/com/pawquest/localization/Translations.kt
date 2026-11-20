@@ -552,6 +552,8 @@ Couldn't load shop items. Please check your connection and retry.|Không thể t
 Choose a valid quantity (1–100).|Chọn số lượng hợp lệ (1–100).
 Choose a valid item and quantity (1–100).|Chọn vật phẩm và số lượng hợp lệ (1–100).
 Couldn't confirm your purchase. Retry to check the same request safely.|Chưa xác nhận được giao dịch. Thử lại để kiểm tra cùng yêu cầu an toàn.
+Couldn't prepare your purchase safely. Nothing was charged; please retry.|Chưa chuẩn bị được giao dịch an toàn. Bạn chưa bị trừ Coins; vui lòng thử lại.
+Privacy Policy|Chính sách quyền riêng tư
 Head · 1 item per slot|Đầu · 1 món mỗi vị trí
 Face · 1 item per slot|Mặt · 1 món mỗi vị trí
 Neck · 1 item per slot|Cổ · 1 món mỗi vị trí

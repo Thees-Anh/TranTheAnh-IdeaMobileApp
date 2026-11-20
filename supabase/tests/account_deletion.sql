@@ -11,6 +11,10 @@ insert into public.quest_sessions(user_id,quest_id,duration_minutes,started_at,e
  ('f6100000-0000-0000-0000-000000000001','f6200000-0000-0000-0000-000000000001',5,'2026-03-08T05:25:00Z','2026-03-08T05:30:00Z','completed'),
  ('f6100000-0000-0000-0000-000000000002','f6200000-0000-0000-0000-000000000002',5,'2026-03-08T05:25:00Z','2026-03-08T05:30:00Z','completed');
 
+-- User-entered pet names (personal data) for both accounts.
+update public.pets set name='Nguyen Van A' where user_id='f6100000-0000-0000-0000-000000000001';
+update public.pets set name='Keep This Name' where user_id='f6100000-0000-0000-0000-000000000002';
+
 select pg_temp.deletion_assert(not has_function_privilege('anon','public.delete_my_account()','EXECUTE'),'anonymous deletion prohibited');
 select pg_temp.deletion_assert(has_function_privilege('authenticated','public.delete_my_account()','EXECUTE'),'signed-in users can delete themselves');
 
@@ -30,6 +34,9 @@ select pg_temp.deletion_assert(not exists(select 1 from auth.users where id='f61
 select pg_temp.deletion_assert((select display_name='Deleted user' and deleted_at is not null from public.profiles where id='f6100000-0000-0000-0000-000000000001'),'profile is an anonymous tombstone');
 select pg_temp.deletion_assert((select bool_and(title='Deleted quest' and description='' and due_at is null and archived) from public.quests where user_id='f6100000-0000-0000-0000-000000000001'),'quest text erased');
 select pg_temp.deletion_assert((select bool_and(title_snapshot='Deleted quest') from public.quest_sessions where user_id='f6100000-0000-0000-0000-000000000001'),'session titles erased');
+select pg_temp.deletion_assert((select bool_and(p.name=s.name) from public.pets p join public.pet_species s on s.code=p.species_code
+    where p.user_id='f6100000-0000-0000-0000-000000000001'),'pet name reset to the species default');
+select pg_temp.deletion_assert(not exists(select 1 from public.pets where name='Nguyen Van A'),'no user-entered pet name remains');
 select pg_temp.deletion_assert(current_setting('pawquest.erasing_user',true)='','erasure flag cleared');
 
 -- Other accounts are untouched.
@@ -37,6 +44,7 @@ select pg_temp.deletion_assert(exists(select 1 from auth.users where id='f610000
 select pg_temp.deletion_assert((select title='Other owner' from public.quests where id='f6200000-0000-0000-0000-000000000002'),'other quests kept');
 select pg_temp.deletion_assert((select bool_and(title_snapshot='Other owner') from public.quest_sessions where user_id='f6100000-0000-0000-0000-000000000002'),'other sessions kept');
 select pg_temp.deletion_assert((select deleted_at is null from public.profiles where id='f6100000-0000-0000-0000-000000000002'),'other profile active');
+select pg_temp.deletion_assert((select name='Keep This Name' from public.pets where user_id='f6100000-0000-0000-0000-000000000002'),'other pet name kept');
 
 -- A deleted identity cannot call it again; an anonymous caller is rejected.
 do $$begin

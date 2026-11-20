@@ -14,3 +14,11 @@
 }
 -keep,includedescriptorclasses class com.pawquest.**$$serializer { *; }
 
+
+# Release builds drop verbose/debug/info logging (e.g. the inactive SceneView renderer's
+# diagnostics). Warnings and errors stay for crash triage.
+-assumenosideeffects class android.util.Log {
+    public static int v(...);
+    public static int d(...);
+    public static int i(...);
+}

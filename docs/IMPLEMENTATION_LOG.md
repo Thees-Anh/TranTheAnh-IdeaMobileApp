@@ -1,5 +1,26 @@
 # Implementation log
 
+## 2026-11-20 - Release 1.0.0 remediation (audit action plan)
+
+- Account deletion: migration `20261120003500_account_deletion_pet_names.sql` also resets the
+  user-entered pet name to the species default; `account_deletion.sql` asserts it.
+- Shop: purchases are journaled per account in a no-backup AtomicFile before sending
+  (`PendingPurchaseStore`); after a lost response and process death the app re-sends the
+  same request ID automatically and clears the journal once the server answers.
+- Privacy policy link on the sign-in screen and in Settings (`LegalLinks`, hidden until
+  `PAWQUEST_PRIVACY_POLICY_URL` is set); bilingual pages in `docs/legal/`.
+- Build: `bundleRelease` runs `verifyPawQuestRelease` and fails without upload key,
+  version code, HTTPS Supabase URL/key or legal URLs; AAB language splits disabled because
+  the language is chosen in-app; `dataExtractionRules` exclude all local data from cloud
+  backup and device transfer; release R8 strips `Log.v/d/i`.
+- Supply chain: `PAWQUEST_OFFICIAL_REPOSITORIES_ONLY=true` limits resolution to Google Maven
+  and Maven Central; the Aliyun mirror is now the last fallback for development only;
+  `gradle/verification-metadata.xml` pins SHA-256 (lenient locally, strict in CI). All 45
+  `manual-maven` and 590 `local-maven` files matched the official repositories' SHA-1.
+- Operations: kill switches `disable_item_case.sql` / `disable_lucky_wheel.sql`, operator
+  `delete_account_by_email.sql`, runbook, release process and Supabase checklist under
+  `docs/operations/`; GitHub Actions CI in `.github/workflows/ci.yml`.
+
 ## 2026-11-20 - Full-screen gacha animations and reward flights
 
 - Mystery Box and Lucky Wheel render their animation behind the system bars on Android, with Skip Animation over the artwork and inside the safe area.

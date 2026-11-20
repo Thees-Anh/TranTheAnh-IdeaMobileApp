@@ -1,5 +1,18 @@
 # PawQuest MVP integration test report
 
+## 2026-11-20 - Release 1.0.0 remediation
+
+| Check | Actual result |
+|---|---|
+| Strict build (official repositories only, dependency verification strict, `--rerun-tasks`) | Shared host tests 232 passed, 0 failures; lintRelease 0 errors; signed `bundleRelease` (throwaway key, deleted) and assembleRelease OK |
+| Release artifact | apksigner/jarsigner verified; versionCode 10000; `vi` resources in base APK; 16 KB zipalign OK |
+| `bundleRelease` without release settings | Fails listing keystore, version code and legal URLs |
+| Database runner | 24/24 PASS incl. migration 20261120003500 and pet-name erasure assertions |
+| Operator scripts on a disposable DB | delete_account_by_email, disable/enable Item Case and Lucky Wheel behaved as documented |
+
+NOT TESTED: GitHub Actions run, hosted Supabase (migrations 003300–003500 still to apply),
+Play Console, physical devices, the privacy link on a device (hidden until the URL is set).
+
 ## 2026-11-12 - Widget redesign and gacha pet-care gate
 
 | Check | Actual result |

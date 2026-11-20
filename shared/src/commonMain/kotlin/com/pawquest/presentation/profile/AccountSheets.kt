@@ -151,6 +151,7 @@ fun SettingsSheetContent(
             labelColor = colors.error,
             modifier = Modifier.fillMaxWidth().height(48.dp),
         )
+        com.pawquest.presentation.components.PrivacyPolicyLink()
         Spacer(modifier = Modifier.height(24.dp))
     }
 

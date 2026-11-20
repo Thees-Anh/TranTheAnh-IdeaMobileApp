@@ -26,6 +26,12 @@
 - [Walkthrough Pet Home cũ](archive/pet-home-walkthrough.md) · [Walkthrough Shop/Kho đồ cũ](archive/shop-inventory-walkthrough.md)
 - [Hình tham khảo](media/design/) · [Ảnh/HTML xem trước](media/previews/) · [Giấy phép font](licenses/Quicksand-OFL.txt)
 
+## Phát hành 1.0.0
+
+- [Audit trước phát hành](release-audit/RELEASE_READINESS_REPORT.md) · [Kế hoạch khắc phục](release-audit/RELEASE_ACTION_PLAN.md) · [Tình trạng khắc phục](release-audit/REMEDIATION_STATUS.md)
+- [Quy trình phát hành](operations/RELEASE_PROCESS.md) · [Runbook sự cố](operations/RUNBOOK.md) · [Checklist Supabase](operations/SUPABASE_PRODUCTION_CHECKLIST.md)
+- [Trang pháp lý (privacy, xoá tài khoản)](legal/README.md)
+
 ## Kết quả
 
 - [Báo cáo kiểm thử](TEST_REPORT.md)

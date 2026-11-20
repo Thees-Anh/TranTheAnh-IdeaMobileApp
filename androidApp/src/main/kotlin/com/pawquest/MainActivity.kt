@@ -57,7 +57,8 @@ class MainActivity : ComponentActivity() {
                 },focusCompanion={com.pawquest.presentation.scene.FocusCompanion(it)},requestedRoute=requestedRoute,onRouteConsumed={requestedRoute=null;intent.removeExtra("pawquest_destination")},
                     casePreview={com.pawquest.presentation.gacha.MysteryCasePreview(it)},
                     caseAnimation={animation,modifier->com.pawquest.presentation.gacha.MysteryCasePreview(modifier,animation)},
-                    wheelPreview={animation,modifier->com.pawquest.presentation.gacha.LuckyWheelPreview(modifier,animation)})
+                    wheelPreview={animation,modifier->com.pawquest.presentation.gacha.LuckyWheelPreview(modifier,animation)},
+                    legalLinks=com.pawquest.presentation.components.LegalLinks(BuildConfig.PRIVACY_POLICY_URL,BuildConfig.ACCOUNT_DELETION_URL))
             }
         }
     }

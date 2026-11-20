@@ -46,7 +46,8 @@ data class AndroidRepositories(val authentication: AuthenticationRepository, val
     val pendingItemExchange: com.pawquest.domain.repository.PendingItemExchangeStore = com.pawquest.domain.repository.UnavailableItemExchangeStore(),
     val luckyWheel: com.pawquest.domain.repository.LuckyWheelRepository = com.pawquest.data.repository.UnconfiguredLuckyWheelRepository(),
     val petExchange: com.pawquest.domain.repository.PetShardExchangeRepository = com.pawquest.data.repository.UnconfiguredLuckyWheelRepository(),
-    val pendingLucky: com.pawquest.domain.repository.PendingLuckyOperationStore = com.pawquest.domain.repository.UnavailableLuckyOperationStore())
+    val pendingLucky: com.pawquest.domain.repository.PendingLuckyOperationStore = com.pawquest.domain.repository.UnavailableLuckyOperationStore(),
+    val pendingPurchases: com.pawquest.domain.repository.PendingPurchaseStore = com.pawquest.domain.repository.InMemoryPendingPurchaseStore())
 
 fun createAndroidRepositories(context: Context, url: String, publishableKey: String, debug: Boolean) =
     if (url.isBlank() || publishableKey.isBlank()) {
@@ -94,5 +95,6 @@ fun createAndroidRepositories(context: Context, url: String, publishableKey: Str
             com.pawquest.data.repository.SupabaseLuckyWheelRepository(client),
             com.pawquest.data.repository.SupabaseLuckyWheelRepository(client),
             com.pawquest.data.repository.AndroidPendingLuckyOperationStore(context,url),
+            com.pawquest.data.repository.AndroidPendingPurchaseStore(context,url),
         )
     }
