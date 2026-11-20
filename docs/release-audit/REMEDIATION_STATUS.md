@@ -23,7 +23,7 @@ Toàn bộ thay đổi mã nguồn cho các P0/P1 đã xong. Các blocker còn l
 | SEC‑04 dataExtractionRules | ✅ | `res/xml/data_extraction_rules.xml` (Android 12+) và `backup_rules.xml` (≤ 11); lint `DataExtractionRules` đã hết | — |
 | BE‑05 Request ID Shop | ✅ | `PendingPurchaseStore` + `AndroidPendingPurchaseStore`; 4 unit test mới | — |
 | BE‑06 Kill switch gacha | ✅ | `disable_item_case.sql`, `disable_lucky_wheel.sql` (đã thử trên DB local) | Thử trên staging |
-| QA‑01 CI | ✅/🟡 | `.github/workflows/ci.yml` (validators, unit test, lint, R8, 16 KB, SQL suite trên PostgreSQL 18, bundle ký khi có tag) | Push lên GitHub để chạy lần đầu; thêm secrets/vars cho job `bundle` |
+| QA‑01 CI | ✅ | `.github/workflows/ci.yml` chạy xanh trên GitHub (run 44684485452, commit `d297a97`): validators, 232 unit test, lint release, R8, 16 KB, SQL suite trên PostgreSQL 18; job tay `refresh_verification_metadata` | Thêm secrets/vars cho job `bundle` khi phát hành |
 | SEC‑06 Log release | ✅ | R8 `-assumenosideeffects` cho `Log.v/d/i` | — |
 | 3.4 Bật gacha ở 1.0.0? | 🟡 | — | Quyết định sản phẩm |
 
@@ -42,4 +42,4 @@ Toàn bộ thay đổi mã nguồn cho các P0/P1 đã xong. Các blocker còn l
 | Validators (`check_project_structure`, `audit_localization`, 4 generator `--check`) | PASS (978 cặp song ngữ) |
 | Checksum artifact cục bộ | 45/45 `manual-maven`, 590/590 `local-maven` khớp SHA‑1 của Google Maven/Maven Central |
 
-**Chưa kiểm chứng:** CI GitHub Actions chưa chạy lần nào (cần push); không thử trên Supabase hosted, Play Console hay thiết bị vật lý; UI link privacy chỉ kiểm tra bằng build, chưa xem trên thiết bị (link bị ẩn khi chưa cấu hình URL).
+**CI GitHub Actions:** xanh từ commit `d297a97` (232 test, 0 lỗi). **Chưa kiểm chứng:** không thử trên Supabase hosted, Play Console hay thiết bị vật lý; UI link privacy chỉ kiểm tra bằng build, chưa xem trên thiết bị (link bị ẩn khi chưa cấu hình URL).

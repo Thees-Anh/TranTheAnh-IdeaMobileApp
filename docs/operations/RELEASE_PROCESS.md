@@ -29,6 +29,12 @@ Kết quả: `androidApp/build/outputs/bundle/release/androidApp-release.aab`. K
 jarsigner -verify -verbose:summary androidApp\build\outputs\bundle\release\androidApp-release.aab
 ```
 
+## 3a. Khi thêm hoặc nâng cấp thư viện
+`gradle/verification-metadata.xml` ghim SHA‑256 mọi artifact; CI chạy strict nên artifact mới sẽ làm build fail.
+1. Trên máy dev: `.\gradlew.bat --write-verification-metadata sha256 :shared:testAndroidHostTest :androidApp:lintRelease :androidApp:assembleRelease`.
+2. Trên GitHub: *Actions → CI → Run workflow* với `refresh_verification_metadata = true`, tải artifact `verification-metadata-linux` (artifact chỉ có trên Linux, ví dụ `aapt2-*-linux.jar`, một số BOM).
+3. Chỉ gộp entry mới sau khi đối chiếu SHA‑1 công bố của repository gốc. Checksum **khác** cho cùng một file là dấu hiệu cần điều tra (ngoại lệ đã biết: plugin marker JetBrains khác nhau giữa Maven Central và Gradle Plugin Portal, đã ghi `also-trust`).
+
 ## 4. Checklist trước khi upload
 - [ ] Tag `vX.Y.Z` trỏ đúng commit; `git status` sạch.
 - [ ] Unit test, lint release (0 error), `tools/testing/test_database.py` PASS (CI xanh).
