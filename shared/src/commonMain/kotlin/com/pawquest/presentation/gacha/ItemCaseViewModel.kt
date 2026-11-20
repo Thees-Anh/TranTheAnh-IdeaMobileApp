@@ -222,8 +222,8 @@ class ItemCaseViewModel(
         if(state.value.result?.transactionId==transactionId && state.value.phase in setOf(ItemCasePhase.ReadyToAnimate,ItemCasePhase.Animating))
             mutable.value=state.value.copy(phase=ItemCasePhase.RewardRevealed)
     }
-    fun acknowledgeReward() {
-        if(state.value.phase==ItemCasePhase.RewardRevealed) retire()
+    fun acknowledgeReward(onClosed: ()->Unit={}) {
+        if(state.value.phase==ItemCasePhase.RewardRevealed) retire(onClosed=onClosed)
     }
     /** Explicit new purchase only after the previous receipt is durably retired. */
     fun openAgain() {
@@ -236,7 +236,7 @@ class ItemCaseViewModel(
     fun dismissRejection() {
         if(state.value.rejection?.reason?.canDismiss==true) retire()
     }
-    private fun retire(openAgain: Boolean=false) {
+    private fun retire(openAgain: Boolean=false,onClosed: ()->Unit={}) {
         if(job?.isActive==true || state.value.retiring) return
         val pending=state.value.pending ?: return
         val revision=epoch
@@ -246,6 +246,7 @@ class ItemCaseViewModel(
                 journal.clear(pending)
                 if(valid(pending.userId,revision)) {
                     mutable.value=state.value.copy(phase=ItemCasePhase.Idle,pending=null,result=null,rejection=null,error=null,retiring=false)
+                    onClosed()
                     if(openAgain) { job=null; openCase() }
                 }
             } catch(cancelled: CancellationException) { throw cancelled }

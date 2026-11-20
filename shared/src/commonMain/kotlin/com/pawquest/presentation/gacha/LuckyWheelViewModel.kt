@@ -142,13 +142,21 @@ class LuckyWheelViewModel(private val wheel: LuckyWheelRepository,private val ex
     fun animationStarted(id: String) {if(state.value.result?.transactionId==id && state.value.phase==LuckyWheelPhase.ReadyToAnimate) mutable.value=state.value.copy(phase=LuckyWheelPhase.Animating)}
     fun animationFinished(id: String) {if(state.value.result?.transactionId==id && state.value.phase in setOf(LuckyWheelPhase.ReadyToAnimate,LuckyWheelPhase.Animating)) mutable.value=state.value.copy(phase=LuckyWheelPhase.RewardRevealed)}
     fun skip() {state.value.result?.let {mutable.value=state.value.copy(skipRequested=true);animationFinished(it.transactionId)}}
-    fun dismiss() {
+    fun dismiss() = dismiss {}
+    internal fun dismissReward(transactionId: String,onClosed: ()->Unit) {
+        val current=state.value
+        if(current.phase==LuckyWheelPhase.RewardRevealed && current.result?.transactionId==transactionId) dismiss(onClosed)
+    }
+    private fun dismiss(onClosed: ()->Unit) {
         val current=state.value
         if(!current.canDismiss) return
         val owner=current.owner ?: return
         run(owner) {revision ->
             current.pending?.let {journal.clear(it)}
-            if(valid(owner,revision)) mutable.value=state.value.copy(pending=null,result=null,redemption=null,quote=null,rejection=null,error=null,skipRequested=false,phase=LuckyWheelPhase.Idle)
+            if(valid(owner,revision)) {
+                mutable.value=state.value.copy(pending=null,result=null,redemption=null,quote=null,rejection=null,error=null,skipRequested=false,phase=LuckyWheelPhase.Idle)
+                onClosed()
+            }
         }
     }
     fun loadHistory(more: Boolean=false) {

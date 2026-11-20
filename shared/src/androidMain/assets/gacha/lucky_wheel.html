@@ -116,6 +116,7 @@ main::after{content:"";position:absolute;left:8%;right:8%;bottom:8%;height:12%;b
 #lucky-wheel-svg{filter:drop-shadow(0 12px 14px #7d459433)}
 #wheel-status-banner{border-radius:14px 14px 0 0;padding:8px;box-sizing:border-box;background:#fff5f8dc!important;color:#4a2511}
 #wheel-status-banner{position:absolute;bottom:0;width:100%;text-align:center;background:#fff5f8;font-size:12px;font-weight:700}
+.fullscreen-spin #wheel-status-banner{display:none}
 #pet-unlock-stage{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:12px;background:#fff5f8f5;text-align:center}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 .reduced-motion *{animation:none!important;transition:none!important}
@@ -549,6 +550,7 @@ function getPointedSlotIndexFromAngle(deg) {
                 });
             }
             config=value;resize();
+            document.documentElement.classList.toggle('fullscreen-spin',value.fullScreen===true);
             document.documentElement.classList.toggle('reduced-motion',Boolean(reduce()));
             renderWheelSVG(); return true;
         },

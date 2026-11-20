@@ -88,16 +88,14 @@ class ItemCaseRevealDeviceTest {
             click("Open Case") // Explicit native confirmation.
             waitFor {activity.itemCaseModel.state.value.phase==ItemCasePhase.Animating}
             assertEquals(1,activity.openingRequests.size)
-            fun webView(node: AccessibilityNodeInfo?): AccessibilityNodeInfo? {
-                if(node==null) return null
-                if(node.className?.toString()=="android.webkit.WebView") return node
-                for(i in 0 until node.childCount) webView(node.getChild(i))?.let {return it}
-                return null
+            waitFor {find(ui.rootInActiveWindow,"Skip Animation")!=null}
+            val skip=Rect().also {checkNotNull(find(ui.rootInActiveWindow,"Skip Animation")).getBoundsInScreen(it)}
+            val screen=checkNotNull(ui.takeScreenshot())
+            assertTrue("Skip must overlay the lower artwork: $skip",skip.centerY()>screen.height*0.8)
+            for(y in listOf(2,screen.height-3)) {
+                val pixel=screen.getPixel(screen.width/6,y)
+                assertTrue("Opening background must reach row $y",android.graphics.Color.blue(pixel)>android.graphics.Color.green(pixel)+20)
             }
-            val stage=Rect().also {checkNotNull(webView(ui.rootInActiveWindow)).getBoundsInScreen(it)}
-            val screen=activity.resources.displayMetrics
-            assertTrue("Opening must use the full phone width: $stage",stage.width()>=screen.widthPixels*0.9)
-            assertTrue("Opening must be taller than the Shop preview: $stage",stage.height()>=screen.heightPixels*0.65)
             click("Skip Animation")
             waitFor {find(ui.rootInActiveWindow,if(grant) "New Item" else "Duplicate Item")!=null}
             assertNotNull(find(ui.rootInActiveWindow,"Rare glasses"))

@@ -18,7 +18,7 @@ import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.boundsInRoot
 import com.pawquest.localization.tr
 import com.pawquest.presentation.theme.PawQuestTheme
 
@@ -68,10 +68,13 @@ object ShardIcons {
     shards: ShardBalances=LocalShardBalances.current) {
     FlowRow(modifier,horizontalArrangement=Arrangement.spacedBy(5.dp,Alignment.End),
         verticalArrangement=Arrangement.spacedBy(5.dp)) {
-        CoinBadge(coins,Modifier.align(Alignment.CenterVertically))
-        val motion=LocalShardRewardMotion.current
-        ShardBadge(animatedShardBalance(shards.pet,true),true,Modifier.align(Alignment.CenterVertically).onGloballyPositioned {motion?.targets?.set(true,it.boundsInWindow())})
-        ShardBadge(animatedShardBalance(shards.item,false),false,Modifier.align(Alignment.CenterVertically).onGloballyPositioned {motion?.targets?.set(false,it.boundsInWindow())})
+        val motion=LocalCurrencyRewardMotion.current
+        fun Modifier.flightTarget(currency: RewardCurrency)=if(motion==null) this else
+            onGloballyPositioned {motion.targets[currency]=it.boundsInRoot()}
+        val badge=Modifier.align(Alignment.CenterVertically)
+        CoinBadge(animatedCurrencyBalance(coins.toLong(),RewardCurrency.Coin) ?: coins,badge.flightTarget(RewardCurrency.Coin))
+        ShardBadge(animatedCurrencyBalance(shards.pet,RewardCurrency.PetShard),true,badge.flightTarget(RewardCurrency.PetShard))
+        ShardBadge(animatedCurrencyBalance(shards.item,RewardCurrency.ItemShard),false,badge.flightTarget(RewardCurrency.ItemShard))
     }
 }
 

@@ -1,7 +1,6 @@
 package com.pawquest.presentation.gacha
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
@@ -9,8 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pawquest.domain.model.*
 import com.pawquest.localization.tr
@@ -30,7 +28,8 @@ fun MysteryCaseContent(model: ItemCaseViewModel,coins: Long,itemNames: Map<Strin
     catalog: List<CatalogItem> = emptyList(),
     onViewInventory: ((String)->Unit)?=null,
     onUseReward: ((String)->Unit)?=null,
-    actionableItemIds: Set<String> = emptySet(),exchangeModel: ItemExchangeViewModel?=null) {
+    actionableItemIds: Set<String> = emptySet(),exchangeModel: ItemExchangeViewModel?=null,
+    onRewardClosed: (ItemCaseReceipt)->Unit={}) {
     val state by model.state.collectAsStateWithLifecycle()
     val colors=PawQuestTheme.colors
     var panel by remember(state.userId) { mutableStateOf<String?>(null) }
@@ -95,25 +94,17 @@ fun MysteryCaseContent(model: ItemCaseViewModel,coins: Long,itemNames: Map<Strin
         item { PawQuestButton("Shard Wallet",{model.loadShardWallet();panel="wallet"},variant=ButtonVariant.Secondary,enabled=canBrowse,modifier=Modifier.fillMaxWidth()) }
         item {PawQuestButton("Shard Exchange",{exchangeModel?.refresh();panel="exchange"},enabled=canBrowse && config!=null && exchangeModel!=null,modifier=Modifier.fillMaxWidth())}
     }
-    if(receipt!=null && animation!=null && state.phase in setOf(ItemCasePhase.ReadyToAnimate,ItemCasePhase.Animating)) {
-        // A separate full-window surface covers Shop and bottom navigation without
-        // changing navigation or issuing another economic operation. Back skips.
-        Dialog(onDismissRequest={model.revealReward(receipt.transactionId)},
-            properties=DialogProperties(usePlatformDefaultWidth=false,dismissOnClickOutside=false)) {
-            Column(Modifier.fillMaxSize().background(colors.background).windowInsetsPadding(WindowInsets.safeDrawing)) {
-                Text(tr("Mystery Box"),Modifier.padding(horizontal=16.dp,vertical=12.dp),
-                    style=PawQuestTheme.typography.titleLarge,color=colors.textPrimary)
-                animation(ItemCaseAnimation(receipt,config?.rewards.orEmpty(),false,
-                    model::startAnimation,model::revealReward,itemNames),Modifier.fillMaxWidth().weight(1f))
-                PawQuestButton("Skip Animation",{model.revealReward(receipt.transactionId)},
-                    modifier=Modifier.fillMaxWidth().padding(16.dp))
-            }
+    if(receipt!=null && animation!=null && playing) {
+        GachaAnimationStage("Mystery Box",Color(0xFF432360),darkIcons=false,
+            onSkip={model.revealReward(receipt.transactionId)}) { stage ->
+            animation(ItemCaseAnimation(receipt,config?.rewards.orEmpty(),false,
+                model::startAnimation,model::revealReward,itemNames),stage)
         }
     }
     if(receipt!=null && state.phase==ItemCasePhase.RewardRevealed && panel==null) CaseRewardReveal(
         receipt,caseReveal(receipt,config,catalog),state.itemShards,
         busy=state.refreshing || state.retiring,canRepeat=canRepeat,notice=state.synchronizationError,
-        onClose=model::acknowledgeReward,onAgain={panel="again"},
+        onClose={model.acknowledgeReward {onRewardClosed(receipt)}},onAgain={panel="again"},
         onInventory=onViewInventory?.let { callback -> { callback(receipt.winningItemId) } },
         onUse=onUseReward?.takeIf {receipt.winningItemId in actionableItemIds}?.let { callback -> { callback(receipt.winningItemId) } },
         onWallet={model.loadShardWallet();panel="wallet"})

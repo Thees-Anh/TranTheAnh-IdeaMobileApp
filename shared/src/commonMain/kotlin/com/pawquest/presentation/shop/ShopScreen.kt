@@ -31,6 +31,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,19 +43,33 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pawquest.domain.model.CatalogItem
+import com.pawquest.domain.model.ItemCaseReceipt
 import com.pawquest.domain.model.ItemCategory
+import com.pawquest.domain.model.LuckyWheelReceipt
 import com.pawquest.domain.model.PurchaseStatus
 import com.pawquest.presentation.components.ButtonSize
 import com.pawquest.presentation.components.ButtonVariant
 import com.pawquest.presentation.components.CoinBadge
+import com.pawquest.presentation.components.CurrencyRewardFlight
+import com.pawquest.presentation.components.CurrencyRewardHost
 import com.pawquest.presentation.components.PawQuestButton
 import com.pawquest.presentation.components.PawQuestCard
 import com.pawquest.presentation.components.PawQuestEmpty
 import com.pawquest.presentation.components.PawQuestError
 import com.pawquest.presentation.components.PawQuestLoading
+import com.pawquest.presentation.components.RewardCurrency
 import com.pawquest.presentation.icons.PawQuestIcons
 import com.pawquest.presentation.theme.PawQuestColors
 import com.pawquest.presentation.theme.PawQuestTheme
+
+private fun ItemCaseReceipt.rewardFlight()=if(itemShardsGranted>0)
+    CurrencyRewardFlight(transactionId,RewardCurrency.ItemShard,itemShardsGranted.toLong(),itemShardsBalanceAfter) else null
+
+private fun LuckyWheelReceipt.rewardFlight()=when {
+    coinsEarned>0 -> CurrencyRewardFlight(transactionId,RewardCurrency.Coin,coinsEarned.toLong(),coinsBalanceAfter)
+    petShardsEarned>0 -> CurrencyRewardFlight(transactionId,RewardCurrency.PetShard,petShardsEarned.toLong(),petShardsBalanceAfter)
+    else -> null
+}
 
 @Composable
 fun ShopScreen(
@@ -87,19 +103,16 @@ fun ShopScreen(
 
     val caseState=itemCaseModel?.state?.collectAsStateWithLifecycle()?.value
     val wheelState=luckyWheelModel?.state?.collectAsStateWithLifecycle()?.value
-    val flights=buildList {
-        caseState?.result?.takeIf {it.itemShardsGranted>0}?.let {r -> add(com.pawquest.presentation.components.ShardRewardFlight(
-            r.transactionId,false,r.itemShardsGranted.toLong(),r.itemShardsBalanceAfter,
-            caseState.phase==com.pawquest.presentation.gacha.ItemCasePhase.RewardRevealed))}
-        wheelState?.result?.takeIf {it.petShardsEarned>0}?.let {r -> add(com.pawquest.presentation.components.ShardRewardFlight(
-            r.transactionId,true,r.petShardsEarned.toLong(),r.petShardsBalanceAfter,
-            wheelState.phase==com.pawquest.presentation.gacha.LuckyWheelPhase.RewardRevealed))}
+    val closedFlights=remember(caseState?.userId,wheelState?.owner) {mutableStateMapOf<RewardCurrency,CurrencyRewardFlight>()}
+    fun playFlight(flight: CurrencyRewardFlight?) {
+        if(flight!=null) closedFlights[flight.currency]=flight.copy(ready=true)
     }
-    com.pawquest.presentation.components.ShardRewardHost(flights) {
+    val pendingFlights=listOfNotNull(caseState?.result?.rewardFlight(),wheelState?.result?.rewardFlight())
+    val flights=(pendingFlights+closedFlights.values).distinctBy {it.currency}
+    CurrencyRewardHost(flights,modifier) {
 
     Column(
-        modifier = modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
@@ -123,9 +136,10 @@ fun ShopScreen(
             }
             Spacer(modifier = Modifier.width(8.dp))
             Column(horizontalAlignment=Alignment.End,verticalArrangement=Arrangement.spacedBy(4.dp)) {
-                com.pawquest.presentation.components.CurrencyBalances(effectiveCoins,Modifier.widthIn(max=230.dp),
+                val headerCoins=if(state.section==ShopSection.LUCKY_WHEEL) wheelState?.balances?.coins ?: effectiveCoins else effectiveCoins
+                com.pawquest.presentation.components.CurrencyBalances(headerCoins,Modifier.widthIn(max=230.dp),
                     com.pawquest.presentation.components.LocalShardBalances.current.copy(item=itemShards,
-                        pet=luckyWheelModel?.state?.collectAsStateWithLifecycle()?.value?.balances?.petShards
+                        pet=wheelState?.balances?.petShards
                             ?: com.pawquest.presentation.components.LocalShardBalances.current.pet))
             }
         }
@@ -149,7 +163,7 @@ fun ShopScreen(
             }
             state.section==ShopSection.LUCKY_WHEEL -> {
                 if(luckyWheelModel!=null) com.pawquest.presentation.gacha.LuckyWheelContent(luckyWheelModel,Modifier.weight(1f),wheelPreview,
-                    onPetExchange={viewModel.selectSection(ShopSection.SHARD_EXCHANGE)})
+                    onPetExchange={viewModel.selectSection(ShopSection.SHARD_EXCHANGE)},onRewardClosed={playFlight(it.rewardFlight())})
                 else Text(tr("Lucky Wheel data unavailable."))
             }
             state.section==ShopSection.SHARD_EXCHANGE -> com.pawquest.presentation.gacha.ShopShardExchange(luckyWheelModel,exchangeModel,
@@ -157,7 +171,8 @@ fun ShopScreen(
             state.section==ShopSection.ITEM_CASE -> {
                 if(itemCaseModel!=null) com.pawquest.presentation.gacha.MysteryCaseContent(itemCaseModel,effectiveCoins,
                     state.catalog.associate { it.id to it.name },casePreview,Modifier.weight(1f),caseAnimation,
-                    catalog=state.catalog,onViewInventory=onViewCaseItem,onUseReward=onUseCaseReward,actionableItemIds=actionableCaseItemIds,exchangeModel=exchangeModel)
+                    catalog=state.catalog,onViewInventory=onViewCaseItem,onUseReward=onUseCaseReward,actionableItemIds=actionableCaseItemIds,
+                    exchangeModel=exchangeModel,onRewardClosed={playFlight(it.rewardFlight())})
                 else Text(tr("Case data is unavailable."),color=colors.error)
             }
             state.loading && state.catalog.isEmpty() -> {

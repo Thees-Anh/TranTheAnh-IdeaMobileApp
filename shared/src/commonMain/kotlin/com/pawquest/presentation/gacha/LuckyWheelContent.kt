@@ -1,7 +1,6 @@
 package com.pawquest.presentation.gacha
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -11,8 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pawquest.domain.model.*
 import com.pawquest.localization.tr
@@ -57,7 +55,8 @@ internal fun wheelError(state: LuckyWheelState)=when(state.rejection) {
 }
 
 @Composable fun LuckyWheelContent(model: LuckyWheelViewModel,modifier: Modifier=Modifier,
-    preview: (@Composable (LuckyWheelAnimation,Modifier)->Unit)?=null,onPetExchange: ()->Unit={}) {
+    preview: (@Composable (LuckyWheelAnimation,Modifier)->Unit)?=null,onPetExchange: ()->Unit={},
+    onRewardClosed: (LuckyWheelReceipt)->Unit={}) {
     val state by model.state.collectAsStateWithLifecycle()
     var panel by remember {mutableStateOf<String?>(null)}
     val petNeed=currentPetNeed()
@@ -102,22 +101,21 @@ internal fun wheelError(state: LuckyWheelState)=when(state.rejection) {
         item {PawQuestButton("Spin History",{model.loadHistory();panel="history"},modifier=Modifier.fillMaxWidth(),variant=ButtonVariant.Secondary)}
         item {PawQuestButton("Pet Shard Exchange",onPetExchange,modifier=Modifier.fillMaxWidth(),variant=ButtonVariant.Secondary)}
     }
-    if(playing && result!=null && preview!=null) Dialog(onDismissRequest=model::skip,
-        properties=DialogProperties(usePlatformDefaultWidth=false,dismissOnClickOutside=false)) {
-        Column(Modifier.fillMaxSize().background(PawQuestTheme.colors.background).windowInsetsPadding(WindowInsets.safeDrawing)) {
-            Text(tr("Lucky Wheel"),Modifier.padding(horizontal=16.dp,vertical=12.dp),style=PawQuestTheme.typography.titleLarge)
-            preview(animation,Modifier.fillMaxWidth().weight(1f))
-            PawQuestButton("Skip Animation",model::skip,modifier=Modifier.fillMaxWidth().padding(16.dp))
-        }
+    if(playing && result!=null && preview!=null) GachaAnimationStage("Lucky Wheel",Color(0xFFDBB5EB),
+        darkIcons=true,onSkip=model::skip) { stage ->
+        preview(animation,stage)
     }
-    if(result!=null && state.phase==LuckyWheelPhase.RewardRevealed) AlertDialog(onDismissRequest={if(state.canDismiss) model.dismiss()},
-        title={Text(tr("Wheel Reward"))},text={Column(verticalArrangement=Arrangement.spacedBy(10.dp)) {
-            result.selectedPetId?.let {PetRewardPortrait(it)}
-            Text(tr(wheelRewardText(result)))
-            Text(tr("Pet Shards: ${state.balances?.petShards ?: result.petShardsBalanceAfter}"))
-            Text(tr("Coins: ${state.balances?.coins ?: result.coinsBalanceAfter} · Tickets: ${state.balances?.tickets ?: result.ticketsBalanceAfter}"))
-        }},confirmButton={PawQuestButton("Open Again",model::dismiss,enabled=state.canDismiss)},
-        dismissButton={PawQuestButton("Close",model::dismiss,enabled=state.canDismiss,variant=ButtonVariant.Ghost)})
+    if(result!=null && state.phase==LuckyWheelPhase.RewardRevealed) {
+        val closeReward={model.dismissReward(result.transactionId) {onRewardClosed(result)}}
+        AlertDialog(onDismissRequest={if(state.canDismiss) closeReward()},
+            title={Text(tr("Wheel Reward"))},text={Column(verticalArrangement=Arrangement.spacedBy(10.dp)) {
+                result.selectedPetId?.let {PetRewardPortrait(it)}
+                Text(tr(wheelRewardText(result)))
+                Text(tr("Pet Shards: ${state.balances?.petShards ?: result.petShardsBalanceAfter}"))
+                Text(tr("Coins: ${state.balances?.coins ?: result.coinsBalanceAfter} · Tickets: ${state.balances?.tickets ?: result.ticketsBalanceAfter}"))
+            }},confirmButton={PawQuestButton("Open Again",model::dismiss,enabled=state.canDismiss)},
+            dismissButton={PawQuestButton("Close",closeReward,enabled=state.canDismiss,variant=ButtonVariant.Ghost)})
+    }
     panel?.let {kind -> AlertDialog(onDismissRequest={panel=null},title={Text(tr(when(kind) {"rates"->"Drop Rates";"history"->"Spin History";else->"View Rewards"}))},
         text={LazyColumn(Modifier.fillMaxWidth().heightIn(max=400.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
             if(kind=="history") {

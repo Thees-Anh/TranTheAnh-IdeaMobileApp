@@ -67,28 +67,29 @@ class LuckyWheelShopDeviceTest {
     @Test fun coinAndTicketSpinsRevealConfirmedPetAndNeverAutoOpenAgain()=fixture {activity ->
         click("Lucky Wheel");click("Spin using Coins")
         waitFor {find(ui.rootInActiveWindow,"Skip Animation")!=null}
-        SystemClock.sleep(900) // Wait for scroll and Chromium's compositor, not only the JS-ready flag.
-        fun webNode(node: AccessibilityNodeInfo?): AccessibilityNodeInfo? {
-            if(node==null)return null
-            if(node.className?.toString()=="android.webkit.WebView")return node
-            for(i in 0 until node.childCount)webNode(node.getChild(i))?.let {return it}
-            return null
-        }
-        val webBounds=android.graphics.Rect().also {checkNotNull(webNode(ui.rootInActiveWindow)).getBoundsInScreen(it)}
-        val metrics=activity.resources.displayMetrics
-        assertTrue("Full-screen wheel width: $webBounds",webBounds.width()>=metrics.widthPixels*0.9)
-        assertTrue("Full-screen wheel height: $webBounds",webBounds.height()>=metrics.heightPixels*0.65)
-        val diagnostics="full-screen local renderer"
-        ui.takeScreenshot()?.let {bitmap -> java.io.File(instrumentation.targetContext.getExternalFilesDir(null),"lucky-wheel-shop.png").outputStream().use {
-            bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG,100,it)
+        val skipBounds=android.graphics.Rect().also {checkNotNull(find(ui.rootInActiveWindow,"Skip Animation")).getBoundsInScreen(it)}
+        var stageFrame: android.graphics.Bitmap?=null
+        waitFor {
+            if(stageFrame!=null) return@waitFor true
+            val bitmap=ui.takeScreenshot() ?: return@waitFor false
             var yellow=0
-            for(y in webBounds.top.coerceAtLeast(0) until webBounds.bottom.coerceAtMost(bitmap.height) step 8)
-                for(x in webBounds.left.coerceAtLeast(0) until webBounds.right.coerceAtMost(bitmap.width) step 8) {
+            for(y in bitmap.height/4 until bitmap.height*3/4 step 12)
+                for(x in 0 until bitmap.width step 12) {
                     val color=bitmap.getPixel(x,y)
                     if(android.graphics.Color.red(color)>180 && android.graphics.Color.green(color)>130 && android.graphics.Color.blue(color)<180) yellow++
                 }
-            assertTrue("Wheel must paint in Compose host: yellow=$yellow bounds=$webBounds DOM=$diagnostics",yellow>100)
-        }}
+            if(yellow>100) stageFrame=bitmap else bitmap.recycle()
+            stageFrame!=null
+        }
+        val bitmap=checkNotNull(stageFrame)
+        java.io.File(instrumentation.targetContext.getExternalFilesDir(null),"lucky-wheel-shop.png").outputStream().use {
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG,100,it)
+        }
+        assertTrue("Skip must overlay the lower artwork: $skipBounds",skipBounds.centerY()>bitmap.height*0.8)
+        for(y in listOf(2,bitmap.height-3)) {
+            val pixel=bitmap.getPixel(bitmap.width/6,y)
+            assertTrue("Wheel background must reach row $y",android.graphics.Color.blue(pixel)>android.graphics.Color.green(pixel))
+        }
         waitFor {find(ui.rootInActiveWindow,"Wheel Reward")!=null}
         waitFor {find(ui.rootInActiveWindow,"Pet unlocked: Rabbit")!=null}
         assertEquals(1,activity.luckyFixture.spinCalls)

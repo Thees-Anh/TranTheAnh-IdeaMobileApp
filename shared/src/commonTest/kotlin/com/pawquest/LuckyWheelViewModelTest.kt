@@ -96,10 +96,17 @@ class LuckyWheelViewModelTest {
     }
     @Test fun fallbackPreservesPetUnlockAndSkipNeverCallsBackend()=checkTest {
         val f=Fixture();f.reward=WheelReward.PET_UNLOCK_CONVERTED_TO_SHARDS;val vm=f.model();runCurrent()
-        vm.spin(WheelPayment.COINS);runCurrent();vm.skip()
+        var closed=0
+        vm.spin(WheelPayment.COINS);runCurrent()
+        vm.dismissReward(id) {closed++};runCurrent()
+        vm.skip()
+        assertEquals(0,closed)
         assertEquals(LuckyWheelPhase.RewardRevealed,vm.state.value.phase);assertEquals(1,f.grants)
         assertEquals(WheelSector.PET_UNLOCK,vm.state.value.result!!.originalSector);assertNull(vm.state.value.result!!.selectedPetId)
         assertEquals(150,vm.state.value.balances!!.petShards);assertEquals(50,vm.state.value.result!!.petShardsEarned)
+        vm.dismissReward(id) {assertNull(vm.state.value.result);closed++};runCurrent()
+        vm.dismissReward(id) {closed++};runCurrent()
+        assertEquals(1,closed)
     }
     @Test fun petQuoteRequiresConfirmationThenRefreshesOwnershipAndShardBalance()=checkTest {
         val f=Fixture();val vm=f.model();runCurrent();val reads=f.petReads

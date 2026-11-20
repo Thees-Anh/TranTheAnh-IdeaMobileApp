@@ -148,6 +148,7 @@ internal class LuckyWheelWebView(context: Context) : WebView(context) {
         } }
         val config=buildJsonObject {
             put("version",1);put("playbackId",playbackId);sectors?.let {put("sectors",it)}
+            put("fullScreen",receipt!=null)
             put("reducedMotion",Settings.Global.getFloat(context.contentResolver,Settings.Global.ANIMATOR_DURATION_SCALE,1f)==0f)
         }
         if(receipt==null) {
@@ -218,7 +219,13 @@ fun LuckyWheelPreview(modifier: Modifier=Modifier,animation: LuckyWheelAnimation
     }
     Box(modifier) {
         if(state!=LuckyWheelLoad.Failed) key(attempt) {
-            AndroidView(factory={ LuckyWheelWebView(context).also { native -> native.onLoad={state=it}; view=native } },
+            AndroidView(factory={ LuckyWheelWebView(context).also { native ->
+                if(animation?.receipt!=null) {
+                    native.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                    native.importantForAccessibility=android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                }
+                native.onLoad={state=it}; view=native
+            } },
                 update={ native -> animation?.let(native::present) },
                 modifier=Modifier.matchParentSize(),onRelease={ it.release(); if(view===it) view=null })
         }

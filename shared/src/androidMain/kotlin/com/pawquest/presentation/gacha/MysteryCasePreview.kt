@@ -209,7 +209,13 @@ fun MysteryCasePreview(modifier: Modifier=Modifier,animation: ItemCaseAnimation?
     }
     Box(modifier) {
         if(state!=CasePreviewLoad.Failed) key(attempt) {
-            AndroidView(factory={ MysteryCaseWebView(context).also { native -> native.onLoad={state=it}; view=native } },
+            AndroidView(factory={ MysteryCaseWebView(context).also { native ->
+                if(animation!=null) {
+                    native.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                    native.importantForAccessibility=android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                }
+                native.onLoad={state=it}; view=native
+            } },
                 update={ native -> animation?.let(native::present) },
                 modifier=Modifier.matchParentSize(),onRelease={ it.release(); if(view===it) view=null })
         }

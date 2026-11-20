@@ -1,5 +1,10 @@
 # Implementation log
 
+## 2026-11-20 - Full-screen gacha animations and reward flights
+
+- Mystery Box and Lucky Wheel render their animation behind the system bars on Android, with Skip Animation over the artwork and inside the safe area.
+- Coins, Item Shards and Pet Shards fly to the Shop balance only after the reward dialog closes successfully. This is presentation-only; rewards are still granted by the server when the draw completes.
+
 ## 2026-11-12 - Widget 2x2 redesign and pet-care gate for Mystery Box / Lucky Wheel
 
 - Widget: new layout (portrait + mood badge, "Lv. N · mood", rounded Food/Water

@@ -270,12 +270,16 @@ class ItemCaseViewModelTest {
             vm.openCase(); runCurrent()
             val id=vm.state.value.result!!.transactionId
             vm.revealReward(id); f.journal.failClear=true
-            vm.acknowledgeReward(); runCurrent(); vm.openCase()
+            var closed=0
+            vm.acknowledgeReward {closed++}; runCurrent(); vm.openCase()
             assertEquals(1,f.requests.size)
+            assertEquals(0,closed)
             assertEquals(ItemCasePhase.RewardRevealed,vm.state.value.phase)
             assertNotNull(vm.state.value.pending)
-            f.journal.failClear=false; vm.acknowledgeReward(); runCurrent()
+            f.journal.failClear=false; vm.acknowledgeReward {closed++}; runCurrent()
             assertEquals(ItemCasePhase.Idle,vm.state.value.phase)
+            vm.acknowledgeReward {closed++}; runCurrent()
+            assertEquals(1,closed)
         }
     }
     @Test fun initialReadFailureDoesNotDisplayInventedZeroAndCanRetry()=runTest {

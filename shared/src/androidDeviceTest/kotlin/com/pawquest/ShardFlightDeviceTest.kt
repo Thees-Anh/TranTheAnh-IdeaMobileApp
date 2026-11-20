@@ -24,14 +24,14 @@ class ShardFlightFixtureActivity : ComponentActivity() {
     var overlay=false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val pet=intent.getBooleanExtra("pet",false)
+        val currency=RewardCurrency.valueOf(checkNotNull(intent.getStringExtra("currency")))
         setContent {PawQuestTheme {
-            ShardRewardHost(listOf(ShardRewardFlight("fixture",pet,50,150,ready))) {
-                val balance=animatedShardBalance(150,pet) ?: -1
-                val motion=LocalShardRewardMotion.current
-                SideEffect {observed+=balance;overlay=motion?.progress?.isNotEmpty()==true}
+            CurrencyRewardHost(listOf(CurrencyRewardFlight("fixture",currency,50,150,ready))) {
+                val balance=animatedCurrencyBalance(150,currency) ?: -1
+                val flying=LocalCurrencyRewardMotion.current?.progress?.isNotEmpty()==true
+                SideEffect {observed+=balance;overlay=flying}
                 Box(Modifier.fillMaxSize().padding(16.dp)) {
-                    CurrencyBalances(1000,Modifier.align(Alignment.TopEnd),ShardBalances(150,150))
+                    CurrencyBalances(150,Modifier.align(Alignment.TopEnd),ShardBalances(150,150))
                     Text("+50",Modifier.align(Alignment.Center))
                 }
             }
@@ -40,12 +40,13 @@ class ShardFlightFixtureActivity : ComponentActivity() {
 }
 
 class ShardFlightDeviceTest {
-    @Test fun itemShardsFlyAndCountOnce()=checkFlight(false)
-    @Test fun petShardsFlyAndCountOnce()=checkFlight(true)
-    private fun checkFlight(pet: Boolean) {
+    @Test fun itemShardsFlyAndCountOnce()=checkFlight(RewardCurrency.ItemShard)
+    @Test fun petShardsFlyAndCountOnce()=checkFlight(RewardCurrency.PetShard)
+    @Test fun coinsFlyAndCountOnce()=checkFlight(RewardCurrency.Coin)
+    private fun checkFlight(currency: RewardCurrency) {
         val instrumentation=InstrumentationRegistry.getInstrumentation()
         val activity=instrumentation.startActivitySync(Intent(instrumentation.context,ShardFlightFixtureActivity::class.java)
-            .putExtra("pet",pet).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) as ShardFlightFixtureActivity
+            .putExtra("currency",currency.name).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) as ShardFlightFixtureActivity
         fun await(condition: ()->Boolean) {
             val until=SystemClock.uptimeMillis()+6000
             var ok=false
@@ -53,11 +54,11 @@ class ShardFlightDeviceTest {
             assertTrue("Expected flight state",ok)
         }
         try {
-            await {activity.observed.lastOrNull()==100L}
+            await {activity.observed.lastOrNull()==100L && !activity.overlay}
             instrumentation.runOnMainSync {activity.ready=true}
             await {activity.overlay}
             instrumentation.uiAutomation.takeScreenshot()?.let {bitmap ->
-                java.io.File(instrumentation.targetContext.getExternalFilesDir(null),"shard-flight-${if(pet) "pet" else "item"}.png").outputStream().use {
+                java.io.File(instrumentation.targetContext.getExternalFilesDir(null),"currency-flight-${currency.name}.png").outputStream().use {
                     bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG,100,it)
                 }
             }
