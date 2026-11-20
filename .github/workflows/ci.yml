@@ -33,7 +33,7 @@ jobs:
           # The default 'tools' package no longer exists in current sdkmanager releases.
           packages: platform-tools
       - name: Install Android SDK packages
-        run: sdkmanager "platforms;android-37" "build-tools;36.0.0"
+        run: sdkmanager "platforms;android-37.0" "build-tools;36.0.0"
       - uses: gradle/actions/setup-gradle@v4
       - name: Repository validators
         run: |
@@ -99,7 +99,7 @@ jobs:
           # The default 'tools' package no longer exists in current sdkmanager releases.
           packages: platform-tools
       - name: Install Android SDK packages
-        run: sdkmanager "platforms;android-37" "build-tools;36.0.0"
+        run: sdkmanager "platforms;android-37.0" "build-tools;36.0.0"
       - uses: gradle/actions/setup-gradle@v4
       - name: Restore upload keystore
         env:
