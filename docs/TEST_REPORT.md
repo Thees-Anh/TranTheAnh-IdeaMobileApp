@@ -1,5 +1,18 @@
 # PawQuest MVP integration test report
 
+## 2026-11-26 - Crashlytics on a real Firebase project (emulator Medium_Phone)
+
+| Check | Actual result |
+|---|---|
+| Config | Project pawquest-dbb7f, package com.pawquest, git-ignored; CI secret GOOGLE_SERVICES_JSON_BASE64 set |
+| Debug build | google_app_id and mapping-file ID present; Crashlytics 21.1.0 initialised; manifest flag DISABLED, then "ENABLED by API" from the stored default; Firebase settings status `activated` |
+| Crash (`adb shell am crash com.pawquest`) | "Handling uncaught exception"; after relaunch "Crashlytics report successfully enqueued to DataTransport" and the local report file deleted |
+| Opt-out (`crash_reports_enabled=false`, the value the Settings switch writes) | "DISABLED by API"; a new crash was captured but never sent, and no finalized report remained on the device |
+| Cleanup | Default restored, emulator shut down. The signed-in account's pending reward was not touched |
+
+NOT TESTED: the Settings switch by tapping it in the UI (the emulator holds a real account),
+the crash appearing in the Firebase console (check it there), release-build mapping upload.
+
 ## 2026-11-26 - Crash reporting and forced update
 
 | Check | Actual result |

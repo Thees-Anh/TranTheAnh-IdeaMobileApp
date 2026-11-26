@@ -1,6 +1,6 @@
 # Firebase Crashlytics — thiết lập
 
-Code đã sẵn sàng; chỉ thiếu cấu hình của project Firebase (cần tài khoản Google của bạn).
+**Trạng thái (2026‑11‑26):** project `pawquest-dbb7f` đã tạo, `google-services.json` đặt local, secret CI đã thêm, crash thử đã gửi thành công từ emulator. Còn lại: mục 4 (Data safety).
 
 ## 1. Tạo project và app
 1. <https://console.firebase.google.com> → *Add project* (ví dụ `pawquest`). Google Analytics: **tắt** (app không dùng analytics hành vi; bật sẽ phải khai báo thêm trong privacy policy và Data safety).
