@@ -92,6 +92,7 @@ def main():
             sql(db, file=ROOT / 'supabase/tests/reminder_schedule.sql')
             sql(db, file=ROOT / 'supabase/tests/gacha_pet_care_gate.sql')
             sql(db, file=ROOT / 'supabase/tests/widget_streak.sql')
+            sql(db, file=ROOT / 'supabase/tests/app_config.sql')
             print(f'PASS fresh migration replay and SQL integrity/RLS suite #{replay+1}', flush=True)
 
         exchange_user='fc400000-0000-0000-0000-000000000001'

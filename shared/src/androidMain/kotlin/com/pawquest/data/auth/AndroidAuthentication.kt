@@ -31,6 +31,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlin.time.Duration.Companion.seconds
+import com.pawquest.domain.telemetry.NoOpTelemetry
+import com.pawquest.domain.telemetry.Telemetry
+import com.pawquest.domain.telemetry.supabaseOperation
+
+/** Reports HTTP 5xx from Supabase as non-fatals: operation name and status only. */
+private fun serverErrorReporting(telemetry: Telemetry)=okhttp3.Interceptor { chain ->
+    val response=chain.proceed(chain.request())
+    if(response.code>=500) telemetry.recordServerError(supabaseOperation(chain.request().url.encodedPath),response.code)
+    response
+}
 
 data class AndroidRepositories(val authentication: AuthenticationRepository, val quests: QuestRepository,
     val questSessions: QuestSessionRepository, val focus: FocusRepository,val pets: PetRepository,
@@ -47,9 +57,11 @@ data class AndroidRepositories(val authentication: AuthenticationRepository, val
     val luckyWheel: com.pawquest.domain.repository.LuckyWheelRepository = com.pawquest.data.repository.UnconfiguredLuckyWheelRepository(),
     val petExchange: com.pawquest.domain.repository.PetShardExchangeRepository = com.pawquest.data.repository.UnconfiguredLuckyWheelRepository(),
     val pendingLucky: com.pawquest.domain.repository.PendingLuckyOperationStore = com.pawquest.domain.repository.UnavailableLuckyOperationStore(),
-    val pendingPurchases: com.pawquest.domain.repository.PendingPurchaseStore = com.pawquest.domain.repository.InMemoryPendingPurchaseStore())
+    val pendingPurchases: com.pawquest.domain.repository.PendingPurchaseStore = com.pawquest.domain.repository.InMemoryPendingPurchaseStore(),
+    val appStatus: com.pawquest.domain.repository.AppStatusRepository = com.pawquest.domain.repository.UnconfiguredAppStatusRepository())
 
-fun createAndroidRepositories(context: Context, url: String, publishableKey: String, debug: Boolean) =
+fun createAndroidRepositories(context: Context, url: String, publishableKey: String, debug: Boolean,
+    telemetry: Telemetry = NoOpTelemetry) =
     if (url.isBlank() || publishableKey.isBlank()) {
         AndroidRepositories(UnconfiguredAuthenticationRepository(), UnconfiguredQuestRepository(), UnconfiguredQuestSessionRepository(), UnconfiguredFocusRepository(),UnconfiguredPetRepository())
     } else {
@@ -61,7 +73,7 @@ fun createAndroidRepositories(context: Context, url: String, publishableKey: Str
         require(!publishableKey.startsWith("sb_secret_")) { "A public Supabase client key is required" }
         val client = createSupabaseClient(url, publishableKey) {
             defaultLogLevel = LogLevel.NONE
-            httpEngine = OkHttp.create()
+            httpEngine = OkHttp.create { addInterceptor(serverErrorReporting(telemetry)) }
             requestTimeout = 15.seconds
             install(Auth) {
                 sessionManager = EncryptedSessionManager(context.applicationContext, url)
@@ -96,5 +108,6 @@ fun createAndroidRepositories(context: Context, url: String, publishableKey: Str
             com.pawquest.data.repository.SupabaseLuckyWheelRepository(client),
             com.pawquest.data.repository.AndroidPendingLuckyOperationStore(context,url),
             com.pawquest.data.repository.AndroidPendingPurchaseStore(context,url),
+            com.pawquest.data.repository.SupabaseAppStatusRepository(client),
         )
     }

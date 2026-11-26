@@ -40,3 +40,6 @@ supabase/.temp/
 supabase/.branches/
 # Local public development trust anchors; never commit machine/network-specific certificates.
 /local-dev/
+
+# Firebase client config: per-project, provided locally or by CI secret.
+google-services.json

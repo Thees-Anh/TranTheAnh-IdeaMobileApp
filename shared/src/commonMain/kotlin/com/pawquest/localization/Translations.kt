@@ -554,6 +554,11 @@ Choose a valid item and quantity (1–100).|Chọn vật phẩm và số lượn
 Couldn't confirm your purchase. Retry to check the same request safely.|Chưa xác nhận được giao dịch. Thử lại để kiểm tra cùng yêu cầu an toàn.
 Couldn't prepare your purchase safely. Nothing was charged; please retry.|Chưa chuẩn bị được giao dịch an toàn. Bạn chưa bị trừ Coins; vui lòng thử lại.
 Privacy Policy|Chính sách quyền riêng tư
+Send crash reports|Gửi báo cáo sự cố
+Technical data about crashes and server errors (device model, app version, screen). Never your quests, pet names or e-mail.|Dữ liệu kỹ thuật về sự cố và lỗi máy chủ (mẫu máy, phiên bản app, màn hình). Không bao giờ gồm nhiệm vụ, tên thú cưng hay email của bạn.
+Please update PawQuest|Vui lòng cập nhật PawQuest
+This version is no longer supported. Update to keep your pet, Coins and quests safe.|Phiên bản này không còn được hỗ trợ. Hãy cập nhật để giữ an toàn cho thú cưng, Coins và nhiệm vụ của bạn.
+Update now|Cập nhật ngay
 Head · 1 item per slot|Đầu · 1 món mỗi vị trí
 Face · 1 item per slot|Mặt · 1 món mỗi vị trí
 Neck · 1 item per slot|Cổ · 1 món mỗi vị trí

@@ -16,6 +16,8 @@
         android:roundIcon="@mipmap/pawquest_launcher_normal"
         android:supportsRtl="true"
         android:theme="@style/Theme.PawQuest">
+        <!-- Crashlytics stays off until CrashlyticsTelemetry applies the user's choice. -->
+        <meta-data android:name="firebase_crashlytics_collection_enabled" android:value="false"/>
         <receiver android:name=".widget.PetWidgetProvider" android:label="@string/widget_label" android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>

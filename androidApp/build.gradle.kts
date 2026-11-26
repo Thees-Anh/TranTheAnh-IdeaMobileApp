@@ -12,6 +12,14 @@ plugins {
     alias(libs.plugins.composeCompiler)
 }
 
+// Firebase Crashlytics is active only when androidApp/google-services.json exists (git-ignored;
+// CI restores it from a secret). Without it the app builds and runs with crash reporting off.
+val firebaseConfigured = file("google-services.json").isFile
+if (firebaseConfigured) {
+    apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
+}
+
 val localSettings = Properties().apply {
     val file = rootProject.file("local.properties")
     if (file.exists()) file.inputStream().use { load(it) }
@@ -79,6 +87,7 @@ abstract class VerifyPawQuestRelease : DefaultTask() {
     @get:Input abstract val backendKeyPresent: org.gradle.api.provider.Property<Boolean>
     @get:Input abstract val privacyUrl: org.gradle.api.provider.Property<String>
     @get:Input abstract val deletionUrl: org.gradle.api.provider.Property<String>
+    @get:Input abstract val crashReporting: org.gradle.api.provider.Property<Boolean>
 
     @TaskAction fun verify() {
         val problems = buildList {
@@ -91,6 +100,7 @@ abstract class VerifyPawQuestRelease : DefaultTask() {
             if (!backendKeyPresent.get()) add("SUPABASE_PUBLISHABLE_KEY must be set")
             if (!privacyUrl.get().startsWith("https://")) add("PAWQUEST_PRIVACY_POLICY_URL must be an https:// URL")
             if (!deletionUrl.get().startsWith("https://")) add("PAWQUEST_ACCOUNT_DELETION_URL must be an https:// URL")
+            if (!crashReporting.get()) add("androidApp/google-services.json is missing (Crashlytics is disclosed in the privacy policy)")
         }
         if (problems.isNotEmpty()) throw GradleException(
             "Release bundle is not publishable:\n - " + problems.joinToString("\n - "))
@@ -106,6 +116,7 @@ val verifyRelease = tasks.register<VerifyPawQuestRelease>("verifyPawQuestRelease
     backendKeyPresent.set(supabaseKey.isNotBlank())
     privacyUrl.set(privacyPolicyUrl)
     deletionUrl.set(accountDeletionUrl)
+    crashReporting.set(firebaseConfigured)
 }
 tasks.matching { it.name == "bundleRelease" }.configureEach { dependsOn(verifyRelease) }
 
@@ -133,6 +144,8 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtimeCompose)
     implementation(libs.koin.core)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
 
     implementation(libs.compose.uiToolingPreview)
     debugImplementation(libs.compose.uiTooling)
@@ -147,6 +160,7 @@ android {
         buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", quoted(supabaseKey))
         buildConfigField("String", "PRIVACY_POLICY_URL", quoted(privacyPolicyUrl))
         buildConfigField("String", "ACCOUNT_DELETION_URL", quoted(accountDeletionUrl))
+        buildConfigField("boolean", "CRASHLYTICS_CONFIGURED", firebaseConfigured.toString())
         applicationId = "com.pawquest"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
@@ -173,6 +187,12 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             signingConfigs.findByName("release")?.let { signingConfig = it }
+            // R8 mapping upload (readable Crashlytics stack traces) only where explicitly enabled,
+            // e.g. the CI release job; local and PR builds never contact Firebase.
+            if (firebaseConfigured) (this as ExtensionAware).extensions
+                .configure<com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension> {
+                    mappingFileUploadEnabled = publicSetting("PAWQUEST_CRASHLYTICS_UPLOAD_MAPPING") == "true"
+                }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

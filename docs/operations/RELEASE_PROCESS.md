@@ -15,6 +15,8 @@
 | `PAWQUEST_RELEASE_STORE_FILE`, `PAWQUEST_RELEASE_STORE_PASSWORD`, `PAWQUEST_RELEASE_KEY_ALIAS`, `PAWQUEST_RELEASE_KEY_PASSWORD` | Upload key (keystore ngoài repo, có bản sao lưu an toàn) |
 | `PAWQUEST_PRIVACY_POLICY_URL` | URL công khai của `docs/legal/privacy-policy.html` đã điền thông tin |
 | `PAWQUEST_ACCOUNT_DELETION_URL` | URL công khai của `docs/legal/account-deletion.html` |
+| `androidApp/google-services.json` (file, git‑ignored; CI: secret `GOOGLE_SERVICES_JSON_BASE64`) | Bật Crashlytics. Thiếu file thì app vẫn build, Crashlytics tắt — **bản phát hành phải có** |
+| `PAWQUEST_CRASHLYTICS_UPLOAD_MAPPING=true` | Upload R8 mapping để stack trace đọc được (CI job `bundle` đã bật) |
 | `PAWQUEST_OFFICIAL_REPOSITORIES_ONLY=true` | Chỉ tải dependency từ Google Maven / Maven Central |
 
 `bundleRelease` chạy `verifyPawQuestRelease` trước và **fail** nếu thiếu bất kỳ mục nào ở trên (trừ cờ repository). `assembleRelease` vẫn tạo APK chưa ký để thử R8 trên máy dev.

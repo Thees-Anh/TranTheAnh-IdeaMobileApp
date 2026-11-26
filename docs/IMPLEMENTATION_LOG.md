@@ -1,5 +1,19 @@
 # Implementation log
 
+## 2026-11-26 - Crash reporting and forced update
+
+- `Telemetry` interface (commonMain) with Firebase Crashlytics in the Android host
+  (`CrashlyticsTelemetry`); Crashlytics is applied only when `androidApp/google-services.json`
+  exists, so local/CI builds work without it and `bundleRelease` requires it.
+- Reported: crashes, Supabase HTTP 5xx as non-fatals (`rpc:<name>`/`table:<name>` only, via an
+  OkHttp interceptor), current screen as a custom key. Never user IDs, e-mail or typed text.
+- Settings → "Send crash reports" (default on, disclosed; off deletes unsent reports).
+  Manifest keeps collection disabled until the stored choice is applied.
+- Forced update: migration `20261126003600_app_config.sql` (`public.app_status`, anon-callable),
+  fail-open `AppUpdateCheck`, `UpdateRequiredScreen`, operator script
+  `set_min_supported_version.sql`.
+- Privacy policy discloses Crashlytics; setup guide `docs/operations/FIREBASE_SETUP.md`.
+
 ## 2026-11-20 - Release 1.0.0 remediation (audit action plan)
 
 - Account deletion: migration `20261120003500_account_deletion_pet_names.sql` also resets the

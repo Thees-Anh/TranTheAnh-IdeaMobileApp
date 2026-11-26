@@ -86,6 +86,7 @@ fun createAppContainer(
     petExchange: com.pawquest.domain.repository.PetShardExchangeRepository = com.pawquest.data.repository.UnconfiguredLuckyWheelRepository(),
     pendingLucky: com.pawquest.domain.repository.PendingLuckyOperationStore = com.pawquest.domain.repository.UnavailableLuckyOperationStore(),
     pendingPurchases: com.pawquest.domain.repository.PendingPurchaseStore = com.pawquest.domain.repository.InMemoryPendingPurchaseStore(),
+    appStatus: com.pawquest.domain.repository.AppStatusRepository = com.pawquest.domain.repository.UnconfiguredAppStatusRepository(),
 ) = koinApplication {
     modules(dataModule, domainModule, presentationModule, module {
         single<AuthenticationRepository> { authentication }
@@ -106,5 +107,7 @@ fun createAppContainer(
         single<com.pawquest.domain.repository.PetShardExchangeRepository> {petExchange}
         single<com.pawquest.domain.repository.PendingLuckyOperationStore> {pendingLucky}
         single<com.pawquest.domain.repository.PendingPurchaseStore> {pendingPurchases}
+        single<com.pawquest.domain.repository.AppStatusRepository> {appStatus}
+        factory {com.pawquest.domain.repository.AppUpdateCheck(get())}
     })
 }

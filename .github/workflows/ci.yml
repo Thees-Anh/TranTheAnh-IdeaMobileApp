@@ -112,8 +112,13 @@ jobs:
         env:
           KEYSTORE_BASE64: ${{ secrets.PAWQUEST_UPLOAD_KEYSTORE_BASE64 }}
         run: echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+      - name: Restore Firebase config (Crashlytics)
+        env:
+          GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
+        run: echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 -d > androidApp/google-services.json
       - name: Build signed bundle
         env:
+          PAWQUEST_CRASHLYTICS_UPLOAD_MAPPING: "true"
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
           PAWQUEST_PRIVACY_POLICY_URL: ${{ vars.PAWQUEST_PRIVACY_POLICY_URL }}

@@ -58,7 +58,10 @@ class MainActivity : ComponentActivity() {
                     casePreview={com.pawquest.presentation.gacha.MysteryCasePreview(it)},
                     caseAnimation={animation,modifier->com.pawquest.presentation.gacha.MysteryCasePreview(modifier,animation)},
                     wheelPreview={animation,modifier->com.pawquest.presentation.gacha.LuckyWheelPreview(modifier,animation)},
-                    legalLinks=com.pawquest.presentation.components.LegalLinks(BuildConfig.PRIVACY_POLICY_URL,BuildConfig.ACCOUNT_DELETION_URL))
+                    legalLinks=com.pawquest.presentation.components.LegalLinks(BuildConfig.PRIVACY_POLICY_URL,BuildConfig.ACCOUNT_DELETION_URL),
+                    telemetry=(application as PawQuestApplication).telemetry,
+                    versionCode=BuildConfig.VERSION_CODE,
+                    storeUrl="https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}")
             }
         }
     }

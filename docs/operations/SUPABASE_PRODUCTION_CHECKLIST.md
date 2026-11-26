@@ -3,7 +3,7 @@
 Thực hiện trên **staging trước**, sau đó production. Mục nào làm trên Dashboard thì ghi lại giá trị đã chọn (không ghi secret).
 
 ## A. Migration parity (REL‑P0‑03)
-- [ ] `supabase link --project-ref <ref>` rồi `supabase migration list` (chỉ đọc): liệt kê đủ **35** migration của repo (`20261105000100` … `20261120003500`).
+- [ ] `supabase link --project-ref <ref>` rồi `supabase migration list` (chỉ đọc): liệt kê đủ **36** migration của repo (`20261105000100` … `20261126003600`).
 - [ ] Staging dựng mới: `supabase db push` (hoặc áp lần lượt theo tên file) → chạy toàn bộ `supabase/tests/*.sql` **trừ** `local_auth_shim.sql` bằng psql với quyền `postgres`. Mọi file rollback dữ liệu thử.
 - [ ] Production: **backup trước** → áp các migration còn thiếu theo thứ tự (hiện biết thiếu tối thiểu `20261112003300`, `20261112003400`; kiểm tra cả `20261112003100` và `20261120003500`) → `supabase/tests/verification.sql` = 0 vi phạm.
 - [ ] Không có bảng/hàm/grant được tạo tay qua Dashboard ngoài migration (Database → Tables/Functions, đối chiếu với repo).

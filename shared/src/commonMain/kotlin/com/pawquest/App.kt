@@ -51,6 +51,9 @@ fun App(
     caseAnimation: (@Composable (com.pawquest.presentation.gacha.ItemCaseAnimation, Modifier)->Unit)? = null,
     wheelPreview: (@Composable (com.pawquest.presentation.gacha.LuckyWheelAnimation, Modifier)->Unit)? = null,
     legalLinks: com.pawquest.presentation.components.LegalLinks = com.pawquest.presentation.components.LegalLinks(),
+    telemetry: com.pawquest.domain.telemetry.Telemetry = com.pawquest.domain.telemetry.NoOpTelemetry,
+    versionCode: Int = 0,
+    storeUrl: String = "",
 ) {
     val resolvedContainer = container ?: remember { createAppContainer() }
     DisposableEffect(resolvedContainer) {
@@ -63,10 +66,18 @@ fun App(
     val session by authentication.authenticationState.collectAsStateWithLifecycle()
     LaunchedEffect(session,platform) {platform?.authenticationChanged(session)}
     val action by authentication.action.collectAsStateWithLifecycle()
-    CompositionLocalProvider(com.pawquest.presentation.components.LocalLegalLinks provides legalLinks) {
+    // Server-enforced minimum version; any failure leaves the app usable (fail-open).
+    var updateRequired by remember { mutableStateOf(false) }
+    LaunchedEffect(versionCode) {
+        updateRequired = resolvedContainer.koin.get<com.pawquest.domain.repository.AppUpdateCheck>().required(versionCode)
+    }
+    CompositionLocalProvider(com.pawquest.presentation.components.LocalLegalLinks provides legalLinks,
+        com.pawquest.presentation.components.LocalTelemetry provides telemetry) {
     PawQuestTheme { com.pawquest.presentation.components.PortraitFrame {
         val signedIn = session as? AuthenticationState.SignedIn
-        if (signedIn == null) {
+        if (updateRequired) {
+            com.pawquest.presentation.components.UpdateRequiredScreen(storeUrl)
+        } else if (signedIn == null) {
             AuthenticationScreen(session, action, authentication::submit, authentication::retry,
                 authentication::logout, authentication::clearMessages,
                 authentication::requestPasswordReset, authentication::completePasswordReset)
@@ -218,7 +229,9 @@ private fun ProtectedApp(
         onPauseOrDispose { }
     }
 
+    val telemetry = com.pawquest.presentation.components.LocalTelemetry.current
     LaunchedEffect(selectedRoute) {
+        telemetry.setScreen(selectedRoute)
         if (selectedRoute == Destination.Explore.route) { shop.loadCatalog(); itemCases.refresh();wheel.refresh() }
         if (selectedRoute == Destination.PetRoom.route) inventory.loadInventory()
         if (selectedRoute == Destination.Home.route) progress.refresh()

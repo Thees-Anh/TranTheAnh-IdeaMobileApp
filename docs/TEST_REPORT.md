@@ -1,5 +1,18 @@
 # PawQuest MVP integration test report
 
+## 2026-11-26 - Crash reporting and forced update
+
+| Check | Actual result |
+|---|---|
+| Strict build (official repositories, dependency verification strict) | 235 host tests passed (new AppHealthTest 3), lintRelease 0 errors, assembleRelease OK |
+| Build with a placeholder google-services.json (deleted afterwards) | Google Services 4.6.0 + Crashlytics plugin 3.0.8 work with AGP 9.1.1; APK has google_app_id and the Crashlytics mapping-file ID; manifest keeps collection disabled; no mapping upload task ran |
+| New checksums | 102 entries, all matching Google Maven/Maven Central published SHA-1 or module checksums; none changed or removed |
+| bundleRelease without Firebase config | Fails with the google-services.json requirement |
+| Database runner | 24/24 PASS incl. new app_config.sql (anon access, fail cases, single row) |
+
+NOT TESTED: a real Firebase project (no google-services.json yet), Crashlytics delivery,
+the Settings switch and the update screen on a device.
+
 ## 2026-11-20 - Release 1.0.0 remediation
 
 | Check | Actual result |

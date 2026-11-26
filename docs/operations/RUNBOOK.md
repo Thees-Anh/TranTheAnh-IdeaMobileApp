@@ -14,10 +14,11 @@ Dành cho người trực phát hành 1.0.x. Mọi thao tác SQL trên productio
 
 ## 2. Theo dõi hằng ngày (tuần đầu sau mỗi rollout)
 
-1. **Play Console → Android vitals**: crash‑free users ≥ 99,5 %, ANR rate < 0,47 %, user‑perceived crash < 1,09 % (ngưỡng “bad behavior” của Play — kiểm tra lại ngưỡng hiện hành trong Play Console).
-2. **Supabase → Reports / Logs**: tỷ lệ lỗi 5xx của PostgREST, CPU/RAM DB, số kết nối, Auth errors.
-3. **Đối soát kinh tế** (chỉ đọc): chạy `supabase/tests/verification.sql` trên production. Mọi truy vấn “violation” phải trả 0 dòng.
-4. **Đánh giá Play**: đọc review 1–2 sao, đặc biệt về mất Coins/vật phẩm.
+1. **Firebase → Crashlytics**: crash‑free users theo `versionCode`; non‑fatal `ServerErrorReport` (tên RPC + mã 5xx), custom key `screen`.
+2. **Play Console → Android vitals**: crash‑free users ≥ 99,5 %, ANR rate < 0,47 %, user‑perceived crash < 1,09 % (ngưỡng “bad behavior” của Play — kiểm tra lại ngưỡng hiện hành trong Play Console).
+3. **Supabase → Reports / Logs**: tỷ lệ lỗi 5xx của PostgREST, CPU/RAM DB, số kết nối, Auth errors.
+4. **Đối soát kinh tế** (chỉ đọc): chạy `supabase/tests/verification.sql` trên production. Mọi truy vấn “violation” phải trả 0 dòng.
+5. **Đánh giá Play**: đọc review 1–2 sao, đặc biệt về mất Coins/vật phẩm.
 
 ## 3. Mức độ sự cố
 
@@ -31,6 +32,9 @@ Dành cho người trực phát hành 1.0.x. Mọi thao tác SQL trên productio
 
 ### 4.1 Dừng phát hành (Play)
 Play Console → Release → Production → **Halt rollout**. Không thể “rút” bản đã cài; chuẩn bị bản sửa với `versionCode` lớn hơn.
+
+### 4.1a Buộc cập nhật (sau khi bản sửa đã lên 100 % trên Play)
+Chạy `supabase/operations/set_min_supported_version.sql` với `versionCode` của bản sửa. Mọi bản thấp hơn chỉ còn hiển thị “Vui lòng cập nhật PawQuest”. **Không** chạy khi bản sửa chưa có trên Play, vì người dùng sẽ bị khoá. Hạ giá trị xuống để hoàn tác. App bỏ qua kiểm tra khi offline/lỗi (fail‑open).
 
 ### 4.2 Kill switch gacha (không ảnh hưởng số dư)
 - Mystery Box: chạy `supabase/operations/disable_item_case.sql`

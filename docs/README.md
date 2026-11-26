@@ -29,7 +29,7 @@
 ## Phát hành 1.0.0
 
 - [Audit trước phát hành](release-audit/RELEASE_READINESS_REPORT.md) · [Kế hoạch khắc phục](release-audit/RELEASE_ACTION_PLAN.md) · [Tình trạng khắc phục](release-audit/REMEDIATION_STATUS.md)
-- [Quy trình phát hành](operations/RELEASE_PROCESS.md) · [Runbook sự cố](operations/RUNBOOK.md) · [Checklist Supabase](operations/SUPABASE_PRODUCTION_CHECKLIST.md)
+- [Quy trình phát hành](operations/RELEASE_PROCESS.md) · [Runbook sự cố](operations/RUNBOOK.md) · [Checklist Supabase](operations/SUPABASE_PRODUCTION_CHECKLIST.md) · [Firebase Crashlytics](operations/FIREBASE_SETUP.md)
 - [Trang pháp lý (privacy, xoá tài khoản)](legal/README.md)
 
 ## Kết quả
