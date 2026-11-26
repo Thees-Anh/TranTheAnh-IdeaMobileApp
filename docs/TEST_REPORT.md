@@ -1,5 +1,14 @@
 # PawQuest MVP integration test report
 
+## 2026-11-26 - Hosted migration parity
+
+| Check | Actual result |
+|---|---|
+| `supabase/operations/migration_status.sql` on production (run by the owner) | Only 20261120003500 and 20261126003600 missing; both then applied in the SQL Editor |
+| `public.app_status` via the publishable key | HTTP 200, `update_required=false`, minimum 1, for versionCode 1 and 10000 |
+
+NOT TESTED: a second migration_status run, verification.sql and a real account deletion on production.
+
 ## 2026-11-26 - Crashlytics on a real Firebase project (emulator Medium_Phone)
 
 | Check | Actual result |
