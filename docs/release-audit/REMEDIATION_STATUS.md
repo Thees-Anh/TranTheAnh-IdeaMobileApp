@@ -10,8 +10,8 @@ Toàn bộ thay đổi mã nguồn cho các P0/P1 đã xong. Các blocker còn l
 
 | Issue | Trạng thái | Đã làm | Còn lại (của bạn) |
 |---|---|---|---|
-| REL‑P0‑01 Privacy policy | 🟡 | `docs/legal/privacy-policy.html` (vi/en); link trong màn hình đăng nhập và Settings (`LegalLinks.kt`); `bundleRelease` bắt buộc `PAWQUEST_PRIVACY_POLICY_URL` | Điền `{{...}}`, đăng công khai, nhập URL vào Play Console và cấu hình build |
-| REL‑P0‑02 Web xoá tài khoản | 🟡 | `docs/legal/account-deletion.html`; quy trình `supabase/operations/delete_account_by_email.sql` (đã thử trên DB local); `RUNBOOK.md` §4.6 | Điền `{{...}}`, đăng, khai báo trong Data safety |
+| REL‑P0‑01 Privacy policy | ✅/🟡 | Đã đăng: https://thees-anh.github.io/TranTheAnh-IdeaMobileApp/privacy-policy.html (vi/en, HTTPS, công khai); link trong màn hình đăng nhập và Settings; `bundleRelease` bắt buộc URL | Nhập URL vào Play Console (App content → Privacy policy) và vào cấu hình build release |
+| REL‑P0‑02 Web xoá tài khoản | ✅/🟡 | Đã đăng: https://thees-anh.github.io/TranTheAnh-IdeaMobileApp/account-deletion.html; quy trình `delete_account_by_email.sql`; `RUNBOOK.md` §4.6 | Khai báo URL trong Data safety; theo dõi hộp thư deahn.developer@gmail.com để xử lý yêu cầu trong 30 ngày |
 | REL‑P0‑03 Migration parity / hosted | 🟡 | `docs/operations/SUPABASE_PRODUCTION_CHECKLIST.md`; migration mới 035 đã chạy trong suite local | Dựng staging, backup production, áp migration (≥ 003300, 003400, 003500), chạy `verification.sql`, smoke test xoá tài khoản & OTP |
 | REL‑P1‑01 Build truy vết được | ✅/🟡 | Commit phần việc dở; nhánh `release/1.0.0`; `verifyPawQuestRelease` chặn `bundleRelease` thiếu key/versionCode/URL; quy ước versionCode trong `RELEASE_PROCESS.md` | Tạo upload keystore, bật Play App Signing, tag `v1.0.0` khi phát hành |
 | REL‑P1‑02 Supply chain | ✅ | Chế độ `PAWQUEST_OFFICIAL_REPOSITORIES_ONLY`; Aliyun chỉ còn là fallback cuối cho dev; `gradle/verification-metadata.xml` (SHA‑256; lenient local, strict CI); 45 file `manual-maven` + 590 file `local-maven` khớp SHA‑1 với Google Maven/Maven Central | — |

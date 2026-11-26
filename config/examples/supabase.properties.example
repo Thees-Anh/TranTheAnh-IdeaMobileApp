@@ -5,8 +5,8 @@ SUPABASE_PUBLISHABLE_KEY=
 
 # Release builds only (bundleRelease fails without them). See docs/operations/RELEASE_PROCESS.md.
 # Public legal pages (docs/legal/*.html after filling the placeholders and publishing).
-PAWQUEST_PRIVACY_POLICY_URL=https://YOUR_SITE/privacy-policy.html
-PAWQUEST_ACCOUNT_DELETION_URL=https://YOUR_SITE/account-deletion.html
+PAWQUEST_PRIVACY_POLICY_URL=https://thees-anh.github.io/TranTheAnh-IdeaMobileApp/privacy-policy.html
+PAWQUEST_ACCOUNT_DELETION_URL=https://thees-anh.github.io/TranTheAnh-IdeaMobileApp/account-deletion.html
 # versionCode = MAJOR*10000 + MINOR*100 + PATCH (1.0.0 -> 10000)
 PAWQUEST_VERSION_CODE=
 PAWQUEST_VERSION_NAME=
