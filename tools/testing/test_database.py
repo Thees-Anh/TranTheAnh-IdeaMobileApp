@@ -93,7 +93,10 @@ def main():
             sql(db, file=ROOT / 'supabase/tests/gacha_pet_care_gate.sql')
             sql(db, file=ROOT / 'supabase/tests/widget_streak.sql')
             sql(db, file=ROOT / 'supabase/tests/app_config.sql')
-            print(f'PASS fresh migration replay and SQL integrity/RLS suite #{replay+1}', flush=True)
+            health = sql(db, file=ROOT / 'supabase/tests/verification.sql').stdout.decode('utf-8', 'replace')
+            rows = [line.split('|') for line in health.splitlines() if line.count('|') >= 4]
+            assert len(rows) == 19 and all(r[3] == 'PASS' for r in rows), health
+            print(f'PASS fresh migration replay and SQL integrity/RLS suite + 19 verification checks #{replay+1}', flush=True)
 
         exchange_user='fc400000-0000-0000-0000-000000000001'
         exchange_item='e2300000-0000-0000-0000-000000000003'

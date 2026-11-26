@@ -1,5 +1,12 @@
 # Implementation log
 
+## 2026-11-26 - Production health check rewritten
+
+- `supabase/tests/verification.sql` now matches the full economy (signed Coins ledger,
+  Bistro XP, shards, wheel tickets) and covers access control, odds, app_config and
+  account-deletion erasure. One SELECT, one row per check, so the SQL Editor shows all of it.
+- The DB runner requires 19/19 PASS after each migration replay.
+
 ## 2026-11-26 - Crash reporting and forced update
 
 - `Telemetry` interface (commonMain) with Firebase Crashlytics in the Android host

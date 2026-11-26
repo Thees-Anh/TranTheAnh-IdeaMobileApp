@@ -251,10 +251,12 @@ five/250 limits, partial and XP-only claims, idempotent receipts, rollback after
 failed XP credit, ledger immutability, reconciliation, six-way duplicate claim,
 six-way distinct claim, and simultaneous session starts.
 
-`supabase/tests/verification.sql` contains read-only RLS, privilege, daily-cap,
-receipt/status and balance/XP reconciliation queries for operational inspection.
-Violation queries should return no rows. See `IMPLEMENTATION_LOG.md` for actual
-execution results and environment details.
+`supabase/tests/verification.sql` is a single read-only query returning one row per
+check (19 checks: RLS, client grants, anon/private functions, SECURITY DEFINER search_path,
+ledger immutability, Coins/XP/shard/ticket reconciliation, daily cap, claim receipts,
+published odds, app_config, account-deletion erasure). Every row must be PASS. The DB
+runner asserts this after each migration replay. Note that direct admin edits of
+`wallets.coins`/`pets.xp` without a ledger row are reported as FAIL by design.
 
 References: [Supabase RLS](https://supabase.com/docs/guides/database/postgres/row-level-security),
 [secure database functions](https://supabase.com/docs/guides/database/functions),

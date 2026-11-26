@@ -17,7 +17,11 @@ Dành cho người trực phát hành 1.0.x. Mọi thao tác SQL trên productio
 1. **Firebase → Crashlytics**: crash‑free users theo `versionCode`; non‑fatal `ServerErrorReport` (tên RPC + mã 5xx), custom key `screen`.
 2. **Play Console → Android vitals**: crash‑free users ≥ 99,5 %, ANR rate < 0,47 %, user‑perceived crash < 1,09 % (ngưỡng “bad behavior” của Play — kiểm tra lại ngưỡng hiện hành trong Play Console).
 3. **Supabase → Reports / Logs**: tỷ lệ lỗi 5xx của PostgREST, CPU/RAM DB, số kết nối, Auth errors.
-4. **Đối soát kinh tế** (chỉ đọc): chạy `supabase/tests/verification.sql` trên production. Mọi truy vấn “violation” phải trả 0 dòng.
+4. **Đối soát kinh tế** (chỉ đọc): chạy `supabase/tests/verification.sql` trên production. Kết quả là **một bảng 19 dòng**; mọi dòng phải `PASS` (dòng FAIL luôn hiện lên đầu). Khi FAIL:
+   - `access` / `config`: ai đó đã sửa quyền, RLS, trigger hoặc tỷ lệ ngoài migration → xem lại thay đổi gần nhất trên Dashboard, sửa bằng migration mới.
+   - `economy`: số dư lệch sổ cái → SEV‑1 nếu nhiều tài khoản: kill switch (§4.2), điều tra theo §4.3. Một dòng lẻ thường do ai đó sửa Coins/XP trực tiếp bằng SQL.
+   - `privacy`: tài khoản đã xoá còn dữ liệu → chạy lại quy trình §4.6 cho tài khoản đó.
+   Xem chi tiết: chạy riêng phần CTE cùng tên trong file.
 5. **Đánh giá Play**: đọc review 1–2 sao, đặc biệt về mất Coins/vật phẩm.
 
 ## 3. Mức độ sự cố

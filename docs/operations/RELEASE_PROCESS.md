@@ -41,7 +41,7 @@ jarsigner -verify -verbose:summary androidApp\build\outputs\bundle\release\andro
 - [ ] Tag `vX.Y.Z` trỏ đúng commit; `git status` sạch.
 - [ ] Unit test, lint release (0 error), `tools/testing/test_database.py` PASS (CI xanh).
 - [ ] Production Supabase có **đủ** migration của tag (so `supabase migration list` với `supabase/migrations/`), đã backup trước khi áp migration mới.
-- [ ] `supabase/tests/verification.sql` trên production: 0 vi phạm.
+- [ ] `supabase/tests/verification.sql` trên production: 19/19 dòng `PASS`.
 - [ ] Privacy policy & trang xoá tài khoản truy cập được, khớp Data safety.
 - [ ] Ghi chú phát hành (vi/en).
 

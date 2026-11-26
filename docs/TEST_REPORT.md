@@ -1,5 +1,14 @@
 # PawQuest MVP integration test report
 
+## 2026-11-26 - verification.sql rewritten (19 checks, one result table)
+
+| Check | Actual result |
+|---|---|
+| Clean migrated DB | 19/19 PASS |
+| Inside each of 31 SQL suites before rollback (real purchases, Bistro, gacha, exchanges, deletion) | 22 suites all PASS; 9 report coins_vs_ledger or xp_vs_sources, each traced to the suite's own direct `update public.wallets/pets set coins/xp` fixture (true positives) |
+| One deliberate anomaly per check (RLS off, extra grants, unsafe definer, dropped trigger, edited balances, cap breach, odds change, deleted profile with identity and text) | 18/18 checks report exactly 1 violation; multiple_active_sessions cannot be broken (unique index) |
+| Database runner | Asserts 19/19 PASS after each migration replay; full suite PASS |
+
 ## 2026-11-26 - Hosted migration parity
 
 | Check | Actual result |
