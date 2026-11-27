@@ -1,9 +1,5 @@
 package com.pawquest.domain.telemetry
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-
 /**
  * Crash and stability reporting, independent of any vendor SDK. Presentation and data code
  * depend only on this interface; the Android host supplies Firebase Crashlytics.
@@ -14,9 +10,6 @@ import kotlinx.coroutines.flow.asStateFlow
 interface Telemetry {
     /** False when the platform has no crash-reporting backend configured. */
     val available: Boolean
-    /** The user's choice (Settings); reports are sent only while true. */
-    val collectionEnabled: StateFlow<Boolean>
-    fun setCollectionEnabled(enabled: Boolean)
     /** Attached to later crash reports as context, e.g. "quests". */
     fun setScreen(route: String)
     /** A server-side failure the user could not see as a crash, e.g. HTTP 503 from an RPC. */
@@ -25,9 +18,6 @@ interface Telemetry {
 
 object NoOpTelemetry: Telemetry {
     override val available=false
-    private val disabled=MutableStateFlow(false)
-    override val collectionEnabled: StateFlow<Boolean> = disabled.asStateFlow()
-    override fun setCollectionEnabled(enabled: Boolean)=Unit
     override fun setScreen(route: String)=Unit
     override fun recordServerError(operation: String,status: Int)=Unit
 }

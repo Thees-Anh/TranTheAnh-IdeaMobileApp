@@ -57,7 +57,6 @@ import com.pawquest.domain.model.PetCareBalance
 import com.pawquest.domain.model.PetProgress
 import com.pawquest.domain.model.UserAccount
 import com.pawquest.presentation.components.ButtonSize
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pawquest.presentation.components.ButtonVariant
 import com.pawquest.presentation.components.CardVariant
 import com.pawquest.presentation.components.CoinBadge
@@ -126,7 +125,6 @@ fun SettingsSheetContent(
             hapticsEnabled = hapticsEnabled,
             onHapticsToggle = { hapticsEnabled = it },
         )
-        CrashReportsCard()
         if (logoutError != null) {
             Surface(color = colors.errorContainer, shape = PawQuestTheme.shapes.card, modifier = Modifier.fillMaxWidth()) {
                 Text(
@@ -763,25 +761,6 @@ private fun SettingsCard(
                     color = colors.textSecondary,
                 )
             }
-        }
-    }
-}
-
-/** Opt-out for crash reports; hidden when the build has no crash-reporting backend. */
-@Composable
-private fun CrashReportsCard() {
-    val telemetry = com.pawquest.presentation.components.LocalTelemetry.current
-    if (!telemetry.available) return
-    val enabled by telemetry.collectionEnabled.collectAsStateWithLifecycle()
-    PawQuestCard(modifier = Modifier.fillMaxWidth(), variant = CardVariant.Elevated) {
-        Column(modifier = Modifier.fillMaxWidth().padding(4.dp)) {
-            SettingSwitchRow(
-                icon = PawQuestIcons.Warning,
-                title = "Send crash reports",
-                subtitle = "Technical data about crashes and server errors (device model, app version, screen). Never your quests, pet names or e-mail.",
-                checked = enabled,
-                onCheckedChange = telemetry::setCollectionEnabled,
-            )
         }
     }
 }

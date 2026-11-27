@@ -17,16 +17,16 @@
 - `bundleRelease` **fail** nếu thiếu `google-services.json`, vì privacy policy đã công bố việc dùng Crashlytics.
 
 ## 3. Kiểm tra trên thiết bị (bản debug có `google-services.json`)
-1. Cài app, mở *Cài đặt*: thấy **Gửi báo cáo sự cố** (bật). Không có file cấu hình thì mục này bị ẩn.
-2. Tạo một crash thử bằng cách tạm thêm `throw RuntimeException("Crashlytics test")` vào một nút (không commit), mở lại app để report được gửi. Crash xuất hiện trong Console sau vài phút.
-3. Tắt công tắc, crash lại: không có report mới.
+Báo cáo sự cố **luôn bật**, không có công tắc trong app (từ 2026‑11‑27; đã công bố trong privacy policy).
+1. Cài app, mở app một lần.
+2. Gây crash thử không cần sửa code: `adb shell am crash com.pawquest`, rồi mở lại app để report được gửi. Crash xuất hiện trong Console sau vài phút (`CrashedByAdbException: shell-induced crash`).
 
 ## 4. Play Console — Data safety (cập nhật cùng bản có Crashlytics)
 | Data type | Collected | Shared | Optional | Purpose |
 |---|---|---|---|---|
-| App info and performance → Crash logs | Yes | No (Google là service provider) | Yes (tắt được) | Analytics |
-| App info and performance → Diagnostics | Yes | No | Yes | Analytics |
-| Device or other IDs | Yes (Firebase installation ID) | No | Yes | Analytics |
+| App info and performance → Crash logs | Yes | No (Google là service provider) | **No — Required** (luôn thu thập) | Analytics |
+| App info and performance → Diagnostics | Yes | No | **No — Required** | Analytics |
+| Device or other IDs | Yes (Firebase installation ID) | No | **No — Required** | Analytics |
 
 Dữ liệu mã hoá khi truyền: **Yes**. Đối chiếu lại với privacy policy đã đăng.
 

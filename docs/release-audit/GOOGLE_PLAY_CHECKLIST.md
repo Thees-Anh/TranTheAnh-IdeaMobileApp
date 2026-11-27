@@ -58,8 +58,8 @@ Không có quyền vị trí, camera, danh bạ, ảnh, quyền truy cập tất
 | Tên hiển thị, tên pet | Có | Chức năng app | Không | Không | ⚠️ tên pet hiện chưa bị xoá |
 | Nội dung quest (tiêu đề/mô tả/hạn) | Có | Chức năng app | Không | Không | Có (thay bằng placeholder) |
 | Hoạt động trong app (phiên Focus, giao dịch Coins/shard, lịch sử gacha) | Có | Chức năng app | Không | Có | **Giữ lại ẩn danh** — phải công bố |
-| Crash logs, Diagnostics (App info and performance) | Có — Firebase Crashlytics, từ 2026‑11‑26 | Analytics (ổn định ứng dụng) | Không (Google là bộ xử lý dữ liệu) | **Không** — người dùng tắt được trong Cài đặt | Báo cáo chưa gửi bị xoá khi tắt; Google lưu tối đa 90 ngày |
-| Device or other IDs (mã cài đặt Firebase) | Có — kèm báo cáo sự cố | Analytics | Không | Không | Như trên |
+| Crash logs, Diagnostics (App info and performance) | Có — Firebase Crashlytics, từ 2026‑11‑26 | Analytics (ổn định ứng dụng) | Không (Google là bộ xử lý dữ liệu) | **Có** — luôn gửi khi có lỗi (từ 2026‑11‑27, không có công tắc) | Google lưu tối đa 90 ngày; xoá tài khoản không xoá báo cáo đã gửi |
+| Device or other IDs (mã cài đặt Firebase) | Có — kèm báo cáo sự cố | Analytics | Không | Có | Như trên |
 | Vị trí, danh bạ, ảnh, sức khoẻ | Không | — | — | — | — |
 
 Bên thứ ba trong APK: Supabase‑kt, Ktor/OkHttp, Koin, kotlinx, AndroidX, Filament/SceneView (Google, renderer không hoạt động), **Firebase Crashlytics** (từ 2026‑11‑26). Không có SDK analytics hành vi hay quảng cáo. Cần xác nhận khu vực lưu trữ Supabase (region) cho chính sách quyền riêng tư ❓.
